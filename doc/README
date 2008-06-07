@@ -1,3 +1,12 @@
+Original Minix README
+=====================
+
+Below is the original Minix editline README file.  It has been
+split into a modified README and LICENSE file.
+
+                 -- Joachim Nilsson, June 7th 2008
+
+-----------------------------------------------------------------
 $Revision: 5 $
 
 This is a line-editing library.  It can be linked into almost any

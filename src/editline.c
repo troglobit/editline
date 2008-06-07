@@ -984,7 +984,7 @@ rl_reset_terminal(p)
 }
 
 void
-rl_initialize()
+rl_initialize(void)
 {
 }
 

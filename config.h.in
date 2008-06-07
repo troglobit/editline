@@ -75,6 +75,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Enable static keyword, hides internal methods. */
+#undef HIDE
+
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
@@ -103,7 +106,7 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Glue definitions for Minix sources. */
+/* Default to UNIX backend, should be detected. */
 #undef SYS_UNIX
 
 /* Version number of package */

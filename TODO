@@ -1,0 +1,6 @@
+TODO
+
+* Merge in useful patches from Debian package
+
+* Add --enable-FEATURE for features defined in Makefile-minix.in
+

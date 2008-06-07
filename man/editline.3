@@ -2,9 +2,15 @@
 .SH NAME
 editline \- command-line editing library with history
 .SH SYNOPSIS
-.ft B
-char *readline(char *\fIprompt\fP)
-.ft P
+.nf
+.B "char *"
+.B "readline(prompt)"
+.B "     char	*prompt;"
+
+.B "void"
+.B "add_history(line)"
+.B "    char	*line;"
+.fi
 .SH DESCRIPTION
 .I Editline
 is a library that provides an line-editing interface with text recall.
@@ -37,7 +43,7 @@ holding down the ``control'' key while the letter is typed.
 For example, ``^A'' is a control-A.
 An escape sequence is entered by typing the ``escape'' key followed by one or
 more characters.
-The escape key is abbreviated as ``ESC.''
+The escape key is abbreviated as ``ESC''.
 Note that unlike control keys, case matters in escape sequences; ``ESC\ F''
 is not the same as ``ESC\ f''.
 .PP
@@ -153,7 +159,7 @@ If you then type a period and a tab, the library will finish off the filename
 for you:
 .RS
 .nf
-.RI "rm /v[TAB]" munix .TAB old
+.RI "rm /v[TAB]" munix ".[TAB]" old
 .fi
 .RE
 The tab key is shown by ``[TAB]'' and the automatically-entered text

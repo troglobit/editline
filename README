@@ -1,7 +1,7 @@
 README                                          -*-text-*-
-======
+
 This is a line-editing library.  It can be linked into almost any
-program to provide command-line editing and recall.
+program to provide command-line editing and history.  
 
 It is call-compatible with the FSF readline library, but it is a
 fraction of the size (and offers fewer features).  It does not use
@@ -9,36 +9,15 @@ standard I/O.  It is distributed under a "C News-like" copyright, see
 the file LICENSE for details.
 
 Configuration is made by supplying different options to the GNU
-configure script.  In the examples directory, type "make testit" to
-get a small slow shell for testing.
+configure script.  In the examples directory you can find a small and
+slow shell for testing called testit.
 
-Changes
--------
-An earlier version was distributed with Byron's rc.  Principal changes
-over that version include:
-
- * Faster.
- * Is eight-bit clean (thanks to brendan@cs.widener.edu)
- * Written in K&R C, but ANSI compliant (gcc all warnings)
- * Propagates EOF properly; rc trip test now passes
- * Doesn't need or use or provide memmove.
- * More robust
- * Calling sequence changed to be compatible with readline.
- * Test program, new manpage, better configuration
- * More system-independant; includes Unix and OS-9 support.
-
-This contains some changes since the posting to comp.sources.misc:
- * Bugfix for completion on absolute pathnames.
- * Better handling of M-n versus showing raw 8bit chars.
- * Better signal handling.
- * Now supports termios/termio/sgttyb ioctl's.
- * Add M-m command to toggle how 8bit data is displayed.
-
-Bugs
-----
-There is one known bug. History-searching redraws the line wrong if
-the text retrieved is shorter then the prompt.
+This library was previously also packaged exclusively for Debian.  The
+exact origin of the Debian version is unclear, see the Sid package at
+http://packages.debian.org/sid/libeditline0 for details.  There are
+some differences between that version and upstream, some of those
+patches will also be merged here.
 
 Enjoy,
-	Rich $alz
-	<rsalz@osf.org>
+	Joachim Nilsson
+	<joachim@vmlinux.org>

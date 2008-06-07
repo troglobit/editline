@@ -2,12 +2,12 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(minix_editline, 0.1.0, joachim@vmlinux.org)
+AC_INIT(Minix editline, 0.1.1, joachim@vmlinux.org)
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
 
 # Prepare automake
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([dist-bzip2 dist-lzma])
 
 # Checks for programs.
 AC_PROG_CC
@@ -24,7 +24,8 @@ AC_CHECK_HEADERS([sgtty.h stdlib.h string.h termio.h termios.h])
 AC_HEADER_STAT
 
 # Overrides and types, should be a check.
-AC_DEFINE([SYS_UNIX], [1], [Glue definitions for Minix sources.])
+AC_DEFINE([SYS_UNIX], [1], [Default to UNIX backend, should be detected.])
+AC_DEFINE([HIDE], [1], [Enable static keyword, hides internal methods.])
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
@@ -35,4 +36,4 @@ AC_FUNC_REALLOC
 AC_FUNC_STAT
 AC_CHECK_FUNCS([strchr strdup strrchr])
 
-AC_OUTPUT(Makefile src/Makefile examples/Makefile)
+AC_OUTPUT(Makefile src/Makefile include/Makefile man/Makefile examples/Makefile)

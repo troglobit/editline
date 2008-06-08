@@ -5,7 +5,7 @@
 /*
 **  For compatibility with FSF readline.
 */
-extern rl_reset_terminal(char *p);
+extern void rl_reset_terminal(char *p);
 extern void rl_initialize(void);
 
 extern char *readline(const char *prompt);

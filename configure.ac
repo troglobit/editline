@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(Minix editline, 0.1.1, joachim@vmlinux.org)
+AC_INIT(Minix editline, 0.1.2, joachim@vmlinux.org)
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
 
@@ -18,7 +18,9 @@ AC_PROG_RANLIB
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
-AC_CHECK_HEADERS([sgtty.h stdlib.h string.h termio.h termios.h])
+# Check for malloc.h instead of AC_FUNC_MALLOC/REALLOC AIX and others
+# mess up the traditional malloc check.
+AC_CHECK_HEADERS([malloc.h sgtty.h stdlib.h string.h termio.h termios.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STAT
@@ -31,8 +33,10 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_CLOSEDIR_VOID
 AC_PROG_GCC_TRADITIONAL
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
+# Check for malloc.h instead of AC_FUNC_MALLOC/REALLOC AIX and others
+# mess up the traditional malloc check.
+#AC_FUNC_MALLOC
+#AC_FUNC_REALLOC
 AC_FUNC_STAT
 AC_CHECK_FUNCS([strchr strdup strrchr])
 

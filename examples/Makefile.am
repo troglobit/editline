@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS = foreign
+
 LDADD = $(top_builddir)/src/libedit.a
 AM_CFLAGS = -I$(top_srcdir)/src
 

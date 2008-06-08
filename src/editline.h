@@ -16,6 +16,9 @@
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 #ifdef SYS_UNIX
 #include "unix.h"
 #endif	/* defined(SYS_UNIX) */
@@ -65,7 +68,7 @@ extern int	rl_intr;
 extern int	rl_kill;
 extern int	rl_quit;
 extern char	*rl_complete();
-extern int	rl_list_possib();
+extern int	rl_list_possib(char *pathname, char ***avp);
 extern void	rl_ttyset();
 extern void	rl_add_slash();
 

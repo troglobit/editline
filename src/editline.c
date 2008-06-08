@@ -1119,7 +1119,7 @@ find_word()
 }
 
 STATIC STATUS
-c_possible()
+c_possible(void)
 {
     CHAR	**av;
     CHAR	*word;
@@ -1140,7 +1140,7 @@ c_possible()
 }
 
 STATIC STATUS
-c_complete()
+c_complete(void)
 {
     CHAR	*p, *q;
     CHAR	*word, *new;

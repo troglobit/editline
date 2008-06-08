@@ -8,6 +8,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #if	defined(USE_DIRENT)
 #include <dirent.h>

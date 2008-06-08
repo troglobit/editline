@@ -131,6 +131,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+AUTOMAKE_OPTIONS = foreign
 man3_MANS = editline.3
 dist_man_MANS = $(man3_MANS)
 all: all-am
@@ -145,9 +146,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  man/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  man/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  man/Makefile
+	  $(AUTOMAKE) --foreign  man/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

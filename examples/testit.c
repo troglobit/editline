@@ -49,18 +49,21 @@ main(ac, av)
 
     while ((p = readline(prompt)) != NULL) {
 	(void)printf("\t\t\t|%s|\n", p);
-	if (doit)
+	if (doit) {
 	    if (strncmp(p, "cd ", 3) == 0) {
-		if (chdir(&p[3]) < 0)
+		if (chdir(&p[3]) < 0) {
 		    perror(&p[3]);
+                }
 	    }
-	    else if (system(p) != 0)
+	    else if (system(p) != 0) {
 		perror(p);
+            }
+        }
 	add_history(p);
 	free(p);
     }
-    exit(0);
-    /* NOTREACHED */
+
+    return 0;
 }
 
 /*

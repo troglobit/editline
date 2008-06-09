@@ -67,6 +67,9 @@ extern int	rl_erase;
 extern int	rl_intr;
 extern int	rl_kill;
 extern int	rl_quit;
+#if	defined(DO_SIGTSTP)
+extern int	rl_susp;
+#endif	/* defined(DO_SIGTSTP) */
 extern char	*rl_complete();
 extern int	rl_list_possib(char *pathname, char ***avp);
 extern void	rl_ttyset();
@@ -81,6 +84,7 @@ extern char	*strcat();
 extern char	*strchr();
 extern char	*strrchr();
 extern char	*strcpy();
+extern char	*strdup();
 extern int	strcmp();
 extern int	strlen();
 extern int	strncmp();

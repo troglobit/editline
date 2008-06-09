@@ -15,19 +15,22 @@ rl_ttyset(Reset)
     struct termios		new;
 
     if (Reset == 0) {
-	(void)tcgetattr(0, &old);
+	if (tcgetattr(0, &old) < 0) perror("tcgetattr");
 	rl_erase = old.c_cc[VERASE];
 	rl_kill = old.c_cc[VKILL];
 	rl_eof = old.c_cc[VEOF];
 	rl_intr = old.c_cc[VINTR];
 	rl_quit = old.c_cc[VQUIT];
+#if	defined(DO_SIGTSTP)
+	rl_susp = old.c_cc[VSUSP];
+#endif	/* defined(DO_SIGTSTP) */
 
 	new = old;
-	new.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
-	new.c_iflag &= ~(ICRNL);
+	new.c_lflag &= ~(ECHO | ICANON | ISIG);
+	new.c_iflag &= ~(ISTRIP | INPCK);
 	new.c_cc[VMIN] = 1;
 	new.c_cc[VTIME] = 0;
-	(void)tcsetattr(0, TCSADRAIN, &new);
+	if (tcsetattr(0, TCSADRAIN, &new) < 0) perror("tcsetattr");
     }
     else
 	(void)tcsetattr(0, TCSADRAIN, &old);
@@ -51,11 +54,13 @@ rl_ttyset(Reset)
 	rl_eof = old.c_cc[VEOF];
 	rl_intr = old.c_cc[VINTR];
 	rl_quit = old.c_cc[VQUIT];
+#if	defined(DO_SIGTSTP)
+	rl_susp = old.c_cc[VSUSP];
+#endif	/* defined(DO_SIGTSTP) */
 
 	new = old;
-	new.c_cc[VINTR] = -1;
-	new.c_cc[VQUIT] = -1;
-	new.c_lflag &= ~(ECHO | ICANON);
+	new.c_lflag &= ~(ECHO | ICANON | ISIG);
+	new.c_iflag &= ~(ISTRIP | INPCK);
 	new.c_cc[VMIN] = 1;
 	new.c_cc[VTIME] = 0;
 	(void)ioctl(0, TCSETAW, &new);
@@ -75,6 +80,9 @@ rl_ttyset(Reset)
     static struct tchars	old_tchars;
     struct sgttyb		new_sgttyb;
     struct tchars		new_tchars;
+#if	defined(DO_SIGTSTP)
+    struct ltchars		old_ltchars;
+#endif	/* defined(DO_SIGTSTP) */
 
     if (Reset == 0) {
 	(void)ioctl(0, TIOCGETP, &old_sgttyb);
@@ -86,9 +94,17 @@ rl_ttyset(Reset)
 	rl_intr = old_tchars.t_intrc;
 	rl_quit = old_tchars.t_quitc;
 
+#if	defined(DO_SIGTSTP)
+	(void)ioctl(0, TIOCGLTC, &old_ltchars);
+	rl_susp = old_ltchars.t_suspc;
+#endif	/* defined(DO_SIGTSTP) */
+
 	new_sgttyb = old_sgttyb;
 	new_sgttyb.sg_flags &= ~ECHO;
 	new_sgttyb.sg_flags |= RAW;
+#if	defined(PASS8)
+	new_sgttyb.sg_flags |= PASS8;
+#endif	/* defined(PASS8) */
 	(void)ioctl(0, TIOCSETP, &new_sgttyb);
 
 	new_tchars = old_tchars;

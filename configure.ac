@@ -38,6 +38,6 @@ AC_PROG_GCC_TRADITIONAL
 #AC_FUNC_MALLOC
 #AC_FUNC_REALLOC
 AC_FUNC_STAT
-AC_CHECK_FUNCS([strchr strdup strrchr])
+AC_CHECK_FUNCS([strchr strdup strrchr tcgetattr])
 
 AC_OUTPUT(Makefile src/Makefile include/Makefile man/Makefile examples/Makefile)

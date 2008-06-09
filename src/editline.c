@@ -20,6 +20,8 @@
 #define META(x)		((x) | 0x80)
 #define ISMETA(x)	((x) & 0x80)
 #define UNMETA(x)	((x) & 0x7F)
+#define MAPSIZE		33
+#define METAMAPSIZE	17
 #if	!defined(HIST_SIZE)
 #define HIST_SIZE	20
 #endif	/* !defined(HIST_SIZE) */
@@ -63,6 +65,9 @@ int		rl_erase;
 int		rl_intr;
 int		rl_kill;
 int		rl_quit;
+#if	defined(DO_SIGTSTP)
+int		rl_susp;
+#endif	/* defined(DO_SIGTSTP) */
 
 STATIC CHAR		NIL[] = "";
 STATIC CONST CHAR	*Input = NIL;
@@ -80,8 +85,8 @@ STATIC int		Point;
 STATIC int		PushBack;
 STATIC int		Pushed;
 STATIC int		Signal;
-FORWARD KEYMAP		Map[33];
-FORWARD KEYMAP		MetaMap[17];
+FORWARD KEYMAP		Map[MAPSIZE];
+FORWARD KEYMAP		MetaMap[METAMAPSIZE];
 STATIC SIZE_T		Length;
 STATIC SIZE_T		ScreenCount;
 STATIC SIZE_T		ScreenSize;
@@ -90,18 +95,17 @@ STATIC int		TTYwidth;
 STATIC int		TTYrows;
 
 /* Display print 8-bit chars as `M-x' or as the actual 8-bit char? */
-int		rl_meta_chars = 0;
+int		rl_meta_chars = 1;
 
 /*
 **  Declarations.
 */
 STATIC CHAR	*editinput();
-extern int	read();
-extern int	write();
 #if	defined(USE_TERMCAP)
 extern char	*getenv();
 extern char	*tgetstr();
 extern int	tgetent();
+extern int	tgetnum();
 #endif	/* defined(USE_TERMCAP) */
 
 /*
@@ -119,7 +123,7 @@ TTYflush()
 
 STATIC void
 TTYput(c)
-    CHAR	c;
+    CONST CHAR	c;
 {
     Screen[ScreenCount] = c;
     if (++ScreenCount >= ScreenSize - 1) {
@@ -864,12 +868,16 @@ emacs(c)
     STATUS		s;
     KEYMAP		*kp;
 
+#if 0 /* Debian patch removes this to be able to handle 8-bit input */
+    /* This test makes it impossible to enter eight-bit characters when
+     * meta-char mode is enabled. */
     OldPoint = Point;
     if (rl_meta_chars && ISMETA(c)) {
 	Pushed = 1;
 	PushBack = UNMETA(c);
 	return meta();
     }
+#endif /* Debian patch removal. */
     for (kp = Map; kp->Function; kp++)
 	if (kp->Key == c)
 	    break;
@@ -884,7 +892,7 @@ STATIC STATUS
 TTYspecial(c)
     unsigned int	c;
 {
-    if (ISMETA(c))
+    if (rl_meta_chars && ISMETA(c))
 	return CSdispatch;
 
     if (c == rl_erase || c == DEL)
@@ -907,6 +915,12 @@ TTYspecial(c)
 	Signal = SIGQUIT;
 	return CSeof;
     }
+#if	defined(DO_SIGTSTP)
+    if (c == rl_susp) {
+	Signal = SIGTSTP;
+	return CSsignal;
+    }
+#endif	/* defined(DO_SIGTSTP) */
 
     return CSdispatch;
 }
@@ -973,6 +987,32 @@ hist_add(p)
     H.Pos = H.Size - 1;
 }
 
+STATIC char *
+read_redirected()
+{
+    int		size;
+    char	*p;
+    char	*line;
+    char	*end;
+
+    for (size = MEM_INC, p = line = NEW(char, size), end = p + size; ; p++) {
+	if (p == end) {
+	    size += MEM_INC;
+	    p = line = realloc(line, size);
+	    end = p + size;
+	}
+	if (read(0, p, 1) <= 0) {
+	    /* Ignore "incomplete" lines at EOF, just like we do for a tty. */
+	    free(line);
+	    return NULL;
+	}
+	if (*p == '\n')
+	    break;
+    }
+    *p = '\0';
+    return line;
+}
+
 /*
 **  For compatibility with FSF readline.
 */
@@ -994,6 +1034,11 @@ readline(prompt)
 {
     CHAR	*line;
     int		s;
+
+    if (!isatty(0)) {
+	TTYflush();
+	return read_redirected();
+    }
 
     if (Line == NULL) {
 	Length = MEM_INC;

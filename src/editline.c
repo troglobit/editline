@@ -988,18 +988,24 @@ hist_add(p)
 }
 
 STATIC char *
-read_redirected()
+read_redirected(void)
 {
-    int		size;
+    int		size = MEM_INC;
     char	*p;
     char	*line;
     char	*end;
 
-    for (size = MEM_INC, p = line = NEW(char, size), end = p + size; ; p++) {
+    p = line = NEW(char, size);
+    end = p + size;
+    while (1) {
 	if (p == end) {
+            int oldpos = end - line;
+
 	    size += MEM_INC;
-	    p = line = realloc(line, size);
+	    p = RENEW(line, char, size);
 	    end = p + size;
+
+            p += oldpos;        /* Continue where we left off... */
 	}
 	if (read(0, p, 1) <= 0) {
 	    /* Ignore "incomplete" lines at EOF, just like we do for a tty. */
@@ -1008,6 +1014,7 @@ read_redirected()
 	}
 	if (*p == '\n')
 	    break;
+        p++;
     }
     *p = '\0';
     return line;

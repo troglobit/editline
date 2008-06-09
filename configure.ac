@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(Minix editline, 0.1.4, joachim@vmlinux.org)
+AC_INIT(Minix editline, 0.2.0, joachim@vmlinux.org)
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
 

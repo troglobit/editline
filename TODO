@@ -4,3 +4,7 @@ TODO
 
 * Add --enable-FEATURE for features defined in Makefile-minix.in
 
+* Add support for arrow keys, home, end, etc.  See the following URL
+  for how to catch complex key strokes such as escape sequences:
+  http://www.unixwiz.net/techtips/termios-vmin-vtime.html
+

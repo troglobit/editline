@@ -4,6 +4,10 @@ TODO
 
 * Add --enable-FEATURE for features defined in Makefile-minix.in
 
+* Add support for custom completion, rl_attempted_completion_function.
+
+* Add support for inhibiting completion: rl_inhibit_completion
+
 * Add support for arrow keys, home, end, etc.  See the following URL
   for how to catch complex key strokes such as escape sequences:
   http://www.unixwiz.net/techtips/termios-vmin-vtime.html

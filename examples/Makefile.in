@@ -30,7 +30,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-noinst_PROGRAMS = testit$(EXEEXT)
+noinst_PROGRAMS = testit$(EXEEXT) cli$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -41,6 +41,10 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
+cli_SOURCES = cli.c
+cli_OBJECTS = cli.$(OBJEXT)
+cli_LDADD = $(LDADD)
+cli_DEPENDENCIES = $(top_builddir)/src/libedit.a
 am_testit_OBJECTS = testit.$(OBJEXT)
 testit_OBJECTS = $(am_testit_OBJECTS)
 testit_LDADD = $(LDADD)
@@ -52,8 +56,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(testit_SOURCES)
-DIST_SOURCES = $(testit_SOURCES)
+SOURCES = cli.c $(testit_SOURCES)
+DIST_SOURCES = cli.c $(testit_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -144,7 +148,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 LDADD = $(top_builddir)/src/libedit.a
-AM_CFLAGS = -I$(top_srcdir)/src
+AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include
 testit_SOURCES = testit.c
 all: all-am
 
@@ -182,6 +186,9 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+cli$(EXEEXT): $(cli_OBJECTS) $(cli_DEPENDENCIES) 
+	@rm -f cli$(EXEEXT)
+	$(LINK) $(cli_OBJECTS) $(cli_LDADD) $(LIBS)
 testit$(EXEEXT): $(testit_OBJECTS) $(testit_DEPENDENCIES) 
 	@rm -f testit$(EXEEXT)
 	$(LINK) $(testit_OBJECTS) $(testit_LDADD) $(LIBS)
@@ -192,6 +199,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testit.Po@am__quote@
 
 .c.o:

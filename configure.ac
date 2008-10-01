@@ -40,4 +40,19 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_STAT
 AC_CHECK_FUNCS([strchr strdup strrchr tcgetattr])
 
+AC_ARG_ENABLE([complete],
+   [  --enable-default-complete      Enable default completion handler.],[
+   case "${enableval}" in
+       yes)
+        complete=true
+        ;;
+       no)
+        complete=false
+        ;;
+       *)
+        AC_MSG_ERROR([bad value ${enableval} for --enable-default-complete])
+        ;;
+   esac],[complete=false])
+AM_CONDITIONAL([COMPLETE], [test x$complete = xtrue])
+
 AC_OUTPUT(Makefile src/Makefile include/Makefile man/Makefile examples/Makefile)

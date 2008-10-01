@@ -695,6 +695,8 @@ CPP
 GREP
 EGREP
 LIBOBJS
+COMPLETE_TRUE
+COMPLETE_FALSE
 LTLIBOBJS'
 ac_subst_files=''
       ac_precious_vars='build_alias
@@ -1283,6 +1285,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-default-complete      Enable default completion handler.
 
 Some influential environment variables:
   CC          C compiler command
@@ -4970,6 +4973,35 @@ fi
 done
 
 
+# Check whether --enable-complete was given.
+if test "${enable_complete+set}" = set; then
+  enableval=$enable_complete;
+   case "${enableval}" in
+       yes)
+        complete=true
+        ;;
+       no)
+        complete=false
+        ;;
+       *)
+        { { echo "$as_me:$LINENO: error: bad value ${enableval} for --enable-default-complete" >&5
+echo "$as_me: error: bad value ${enableval} for --enable-default-complete" >&2;}
+   { (exit 1); exit 1; }; }
+        ;;
+   esac
+else
+  complete=false
+fi
+
+ if test x$complete = xtrue; then
+  COMPLETE_TRUE=
+  COMPLETE_FALSE='#'
+else
+  COMPLETE_TRUE='#'
+  COMPLETE_FALSE=
+fi
+
+
 ac_config_files="$ac_config_files Makefile src/Makefile include/Makefile man/Makefile examples/Makefile"
 
 cat >confcache <<\_ACEOF
@@ -5079,6 +5111,13 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${COMPLETE_TRUE}" && test -z "${COMPLETE_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"COMPLETE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"COMPLETE\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -5698,10 +5737,12 @@ CPP!$CPP$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
+COMPLETE_TRUE!$COMPLETE_TRUE$ac_delim
+COMPLETE_FALSE!$COMPLETE_FALSE$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 81; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 83; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -45,8 +45,8 @@ cli_SOURCES = cli.c
 cli_OBJECTS = cli.$(OBJEXT)
 cli_LDADD = $(LDADD)
 cli_DEPENDENCIES = $(top_builddir)/src/libedit.a
-am_testit_OBJECTS = testit.$(OBJEXT)
-testit_OBJECTS = $(am_testit_OBJECTS)
+testit_SOURCES = testit.c
+testit_OBJECTS = testit.$(OBJEXT)
 testit_LDADD = $(LDADD)
 testit_DEPENDENCIES = $(top_builddir)/src/libedit.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -56,8 +56,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = cli.c $(testit_SOURCES)
-DIST_SOURCES = cli.c $(testit_SOURCES)
+SOURCES = cli.c testit.c
+DIST_SOURCES = cli.c testit.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -149,7 +149,6 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 LDADD = $(top_builddir)/src/libedit.a
 AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include
-testit_SOURCES = testit.c
 all: all-am
 
 .SUFFIXES:
@@ -389,7 +388,6 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
-#fileman_SOURCES = fileman.c
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

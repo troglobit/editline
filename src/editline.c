@@ -97,6 +97,11 @@ STATIC int		TTYrows;
 /* Display print 8-bit chars as `M-x' or as the actual 8-bit char? */
 int		rl_meta_chars = 1;
 
+/* User definable callbacks. */
+char *(*rl_complete)(char *token, int *match); 
+int (*rl_list_possib)(char *token, char ***av);
+
+
 /*
 **  Declarations.
 */
@@ -1033,6 +1038,20 @@ rl_reset_terminal(p)
 void
 rl_initialize(void)
 {
+#ifdef COMPLETE
+    int done = 0;
+
+    if (!done)
+    {
+        if (!rl_complete)
+            rl_complete = &default_rl_complete;
+
+        if (!rl_list_possib)
+            rl_list_possib = &default_rl_list_possib;
+
+        done = 1;
+    }
+#endif
 }
 
 char *
@@ -1041,6 +1060,9 @@ readline(prompt)
 {
     CHAR	*line;
     int		s;
+
+    /* Unless called by the user already. */
+    rl_initialize ();
 
     if (!isatty(0)) {
 	TTYflush();
@@ -1177,6 +1199,10 @@ c_possible(void)
     CHAR	*word;
     int		ac;
 
+    if (!rl_list_possib) {
+        return ring_bell();
+    }
+
     word = find_word();
     ac = rl_list_possib((char *)word, (char ***)&av);
     if (word)
@@ -1199,6 +1225,10 @@ c_complete(void)
     SIZE_T	len;
     int		unique;
     STATUS	s;
+
+    if (!rl_complete) {
+        return ring_bell();
+    }
 
     word = find_word();
     p = (CHAR *)rl_complete((char *)word, &unique);

@@ -2,6 +2,11 @@
 #ifndef __EDITLINE_H__
 #define __EDITLINE_H__
 
+/* Assign these to get command completion, see cli.c for
+ * example usage. */
+char *(*rl_complete)(char *token, int *match);
+int (*rl_list_possib)(char *token, char ***av);
+
 /*
 **  For compatibility with FSF readline.
 */

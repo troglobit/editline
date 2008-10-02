@@ -2,6 +2,9 @@
 **
 **  Internal header file for editline library.
 */
+#ifndef __PRIVATE_EDITLINE_H__
+#define __PRIVATE_EDITLINE_H__
+
 #include <config.h>
 #include <stdio.h>
 #ifdef HAVE_MALLOC_H
@@ -70,8 +73,10 @@ extern int	rl_quit;
 #if	defined(DO_SIGTSTP)
 extern int	rl_susp;
 #endif	/* defined(DO_SIGTSTP) */
-extern char	*rl_complete();
-extern int	rl_list_possib(char *pathname, char ***avp);
+#ifdef COMPLETE
+extern char	*default_rl_complete();
+extern int	default_rl_list_possib(char *pathname, char ***avp);
+#endif
 extern void	rl_ttyset();
 extern void	rl_add_slash();
 
@@ -93,3 +98,6 @@ extern int	strncmp();
 #if	defined(NEED_STRDUP)
 extern char	*strdup();
 #endif
+
+#include "../include/editline.h"
+#endif  /* __PRIVATE_EDITLINE_H__ */

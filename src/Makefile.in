@@ -161,6 +161,7 @@ AUTOMAKE_OPTIONS = foreign
 lib_LIBRARIES = libedit.a
 libedit_a_SOURCES = editline.c editline.h sysunix.c unix.h \
 	$(am__append_1)
+@COMPLETE_TRUE@AM_CPPFLAGS = -DCOMPLETE
 all: all-am
 
 .SUFFIXES:

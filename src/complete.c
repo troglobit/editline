@@ -161,7 +161,7 @@ SplitPath(path, dirpart, filepart)
 **  Fill in *unique if we completed it, or set it to 0 if ambiguous.
 */
 char *
-rl_complete(pathname, unique)
+default_rl_complete(pathname, unique)
     char	*pathname;
     int		*unique;
 {
@@ -233,7 +233,7 @@ rl_complete(pathname, unique)
 **  Return all possible completions.
 */
 int
-rl_list_possib(pathname, avp)
+default_rl_list_possib(pathname, avp)
     char	*pathname;
     char	***avp;
 {

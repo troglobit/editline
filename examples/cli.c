@@ -1,6 +1,4 @@
-/* The "testit" micro shell, now with command completion. 
- * To be able to run, don't "--enable-default-complete".
- */
+/* Custom CLI command completion.  */
 #include "editline.h"
 #include <string.h>
 
@@ -12,7 +10,7 @@ char *list[] = {
 **  Attempt to complete the pathname, returning an allocated copy.
 **  Fill in *unique if we completed it, or set it to 0 if ambiguous.
 */
-char *rl_complete(char *token, int *match)
+char *my_rl_complete(char *token, int *match)
 {
    int i;
    int index = -1;
@@ -43,7 +41,7 @@ char *rl_complete(char *token, int *match)
 /*
 **  Return all possible completions.
 */
-int rl_list_possib(char *token, char ***av)
+int my_rl_list_possib(char *token, char ***av)
 {
    int i, num, total = 0;
    char **copy;
@@ -68,6 +66,10 @@ int main(int ac, char *av[])
 {
    char *line;
    char	*prompt = "cli> ";
+
+   /* Setup callbacks */
+   rl_complete = &my_rl_complete;
+   rl_list_possib = &my_rl_list_possib;
 
    while ((line = readline(prompt)) != NULL) {
       (void)printf("\t\t\t|%s|\n", line);

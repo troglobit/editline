@@ -62,7 +62,7 @@ int my_rl_list_possib(char *token, char ***av)
    return total;
 }
 
-int main(int ac, char *av[])
+int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
 {
    char *line;
    char	*prompt = "cli> ";

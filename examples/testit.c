@@ -3,25 +3,35 @@
 **  A "micro-shell" to test editline library.
 **  If given any arguments, commands aren't executed.
 */
+#include <config.h>
 #include <stdio.h>
-#if	defined(HAVE_STDLIB)
+#if	defined(HAVE_STDLIB_H)
 #include <stdlib.h>
-#endif	/* defined(HAVE_STDLIB) */
+#endif
+#if	defined(HAVE_STRING_H)
+#include <string.h>
+#endif
+#if	defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
 
 extern char	*readline();
 extern void	add_history();
 
-#if	!defined(HAVE_STDLIB)
-extern int	chdir();
+#if	!defined(HAVE_STDLIB_H)
 extern int	free();
-extern int	strncmp();
 extern int	system();
 extern void	exit();
 extern char	*getenv();
 #endif	/* !defined(HAVE_STDLIB) */
+#if   !defined(HAVE_STRING_H)
+extern int	strncmp();
+#endif
+#if   !defined(HAVE_UNISTD_H)
+extern int	chdir();
+#endif
 
-
-#if	defined(NEED_PERROR)
+#if	!defined(HAVE_PERROR)
 void
 perror(s)
     char	*s;
@@ -37,7 +47,7 @@ perror(s)
 int
 main(ac, av)
     int		ac;
-    char	*av[];
+    char	*av[] __attribute__ ((unused));
 {
     char	*prompt;
     char	*p;
@@ -45,7 +55,7 @@ main(ac, av)
 
     doit = ac == 1;
     if ((prompt = getenv("TESTPROMPT")) == NULL)
-	prompt = "testit>  ";
+        prompt = "testit>  ";
 
     while ((p = readline(prompt)) != NULL) {
 	(void)printf("\t\t\t|%s|\n", p);

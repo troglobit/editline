@@ -174,7 +174,7 @@ TTYstring(p)
 	TTYshow(*p++);
 }
 
-STATIC unsigned int
+STATIC int
 TTYget()
 {
     CHAR	c;
@@ -831,7 +831,7 @@ insert_char(c)
 STATIC STATUS
 meta()
 {
-    unsigned int	c;
+    int	c;
     KEYMAP		*kp;
 
     if ((c = TTYget()) == EOF)
@@ -895,7 +895,7 @@ emacs(c)
 
 STATIC STATUS
 TTYspecial(c)
-    unsigned int	c;
+    int	c;
 {
     if (rl_meta_chars && ISMETA(c))
 	return CSdispatch;
@@ -933,7 +933,7 @@ TTYspecial(c)
 STATIC CHAR *
 editinput()
 {
-    unsigned int	c;
+    int	c;
 
     Repeat = NO_ARG;
     OldPoint = Point = Mark = End = 0;
@@ -1031,7 +1031,7 @@ read_redirected(void)
 /* ARGSUSED0 */
 void
 rl_reset_terminal(p)
-    char	*p;
+    char	*p __attribute__((__unused__));
 {
 }
 
@@ -1110,7 +1110,7 @@ readline(prompt)
 
 void
 add_history(p)
-    char	*p;
+    char	*p __attribute__ ((unused));
 {
 #ifdef obsolete		/* Made part of readline(). -- kjb */
     if (p == NULL || *p == '\0')
@@ -1288,7 +1288,7 @@ transpose()
 STATIC STATUS
 quote()
 {
-    unsigned int	c;
+    int	c;
 
     return (c = TTYget()) == EOF ? CSeof : insert_char((int)c);
 }
@@ -1321,7 +1321,7 @@ mk_set()
 STATIC STATUS
 exchange()
 {
-    unsigned int	c;
+    int	c;
 
     if ((c = TTYget()) != CTL('X'))
 	return c == EOF ? CSeof : ring_bell();
@@ -1359,7 +1359,7 @@ copy_region()
 STATIC STATUS
 move_to_char()
 {
-    unsigned int	c;
+    int	c;
     int			i;
     CHAR		*p;
 

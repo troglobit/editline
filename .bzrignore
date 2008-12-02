@@ -1,0 +1,16 @@
+Makefile
+archive
+autom4te.cache
+config.h
+config.log
+config.status
+stamp-h1
+examples/.deps
+examples/Makefile
+examples/cli
+examples/testit
+man/Makefile
+man/Makefile
+include/Makefile
+src/.deps
+src/Makefile

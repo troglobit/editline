@@ -55,4 +55,15 @@ AC_ARG_ENABLE([default-complete],
    esac],[complete=false])
 AM_CONDITIONAL([COMPLETE], [test x$complete = xtrue])
 
+ac_enable_arrow_keys=no
+AC_ARG_ENABLE(arrow-keys,
+   [  --enable-arrow-keys            Enable ANSI arrow keys.],
+   [ ac_enable_arrow_keys=$enableval ], [ ac_enable_arrow_keys=no])
+
+if test "x${ac_enable_arrow_keys}" = xyes ; then
+    AC_DEFINE([ANSI_ARROWS], [],
+  [Define to include ANSI arrow keys support in minix-editline])
+fi
+
 AC_OUTPUT(Makefile src/Makefile include/Makefile man/Makefile examples/Makefile)
+

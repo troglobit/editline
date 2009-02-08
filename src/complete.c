@@ -25,15 +25,11 @@ strdup(p)
 **  strcmp-like sorting predicate for qsort.
 */
 static int
-compare(p1, p2)
-    CONST void  *p1;
-    CONST void  *p2;
+compare(void *p1, void *p2)
 {
-    CONST char  **v1;
-    CONST char  **v2;
+    char **v1 = (char **)p1;
+    char **v2 = (char **)p2;
 
-    v1 = (CONST char **)p1;
-    v2 = (CONST char **)p2;
     return strcmp(*v1, *v2);
 }
 

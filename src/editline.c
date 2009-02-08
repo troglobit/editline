@@ -120,8 +120,10 @@ extern int      tgetnum(void);
 
 static void tty_flush(void)
 {
+    ssize_t res;
+
     if (ScreenCount) {
-        (void)write(1, Screen, ScreenCount);
+        res = write (1, Screen, ScreenCount);
         ScreenCount = 0;
     }
 }
@@ -764,6 +766,29 @@ static el_status_t insert_char(int c)
     return s;
 }
 
+static el_status_t beg_line(void)
+{
+    if (Point) {
+        Point = 0;
+        return CSmove;
+    }
+    return CSstay;
+}
+
+static el_status_t end_line(void)
+{
+    if (Point != End) {
+        Point = End;
+        return CSmove;
+    }
+    return CSstay;
+}
+
+static el_status_t del_char(void)
+{
+    return delete_string(Repeat == NO_ARG ? 1 : Repeat);
+}
+
 static el_status_t meta(void)
 {
     int c;
@@ -773,15 +798,24 @@ static el_status_t meta(void)
         return CSeof;
 #if     defined(ANSI_ARROWS)
     /* Also include VT-100 arrows. */
-    if (c == '[' || c == 'O')
-        switch (c = tty_get()) {
+    if (c == '[' || c == 'O') {
+        c = tty_get();
+//        printf ("E[%c\n", c);
+        switch (c) {
         default:        return ring_bell();
         case EOF:       return CSeof;
-        case 'A':       return h_prev();
-        case 'B':       return h_next();
-        case 'C':       return fd_char();
-        case 'D':       return bk_char();
+        case '2':       tty_get(); return CSstay;     /* Insert */
+        case '3':       tty_get(); return del_char(); /* Delete */
+        case '5':       tty_get(); return CSstay;     /* PgUp */
+        case '6':       tty_get(); return CSstay;     /* PgDn */
+        case 'A':       return h_prev();              /* Up */
+        case 'B':       return h_next();              /* Down */
+        case 'C':       return fd_char();             /* Left */
+        case 'D':       return bk_char();             /* Right */
+        case 'F':       return end_line();            /* End */
+        case 'H':       return beg_line();            /* Home */
         }
+    }
 #endif  /* defined(ANSI_ARROWS) */
 
     if (isdigit(c)) {
@@ -1046,29 +1080,6 @@ void add_history(char *p __attribute__ ((unused)))
 #endif
 }
 
-
-static el_status_t beg_line(void)
-{
-    if (Point) {
-        Point = 0;
-        return CSmove;
-    }
-    return CSstay;
-}
-
-static el_status_t del_char(void)
-{
-    return delete_string(Repeat == NO_ARG ? 1 : Repeat);
-}
-
-static el_status_t end_line(void)
-{
-    if (Point != End) {
-        Point = End;
-        return CSmove;
-    }
-    return CSstay;
-}
 
 /*
 **  Move back to the beginning of the current word and return an

@@ -1136,7 +1136,7 @@ static el_status_t c_complete(void)
     char        *word, *new;
     SIZE_T      len;
     int         unique;
-    el_status_t      s;
+    el_status_t s = 0;
 
     if (!rl_complete) {
         return ring_bell();

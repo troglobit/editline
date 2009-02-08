@@ -1,0 +1,9 @@
+Notable Changes
+
+* v0.3.0
+** Support for ANSI arrow keys using --enable-arrow-keys
+
+* v0.2.x
+** Patches from Debian package merged.
+** Support for custom command completion.
+

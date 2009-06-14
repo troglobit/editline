@@ -52,14 +52,14 @@ libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
 AR = ar
 ARFLAGS = cru
-libedit_a_AR = $(AR) $(ARFLAGS)
-libedit_a_LIBADD =
-am__libedit_a_SOURCES_DIST = editline.c editline.h sysunix.c unix.h \
-	complete.c
+libeditline_a_AR = $(AR) $(ARFLAGS)
+libeditline_a_LIBADD =
+am__libeditline_a_SOURCES_DIST = editline.c editline.h sysunix.c \
+	unix.h complete.c
 @COMPLETE_TRUE@am__objects_1 = complete.$(OBJEXT)
-am_libedit_a_OBJECTS = editline.$(OBJEXT) sysunix.$(OBJEXT) \
+am_libeditline_a_OBJECTS = editline.$(OBJEXT) sysunix.$(OBJEXT) \
 	$(am__objects_1)
-libedit_a_OBJECTS = $(am_libedit_a_OBJECTS)
+libeditline_a_OBJECTS = $(am_libeditline_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -67,8 +67,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libedit_a_SOURCES)
-DIST_SOURCES = $(am__libedit_a_SOURCES_DIST)
+SOURCES = $(libeditline_a_SOURCES)
+DIST_SOURCES = $(am__libeditline_a_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -159,8 +159,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-lib_LIBRARIES = libedit.a
-libedit_a_SOURCES = editline.c editline.h sysunix.c unix.h \
+lib_LIBRARIES = libeditline.a
+libeditline_a_SOURCES = editline.c editline.h sysunix.c unix.h \
 	$(am__append_1)
 @COMPLETE_TRUE@AM_CPPFLAGS = -DCOMPLETE
 all: all-am
@@ -225,10 +225,10 @@ uninstall-libLIBRARIES:
 
 clean-libLIBRARIES:
 	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-libedit.a: $(libedit_a_OBJECTS) $(libedit_a_DEPENDENCIES) 
-	-rm -f libedit.a
-	$(libedit_a_AR) libedit.a $(libedit_a_OBJECTS) $(libedit_a_LIBADD)
-	$(RANLIB) libedit.a
+libeditline.a: $(libeditline_a_OBJECTS) $(libeditline_a_DEPENDENCIES) 
+	-rm -f libeditline.a
+	$(libeditline_a_AR) libeditline.a $(libeditline_a_OBJECTS) $(libeditline_a_LIBADD)
+	$(RANLIB) libeditline.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

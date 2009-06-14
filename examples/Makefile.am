@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-LDADD = $(top_builddir)/src/libedit.a
+LDADD = $(top_builddir)/src/libeditline.a
 AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include
 
 # TODO: Port "fileman" example from BSD editline

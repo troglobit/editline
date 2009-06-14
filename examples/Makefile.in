@@ -44,11 +44,11 @@ PROGRAMS = $(noinst_PROGRAMS)
 cli_SOURCES = cli.c
 cli_OBJECTS = cli.$(OBJEXT)
 cli_LDADD = $(LDADD)
-cli_DEPENDENCIES = $(top_builddir)/src/libedit.a
+cli_DEPENDENCIES = $(top_builddir)/src/libeditline.a
 testit_SOURCES = testit.c
 testit_OBJECTS = testit.$(OBJEXT)
 testit_LDADD = $(LDADD)
-testit_DEPENDENCIES = $(top_builddir)/src/libedit.a
+testit_DEPENDENCIES = $(top_builddir)/src/libeditline.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -148,7 +148,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-LDADD = $(top_builddir)/src/libedit.a
+LDADD = $(top_builddir)/src/libeditline.a
 AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include
 all: all-am
 

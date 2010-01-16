@@ -9,6 +9,9 @@ AC_CONFIG_HEADER([config.h])
 # Prepare automake
 AM_INIT_AUTOMAKE([dist-bzip2 dist-lzma])
 
+# Silent "kernel" style build from automake 1.11 and later.
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_RANLIB

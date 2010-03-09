@@ -1,5 +1,6 @@
 TODO
 
-* Add --enable-FEATURE for features defined in Makefile-minix.in
+* Add --enable-FEATURE for remaining features defined in Makefile-minix.in
+* Add support for rl_bind_key(), currently one needs to "hack" the Map[]
 * Add support for inhibiting completion: rl_inhibit_completion
 

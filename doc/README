@@ -22,7 +22,7 @@ a small slow shell for testing.
 An earlier version was distributed with Byron's rc.  Principal
 changes over that version include:
 	Faster.
-	Is eight-bit clean (thanks to brendan@cs.widener.edu)
+	Is eight-bit clean (thanks to brendan()cs!widener!edu)
 	Written in K&R C, but ANSI compliant (gcc all warnings)
 	Propagates EOF properly; rc trip test now passes
 	Doesn't need or use or provide memmove.
@@ -44,7 +44,7 @@ There is one known bug:
 
 Enjoy,
 	Rich $alz
-	<rsalz@osf.org>
+	<rsalz()osf!org>
 
  Copyright 1992,1993 Simmule Turner and Rich Salz.  All rights reserved.
 

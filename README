@@ -1,39 +1,36 @@
 README                                          -*-text-*-
 
-This is a line-editing library.  It can be linked into almost any program to
-provide command-line editing and history.
+This is a line editing library.  It can be linked into almost any program to provide
+command-line editing and history.
 
-It is call-compatible with the FSF readline library, but it is a fraction of
-the size (and offers fewer features).  It does not use standard I/O.  It is
-distributed under a "C News-like" copyright, see the file LICENSE for
-details.
+It is call-compatible with the FSF readline library, but it is a fraction of the size
+(and offers fewer features).  It does not use standard I/O.  It is distributed under
+a "C News-like" copyright, see the file LICENSE for details.
 
-Configuration is made by supplying different options to the GNU configure
-script.  In the examples/ directory you can find a couple of small & slow
-shell implementations used for testing.
+Configuration is made by supplying different options to the GNU configure script.  In
+the examples/ directory you can find a couple of small & slow shell implementations
+used for testing.
 
-Before finding out about the Debian version I was on the lookout for a
-really small replacement for the GNU readline package. Not only was it large
-and GPL:ed (instead of LGPL:ed), it also depended on libncurses, so the
-resulting size was a bit too much for my embedded system.  I eventually
-stubmled upon the BSD libedit library, which was sufficient for a while,
-even though it too depended upon libncurses.  I searched my soul and went
-back to where I, back in 1996, started out -- Minix.  And there it was, a
-really small readline replacement!
+Before finding out about the Debian version I was on the lookout for a really small
+replacement for the GNU readline package. Not only was it large and GPL:ed (instead
+of LGPL:ed), it also depends on libncurses, so the resulting size was a bit too much
+for my embedded system.  I eventually stubmled upon the BSD libedit library, which
+was sufficient for a while, even though it too depends on libncurses.  I searched my
+soul and went back to where I, back in 1996, started out -- Minix.  And there it was,
+a really small readline replacement!
 
-In 2000 Jim Studt packaged libeditline for Debian[1], the exact origin of
-the Debian code base is unclear, see the Sid package[2] for details. There
-were some notable differences between that version and the upstream Minix
-sources, all of which have now been merged here.
+In 2000 Jim Studt packaged libeditline for Debian[1], the exact origin of the Debian
+code base is unclear, see the Sid package[2] for details. There were some notable
+differences between that version and the upstream Minix sources, all of which have
+now been merged here.
 
-An explanation of the version numbering may be in order.  I didn't know
-about the Debian version for quite some time, so I kept a different name for
-the package and a different versioning scheme. Now, in June 2009, I decided
-to line up alongside Debian, with the intent of merging the efforts.  Sorry
-for any confusion this might cause.
+An explanation of the version numbering may be in order.  I didn't know about the
+Debian version for quite some time, so I kept a different name for the package and a
+different versioning scheme.  In June 2009, I decided to line up alongside Debian,
+with the intent of merging the efforts.  Sorry for any confusion this might cause.
 
 Enjoy,
-	Joachim Nilsson <joachim.nilsson@vmlinux.org>
+	Joachim Nilsson <troglobit()vmlinux!org>
 
 [1] - http://lists.debian.org/debian-devel/2000/05/msg00548.html
 [2] - http://packages.debian.org/sid/libeditline0

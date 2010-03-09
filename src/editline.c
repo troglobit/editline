@@ -20,8 +20,6 @@
 #define META(x)         ((x) | 0x80)
 #define ISMETA(x)       ((x) & 0x80)
 #define UNMETA(x)       ((x) & 0x7F)
-#define MAPSIZE         33
-#define METAMAPSIZE     17
 #if     !defined(HIST_SIZE)
 #define HIST_SIZE       20
 #endif  /* !defined(HIST_SIZE) */
@@ -86,8 +84,8 @@ static int        Point;
 static int        PushBack;
 static int        Pushed;
 static int        Signal;
-static el_keymap_t Map[MAPSIZE];
-static el_keymap_t MetaMap[METAMAPSIZE];
+static el_keymap_t Map[];
+static el_keymap_t MetaMap[];
 static SIZE_T     Length;
 static SIZE_T     ScreenCount;
 static SIZE_T     ScreenSize;
@@ -1018,7 +1016,7 @@ char *readline(const char *prompt)
     int         s;
 
     /* Unless called by the user already. */
-    rl_initialize ();
+    rl_initialize();
 
     if (!isatty(0)) {
         tty_flush();
@@ -1401,7 +1399,7 @@ static el_status_t last_argument(void)
     return s;
 }
 
-static el_keymap_t Map[33] = {
+static el_keymap_t Map[] = {
     {   CTL('@'),       mk_set          },
     {   CTL('A'),       beg_line        },
     {   CTL('B'),       bk_char         },
@@ -1435,7 +1433,7 @@ static el_keymap_t Map[33] = {
     {   0,              NULL            }
 };
 
-static el_keymap_t   MetaMap[17]= {
+static el_keymap_t   MetaMap[]= {
     {   CTL('H'),       wipe            },
     {   DEL,            wipe            },
     {   ' ',            mk_set          },

@@ -74,7 +74,7 @@ am__base_list = \
 man3dir = $(mandir)/man3
 am__installdirs = "$(DESTDIR)$(man3dir)"
 NROFF = nroff
-MANS = $(dist_man_MANS) $(man3_MANS)
+MANS = $(dist_man_MANS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -165,8 +165,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-man3_MANS = editline.3
-dist_man_MANS = $(man3_MANS)
+dist_man_MANS = editline.3
 all: all-am
 
 .SUFFIXES:
@@ -200,10 +199,10 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-man3: $(dist_man_MANS) $(man3_MANS)
+install-man3: $(dist_man_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man3dir)" || $(MKDIR_P) "$(DESTDIR)$(man3dir)"
-	@list='$(man3_MANS)'; test -n "$(man3dir)" || exit 0; \
+	@list=''; test -n "$(man3dir)" || exit 0; \
 	{ for i in $$list; do echo "$$i"; done; \
 	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
 	  sed -n '/\.3[a-z]*$$/p'; \
@@ -229,7 +228,7 @@ install-man3: $(dist_man_MANS) $(man3_MANS)
 
 uninstall-man3:
 	@$(NORMAL_UNINSTALL)
-	@list='$(man3_MANS)'; test -n "$(man3dir)" || exit 0; \
+	@list=''; test -n "$(man3dir)" || exit 0; \
 	files=`{ for i in $$list; do echo "$$i"; done; \
 	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
 	  sed -n '/\.3[a-z]*$$/p'; \

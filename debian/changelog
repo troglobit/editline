@@ -1,3 +1,12 @@
+editline (1.12-6) unstable; urgency=low
+
+  * Switch package format to 3.0 (quilt).
+  * 200_fix-truncation-at-64-char.diff: fix invalid 64-char truncation in
+    batch mode, courtesy of Mark O'Donohue. Thanks to Damyan Ivanov for
+    forwarding the patch from Ubuntu (Closes: #508640).
+
+ -- Sam Hocevar <sho@debian.org>  Sun, 03 Jan 2010 15:45:34 +0100
+
 editline (1.12-5) unstable; urgency=low
 
   * New maintainer (Closes: #229962).

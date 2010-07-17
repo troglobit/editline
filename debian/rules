@@ -19,7 +19,7 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp
-	-$(MAKE) clean
+	[ ! -f Makefile ] || $(MAKE) clean
 	dh_clean
 
 install: build
@@ -34,21 +34,18 @@ install: build
 binary-indep: build install
 
 binary-arch: build install
-#	dh_testversion
 	dh_testdir
 	dh_testroot
-
-        # build libeditline${major} package by moving files from editline-dev
+	# build libeditline${major} package by moving files from editline-dev
 	dh_movefiles --sourcedir=debian/libeditline-dev \
 	             -plibeditline$(major) \
 	             usr/lib/libeditline.so.$(major) \
 	             usr/lib/libeditline.so.$(version)
-
 	dh_installdocs
 	dh_installexamples
 	dh_installmenu
 	dh_installmanpages
-	rm -r debian/libeditline0/usr/share/man/
+	rm -rf debian/libeditline0/usr/share/man/
 	dh_installcron
 	dh_installinfo
 	dh_installchangelogs 

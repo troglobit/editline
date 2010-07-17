@@ -35,7 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 # Built-in completion handler.
-@COMPLETE_TRUE@am__append_1 = complete.c
+@CONFIG_DEFAULT_COMPLETE_TRUE@am__append_1 = complete.c
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -75,7 +75,7 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libeditline_la_LIBADD =
 am__libeditline_la_SOURCES_DIST = editline.c editline.h sysunix.c \
 	unix.h complete.c
-@COMPLETE_TRUE@am__objects_1 = complete.lo
+@CONFIG_DEFAULT_COMPLETE_TRUE@am__objects_1 = complete.lo
 am_libeditline_la_OBJECTS = editline.lo sysunix.lo $(am__objects_1)
 libeditline_la_OBJECTS = $(am_libeditline_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
@@ -228,7 +228,7 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libeditline.la
 libeditline_la_SOURCES = editline.c editline.h sysunix.c unix.h \
 	$(am__append_1)
-@COMPLETE_TRUE@AM_CPPFLAGS = -DCOMPLETE
+@CONFIG_DEFAULT_COMPLETE_TRUE@AM_CPPFLAGS = -DCOMPLETE
 all: all-am
 
 .SUFFIXES:

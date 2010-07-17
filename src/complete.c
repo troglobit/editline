@@ -1,31 +1,43 @@
-/*  $Revision: 5 $
-**
-**  History and file completion functions for editline library.
-*/
+/* History and file completion functions for editline library.
+ *
+ * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz. All rights reserved.
+ *
+ * This software is not subject to any license of the American Telephone
+ * and Telegraph Company or of the Regents of the University of California.
+ *
+ * Permission is granted to anyone to use this software for any purpose on
+ * any computer system, and to alter it and redistribute it freely, subject
+ * to the following restrictions:
+ * 1. The authors are not responsible for the consequences of use of this
+ *    software, no matter how awful, even if they arise from flaws in it.
+ * 2. The origin of this software must not be misrepresented, either by
+ *    explicit claim or by omission.  Since few users ever read sources,
+ *    credits must appear in the documentation.
+ * 3. Altered versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.  Since few users
+ *    ever read sources, credits must appear in the documentation.
+ * 4. This notice may not be removed or altered.
+ */
+
 #include "editline.h"
 
+#define MAX_TOTAL_MATCHES (256 << sizeof(char *))
 
-#if     defined(NEED_STRDUP)
-/*
-**  Return an allocated copy of a string.
-*/
-char *
-strdup(p)
-    char        *p;
+#ifdef NEED_STRDUP
+/* Return an allocated copy of a string. */
+char *strdup(const char *p)
 {
-    char        *new;
+    char *new;
 
     if ((new = NEW(char, strlen(p) + 1)) != NULL)
         (void)strcpy(new, p);
+
     return new;
 }
-#endif  /* defined(NEED_STRDUP) */
+#endif
 
-/*
-**  strcmp-like sorting predicate for qsort.
-*/
-static int
-compare(void *p1, void *p2)
+/* Wrap strcmp() for qsort() */
+static int compare(void *p1, void *p2)
 {
     char **v1 = (char **)p1;
     char **v2 = (char **)p2;
@@ -33,15 +45,9 @@ compare(void *p1, void *p2)
     return strcmp(*v1, *v2);
 }
 
-/*
-**  Fill in *avp with an array of names that match file, up to its length.
-**  Ignore . and .. .
-*/
-static int
-FindMatches(dir, file, avp)
-    char        *dir;
-    char        *file;
-    char        ***avp;
+/* Fill in *avp with an array of names that match file, up to its length.
+ * Ignore . and .. . */
+static int FindMatches(char *dir, char *file, char ***avp)
 {
     char        **av;
     char        **new;
@@ -52,7 +58,6 @@ FindMatches(dir, file, avp)
     SIZE_T      len;
     SIZE_T      choices;
     SIZE_T      total;
-#define MAX_TOTAL       (256 << sizeof(char *))
 
     if ((dp = opendir(dir)) == NULL)
         return 0;
@@ -70,7 +75,7 @@ FindMatches(dir, file, avp)
             continue;
 
         choices++;
-        if ((total += strlen(p)) > MAX_TOTAL) {
+        if ((total += strlen(p)) > MAX_TOTAL_MATCHES) {
             /* This is a bit too much. */
             while (ac > 0) DISPOSE(av[--ac]);
             continue;
@@ -98,8 +103,8 @@ FindMatches(dir, file, avp)
     }
 
     /* Clean up and return. */
-    (void)closedir(dp);
-    if (total > MAX_TOTAL) {
+    closedir(dp);
+    if (total > MAX_TOTAL_MATCHES) {
         char many[sizeof(total) * 3];
         p = many + sizeof(many);
         *--p = '\0';
@@ -114,17 +119,12 @@ FindMatches(dir, file, avp)
         if (ac)
             qsort(av, ac, sizeof (char **), compare);
     }
+
     return ac;
 }
 
-/*
-**  Split a pathname into allocated directory and trailing filename parts.
-*/
-static int
-SplitPath(path, dirpart, filepart)
-    char        *path;
-    char        **dirpart;
-    char        **filepart;
+/* Split a pathname into allocated directory and trailing filename parts. */
+static int SplitPath(char *path, char **dirpart, char **filepart)
 {
     static char DOT[] = ".";
     char        *dpart;
@@ -149,17 +149,13 @@ SplitPath(path, dirpart, filepart)
     }
     *dirpart = dpart;
     *filepart = fpart;
+
     return 0;
 }
 
-/*
-**  Attempt to complete the pathname, returning an allocated copy.
-**  Fill in *unique if we completed it, or set it to 0 if ambiguous.
-*/
-char *
-default_rl_complete(pathname, unique)
-    char        *pathname;
-    int         *unique;
+/* Attempt to complete the pathname, returning an allocated copy.
+ * Fill in *unique if we completed it, or set it to 0 if ambiguous. */
+char *default_rl_complete(char *pathname, int *unique)
 {
     char        **av;
     char        *dir;
@@ -174,9 +170,11 @@ default_rl_complete(pathname, unique)
 
     if (SplitPath(pathname, &dir, &file) < 0)
         return NULL;
+
     if ((ac = FindMatches(dir, file, &av)) == 0) {
         DISPOSE(dir);
         DISPOSE(file);
+
         return NULL;
     }
 
@@ -222,16 +220,12 @@ default_rl_complete(pathname, unique)
     for (i = 0; i < ac; i++)
         DISPOSE(av[i]);
     DISPOSE(av);
+
     return p;
 }
 
-/*
-**  Return all possible completions.
-*/
-int
-default_rl_list_possib(pathname, avp)
-    char        *pathname;
-    char        ***avp;
+/* Return all possible completions. */
+int default_rl_list_possib(char *pathname, char ***avp)
 {
     char        *dir;
     char        *file;
@@ -239,12 +233,10 @@ default_rl_list_possib(pathname, avp)
 
     if (SplitPath(pathname, &dir, &file) < 0)
         return 0;
+
     ac = FindMatches(dir, file, avp);
     DISPOSE(dir);
     DISPOSE(file);
+
     return ac;
 }
-
-/*
- * $PchId: complete.c,v 1.3 1996/02/22 21:18:51 philip Exp $
- */

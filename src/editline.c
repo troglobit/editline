@@ -1,7 +1,24 @@
-/*  $Revision: 2220 $
-**
-**  Main editing routines for editline library.
-*/
+/* Main editing routines for editline library.
+ *
+ * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz. All rights reserved.
+ *
+ * This software is not subject to any license of the American Telephone
+ * and Telegraph Company or of the Regents of the University of California.
+ *
+ * Permission is granted to anyone to use this software for any purpose on
+ * any computer system, and to alter it and redistribute it freely, subject
+ * to the following restrictions:
+ * 1. The authors are not responsible for the consequences of use of this
+ *    software, no matter how awful, even if they arise from flaws in it.
+ * 2. The origin of this software must not be misrepresented, either by
+ *    explicit claim or by omission.  Since few users ever read sources,
+ *    credits must appear in the documentation.
+ * 3. Altered versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.  Since few users
+ *    ever read sources, credits must appear in the documentation.
+ * 4. This notice may not be removed or altered.
+ */
+
 #include "editline.h"
 #include <signal.h>
 #include <errno.h>
@@ -64,9 +81,9 @@ int               rl_erase;
 int               rl_intr;
 int               rl_kill;
 int               rl_quit;
-#if     defined(DO_SIGTSTP)
+#ifdef CONFIG_SIGSTOP
 int               rl_susp;
-#endif  /* defined(DO_SIGTSTP) */
+#endif
 
 static const char NIL[] = "";
 static const char *Input = NIL;
@@ -105,12 +122,12 @@ int (*rl_list_possib)(char *token, char ***av);
 **  Declarations.
 */
 static char     *editinput(void);
-#if     defined(USE_TERMCAP)
+#ifdef USE_TERMCAP
 extern char     *getenv(void);
 extern char     *tgetstr(void);
 extern int      tgetent(void);
 extern int      tgetnum(void);
-#endif  /* defined(USE_TERMCAP) */
+#endif
 
 /*
 **  TTY input/output functions.
@@ -196,30 +213,30 @@ static void tty_backn(int n)
 static void tty_info(void)
 {
     static int          init;
-#if     defined(USE_TERMCAP)
+#ifdef USE_TERMCAP
     char                *term;
     char                buff[2048];
     char                *bp;
-#endif  /* defined(USE_TERMCAP) */
-#if     defined(TIOCGWINSZ)
+#endif
+#ifdef TIOCGWINSZ
     struct winsize      W;
-#endif  /* defined(TIOCGWINSZ) */
+#endif
 
     if (init) {
-#if     defined(TIOCGWINSZ)
+#ifdef TIOCGWINSZ
         /* Perhaps we got resized. */
         if (ioctl(0, TIOCGWINSZ, &W) >= 0
          && W.ws_col > 0 && W.ws_row > 0) {
             tty_width = (int)W.ws_col;
             tty_rows = (int)W.ws_row;
         }
-#endif  /* defined(TIOCGWINSZ) */
+#endif
         return;
     }
     init++;
 
     tty_width = tty_rows = 0;
-#if     defined(USE_TERMCAP)
+#ifdef USE_TERMCAP
     bp = &buff[0];
     if ((term = getenv("TERM")) == NULL)
         term = "dumb";
@@ -232,14 +249,14 @@ static void tty_info(void)
         backspace = strdup(backspace);
     tty_width = tgetnum("co");
     tty_rows = tgetnum("li");
-#endif  /* defined(USE_TERMCAP) */
+#endif
 
-#if     defined(TIOCGWINSZ)
+#ifdef TIOCGWINSZ
     if (ioctl(0, TIOCGWINSZ, &W) >= 0) {
         tty_width = (int)W.ws_col;
         tty_rows = (int)W.ws_row;
     }
-#endif  /* defined(TIOCGWINSZ) */
+#endif
 
     if (tty_width <= 0 || tty_rows <= 0) {
         tty_width = SCREEN_WIDTH;
@@ -323,7 +340,7 @@ static el_status_t ring_bell(void)
 
 static el_status_t do_macro(int c)
 {
-    char                name[4];
+    char name[4];
 
     name[0] = '_';
     name[1] = c;
@@ -367,7 +384,7 @@ static el_status_t do_case(el_case_t type)
     int         count;
     char        *p;
 
-    (void)do_forward(CSstay);
+    do_forward(CSstay);
     if (OldPoint != Point) {
         if ((count = Point - OldPoint) < 0)
             count = -count;
@@ -379,8 +396,9 @@ static el_status_t do_case(el_case_t type)
                 if (islower(*p))
                     *p = toupper(*p);
             }
-            else if (isupper(*p))
+            else if (isupper(*p)) {
                 *p = tolower(*p);
+            }
             right(CSmove);
         }
     }
@@ -496,7 +514,7 @@ static el_status_t do_insert_hist(const char *p)
     return insert_string(p);
 }
 
-static el_status_t do_hist(const char *(*move)())
+static el_status_t do_hist(const char *(*move)(void))
 {
     const char *p;
     int i;
@@ -544,7 +562,7 @@ static int substrcmp(const char *text, const char *pat, size_t len)
     return 1;
 }
 
-static const char *search_hist(const char *search, const char *(*move)())
+static const char *search_hist(const char *search, const char *(*move)(void))
 {
     static char *old_search;
     int         len;
@@ -610,7 +628,7 @@ static el_status_t h_search(void)
     p = search_hist(p, move);
     clear_line();
     if (p == NULL) {
-        (void)ring_bell();
+        ring_bell();
         return redisplay();
     }
     return do_insert_hist(p);
@@ -723,11 +741,11 @@ static el_status_t kill_line(void)
             i = Point;
             Point = Repeat;
             reposition();
-            (void)delete_string(i - Point);
+            delete_string(i - Point);
         }
         else if (Repeat > Point) {
             right(CSmove);
-            (void)delete_string(Repeat - Point - 1);
+            delete_string(Repeat - Point - 1);
         }
         return CSmove;
     }
@@ -794,7 +812,7 @@ static el_status_t meta(void)
 
     if ((c = tty_get()) == EOF)
         return CSeof;
-#if     defined(ANSI_ARROWS)
+#ifdef CONFIG_ANSI_ARROWS
     /* Also include VT-100 arrows. */
     if (c == '[' || c == 'O') {
         c = tty_get();
@@ -814,7 +832,7 @@ static el_status_t meta(void)
         case 'H':       return beg_line();            /* Home */
         }
     }
-#endif  /* defined(ANSI_ARROWS) */
+#endif /* CONFIG_ANSI_ARROWS */
 
     if (isdigit(c)) {
         for (Repeat = c - '0'; (c = tty_get()) != EOF && isdigit(c); )
@@ -883,12 +901,12 @@ static el_status_t tty_special(int c)
         Signal = SIGQUIT;
         return CSeof;
     }
-#if     defined(DO_SIGTSTP)
+#ifdef CONFIG_SIGSTOP
     if (c == rl_susp) {
         Signal = SIGTSTP;
         return CSsignal;
     }
-#endif  /* defined(DO_SIGTSTP) */
+#endif
 
     return CSdispatch;
 }
@@ -984,17 +1002,14 @@ static char *read_redirected(void)
     return line;
 }
 
-/*
-**  For compatibility with FSF readline.
-*/
-/* ARGSUSED0 */
+/* For compatibility with FSF readline. */
 void rl_reset_terminal(char *p __attribute__((__unused__)))
 {
 }
 
 void rl_initialize(void)
 {
-#ifdef COMPLETE
+#ifdef CONFIG_DEFAULT_COMPLETE
     int done = 0;
 
     if (!done)
@@ -1057,7 +1072,7 @@ char *readline(const char *prompt)
     if (Signal > 0) {
         s = Signal;
         Signal = 0;
-        (void)kill(getpid(), s);
+        kill(getpid(), s);
     }
     return (char *)line;
 }
@@ -1170,9 +1185,9 @@ static el_status_t c_complete(void)
         DISPOSE(word);
         if (len > 0) {
             s = insert_string(new);
-#if ANNOYING_NOISE
+#ifdef CONFIG_ANNOYING_NOISE
             if (!unique)
-                (void)ring_bell();
+                ring_bell();
 #endif
         }
         DISPOSE(new);
@@ -1294,7 +1309,7 @@ static el_status_t fd_kill_word(void)
 {
     int         i;
 
-    (void)do_forward(CSstay);
+    do_forward(CSstay);
     if (OldPoint != Point) {
         i = Point - OldPoint;
         Point = OldPoint;
@@ -1325,7 +1340,7 @@ static el_status_t bk_word(void)
 
 static el_status_t bk_kill_word(void)
 {
-    (void)bk_word();
+    bk_word();
     if (OldPoint != Point)
         return delete_string(OldPoint - Point);
     return CSstay;
@@ -1452,6 +1467,3 @@ static el_keymap_t   MetaMap[]= {
     {   0,              NULL            }
 };
 
-/*
- * $PchId: editline.c,v 1.4 1996/02/22 21:16:56 philip Exp $
- */

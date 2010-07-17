@@ -746,8 +746,8 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
-COMPLETE_FALSE
-COMPLETE_TRUE
+CONFIG_DEFAULT_COMPLETE_FALSE
+CONFIG_DEFAULT_COMPLETE_TRUE
 LIBOBJS
 CPP
 OTOOL64
@@ -869,6 +869,8 @@ with_gnu_ld
 enable_libtool_lock
 enable_default_complete
 enable_arrow_keys
+enable_sigstop
+enable_terminal_bell
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1509,6 +1511,8 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-default-complete      Enable default completion handler.
   --enable-arrow-keys            Enable ANSI arrow keys.
+  --enable-sigstop               Enable SIGSTOP key.
+  --enable-terminal-bell         Enable terminal bell on completion.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -4550,13 +4554,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4553: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4557: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4556: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4560: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4559: output\"" >&5)
+  (eval echo "\"\$as_me:4563: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5762,7 +5766,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5765 "configure"' > conftest.$ac_ext
+  echo '#line 5769 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7292,11 +7296,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7295: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7299: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7299: \$? = $ac_status" >&5
+   echo "$as_me:7303: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7631,11 +7635,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7634: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7638: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7638: \$? = $ac_status" >&5
+   echo "$as_me:7642: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7736,11 +7740,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7739: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7743: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7743: \$? = $ac_status" >&5
+   echo "$as_me:7747: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7791,11 +7795,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7794: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7798: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7798: \$? = $ac_status" >&5
+   echo "$as_me:7802: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10175,7 +10179,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10178 "configure"
+#line 10182 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10271,7 +10275,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10274 "configure"
+#line 10278 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11079,11 +11083,11 @@ else
 fi
 
  if test x$complete = xtrue; then
-  COMPLETE_TRUE=
-  COMPLETE_FALSE='#'
+  CONFIG_DEFAULT_COMPLETE_TRUE=
+  CONFIG_DEFAULT_COMPLETE_FALSE='#'
 else
-  COMPLETE_TRUE='#'
-  COMPLETE_FALSE=
+  CONFIG_DEFAULT_COMPLETE_TRUE='#'
+  CONFIG_DEFAULT_COMPLETE_FALSE=
 fi
 
 
@@ -11098,7 +11102,37 @@ fi
 
 if test "x${ac_enable_arrow_keys}" = xyes ; then
 
-$as_echo "#define ANSI_ARROWS /**/" >>confdefs.h
+$as_echo "#define CONFIG_ANSI_ARROWS /**/" >>confdefs.h
+
+fi
+
+ac_enable_sigstop=no
+# Check whether --enable-sigstop was given.
+if test "${enable_sigstop+set}" = set; then :
+  enableval=$enable_sigstop;  ac_enable_sigstop=$enableval
+else
+   ac_enable_sigstop=no
+fi
+
+
+if test "x${ac_enable_sigstop}" = xyes ; then
+
+$as_echo "#define CONFIG_SIGSTOP /**/" >>confdefs.h
+
+fi
+
+ac_enable_terminal_bell=no
+# Check whether --enable-terminal-bell was given.
+if test "${enable_terminal_bell+set}" = set; then :
+  enableval=$enable_terminal_bell;  ac_enable_terminal_bell=$enableval
+else
+   ac_enable_terminal_bell=no
+fi
+
+
+if test "x${ac_enable_terminal_bell}" = xyes ; then
+
+$as_echo "#define CONFIG_ANNOYING_NOISE /**/" >>confdefs.h
 
 fi
 
@@ -11217,8 +11251,8 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error "conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${COMPLETE_TRUE}" && test -z "${COMPLETE_FALSE}"; then
-  as_fn_error "conditional \"COMPLETE\" was never defined.
+if test -z "${CONFIG_DEFAULT_COMPLETE_TRUE}" && test -z "${CONFIG_DEFAULT_COMPLETE_FALSE}"; then
+  as_fn_error "conditional \"CONFIG_DEFAULT_COMPLETE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

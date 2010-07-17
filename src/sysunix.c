@@ -1,7 +1,23 @@
-/*  $Revision: 5 $
-**
-**  Unix system-dependant routines for editline library.
-*/
+/* Unix system-dependant routines for editline library.
+ *
+ * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz. All rights reserved.
+ *
+ * This software is not subject to any license of the American Telephone
+ * and Telegraph Company or of the Regents of the University of California.
+ *
+ * Permission is granted to anyone to use this software for any purpose on
+ * any computer system, and to alter it and redistribute it freely, subject
+ * to the following restrictions:
+ * 1. The authors are not responsible for the consequences of use of this
+ *    software, no matter how awful, even if they arise from flaws in it.
+ * 2. The origin of this software must not be misrepresented, either by
+ *    explicit claim or by omission.  Since few users ever read sources,
+ *    credits must appear in the documentation.
+ * 3. Altered versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.  Since few users
+ *    ever read sources, credits must appear in the documentation.
+ * 4. This notice may not be removed or altered.
+ */
 #include "editline.h"
 
 #if defined(HAVE_TCGETATTR)
@@ -19,7 +35,7 @@ void rl_ttyset(int Reset)
         rl_eof = old.c_cc[VEOF];
         rl_intr = old.c_cc[VINTR];
         rl_quit = old.c_cc[VQUIT];
-#ifdef DO_SIGTSTP
+#ifdef CONFIG_SIGSTOP
         rl_susp = old.c_cc[VSUSP];
 #endif
 
@@ -49,7 +65,7 @@ void rl_ttyset(int Reset)
         rl_eof = old.c_cc[VEOF];
         rl_intr = old.c_cc[VINTR];
         rl_quit = old.c_cc[VQUIT];
-#ifdef DO_SIGTSTP
+#ifdef CONFIG_SIGSTOP
         rl_susp = old.c_cc[VSUSP];
 #endif
 
@@ -73,7 +89,7 @@ void rl_ttyset(int Reset)
     static struct tchars        old_tchars;
     struct sgttyb               new_sgttyb;
     struct tchars               new_tchars;
-#ifdef DO_SIGTSTP
+#ifdef CONFIG_SIGSTOP
     struct ltchars              old_ltchars;
 #endif
 
@@ -87,7 +103,7 @@ void rl_ttyset(int Reset)
         rl_intr = old_tchars.t_intrc;
         rl_quit = old_tchars.t_quitc;
 
-#ifdef DO_SIGTSTP
+#ifdef CONFIG_SIGSTOP
         (void)ioctl(0, TIOCGLTC, &old_ltchars);
         rl_susp = old_ltchars.t_suspc;
 #endif
@@ -119,6 +135,3 @@ void rl_add_slash(char *path, char *p)
         (void)strcat(p, S_ISDIR(Sb.st_mode) ? "/" : " ");
 }
 
-/*
- * $PchId: sysunix.c,v 1.4 1996/02/22 21:16:56 philip Exp $
- */

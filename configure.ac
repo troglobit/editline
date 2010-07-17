@@ -5,6 +5,7 @@ AC_PREREQ(2.61)
 AC_INIT(editline, 1.13.0, troglobit@vmlinux.org)
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Prepare automake
 AM_INIT_AUTOMAKE([dist-bzip2 dist-lzma])
@@ -14,9 +15,9 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB
 
 # Checks for libraries.
+LT_INIT
 
 # Checks for header files.
 AC_HEADER_DIRENT

@@ -1,3 +1,4 @@
 AUTOMAKE_OPTIONS = foreign
-EXTRA_DIST = LICENSE
-SUBDIRS = src include man examples
+ACLOCAL_AMFLAGS  = -I m4
+EXTRA_DIST       = LICENSE
+SUBDIRS          = src include man examples

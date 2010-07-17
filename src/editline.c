@@ -532,7 +532,7 @@ static el_status_t h_last(void)
 /*
 **  Return zero if pat appears as a substring in text.
 */
-static int substrcmp(char *text, char *pat, int len)
+static int substrcmp(const char *text, const char *pat, size_t len)
 {
     char        c;
 
@@ -549,7 +549,7 @@ static const char *search_hist(const char *search, const char *(*move)())
     static char *old_search;
     int         len;
     int         pos;
-    int         (*match)();
+    int         (*match)(const char *s1, const char *s2, size_t n);
     char        *pat;
 
     /* Save or get remembered search pattern. */

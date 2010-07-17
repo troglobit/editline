@@ -2,6 +2,9 @@
 #ifndef __EDITLINE_H__
 #define __EDITLINE_H__
 
+/* Display print 8-bit chars as `M-x' or as the actual 8-bit char?  (Default:1) */
+extern int rl_meta_chars;
+
 /* Assign these to get command completion, see cli.c for
  * example usage. */
 extern char *(*rl_complete)(char *token, int *match);

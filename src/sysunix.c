@@ -4,12 +4,10 @@
 */
 #include "editline.h"
 
-#if     defined(HAVE_TCGETATTR)
+#if defined(HAVE_TCGETATTR)
 #include <termios.h>
 
-void
-rl_ttyset(Reset)
-    int                         Reset;
+void rl_ttyset(int Reset)
 {
     static struct termios       old;
     struct termios              new;
@@ -21,9 +19,9 @@ rl_ttyset(Reset)
         rl_eof = old.c_cc[VEOF];
         rl_intr = old.c_cc[VINTR];
         rl_quit = old.c_cc[VQUIT];
-#if     defined(DO_SIGTSTP)
+#ifdef DO_SIGTSTP
         rl_susp = old.c_cc[VSUSP];
-#endif  /* defined(DO_SIGTSTP) */
+#endif
 
         new = old;
         new.c_lflag &= ~(ECHO | ICANON | ISIG);
@@ -31,18 +29,15 @@ rl_ttyset(Reset)
         new.c_cc[VMIN] = 1;
         new.c_cc[VTIME] = 0;
         if (tcsetattr(0, TCSADRAIN, &new) < 0) perror("tcsetattr");
-    }
-    else
+    } else {
         (void)tcsetattr(0, TCSADRAIN, &old);
+    }
 }
 
-#else
-#if     defined(HAVE_TERMIO_H)
+#elif defined(HAVE_TERMIO_H)
 #include <termio.h>
 
-void
-rl_ttyset(Reset)
-    int                         Reset;
+void rl_ttyset(int Reset)
 {
     static struct termio        old;
     struct termio               new;
@@ -54,9 +49,9 @@ rl_ttyset(Reset)
         rl_eof = old.c_cc[VEOF];
         rl_intr = old.c_cc[VINTR];
         rl_quit = old.c_cc[VQUIT];
-#if     defined(DO_SIGTSTP)
+#ifdef DO_SIGTSTP
         rl_susp = old.c_cc[VSUSP];
-#endif  /* defined(DO_SIGTSTP) */
+#endif
 
         new = old;
         new.c_lflag &= ~(ECHO | ICANON | ISIG);
@@ -64,25 +59,23 @@ rl_ttyset(Reset)
         new.c_cc[VMIN] = 1;
         new.c_cc[VTIME] = 0;
         (void)ioctl(0, TCSETAW, &new);
-    }
-    else
+    } else {
         (void)ioctl(0, TCSETAW, &old);
+    }
 }
 
-#else
+#else /* Neither HAVE_TERMIO_H or HAVE_TCGETATTR */
 #include <sgtty.h>
 
-void
-rl_ttyset(Reset)
-    int                         Reset;
+void rl_ttyset(int Reset)
 {
     static struct sgttyb        old_sgttyb;
     static struct tchars        old_tchars;
     struct sgttyb               new_sgttyb;
     struct tchars               new_tchars;
-#if     defined(DO_SIGTSTP)
+#ifdef DO_SIGTSTP
     struct ltchars              old_ltchars;
-#endif  /* defined(DO_SIGTSTP) */
+#endif
 
     if (Reset == 0) {
         (void)ioctl(0, TIOCGETP, &old_sgttyb);
@@ -94,36 +87,31 @@ rl_ttyset(Reset)
         rl_intr = old_tchars.t_intrc;
         rl_quit = old_tchars.t_quitc;
 
-#if     defined(DO_SIGTSTP)
+#ifdef DO_SIGTSTP
         (void)ioctl(0, TIOCGLTC, &old_ltchars);
         rl_susp = old_ltchars.t_suspc;
-#endif  /* defined(DO_SIGTSTP) */
+#endif
 
         new_sgttyb = old_sgttyb;
         new_sgttyb.sg_flags &= ~ECHO;
         new_sgttyb.sg_flags |= RAW;
-#if     defined(PASS8)
+#ifdef PASS8
         new_sgttyb.sg_flags |= PASS8;
-#endif  /* defined(PASS8) */
+#endif
         (void)ioctl(0, TIOCSETP, &new_sgttyb);
 
         new_tchars = old_tchars;
         new_tchars.t_intrc = -1;
         new_tchars.t_quitc = -1;
         (void)ioctl(0, TIOCSETC, &new_tchars);
-    }
-    else {
+    } else {
         (void)ioctl(0, TIOCSETP, &old_sgttyb);
         (void)ioctl(0, TIOCSETC, &old_tchars);
     }
 }
-#endif  /* defined(HAVE_TERMIO_H) */
-#endif  /* defined(HAVE_TCGETATTR) */
+#endif /* Neither HAVE_TERMIO_H or HAVE_TCGETATTR */
 
-void
-rl_add_slash(path, p)
-    char        *path;
-    char        *p;
+void rl_add_slash(char *path, char *p)
 {
     struct stat Sb;
 

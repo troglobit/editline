@@ -24,28 +24,24 @@
 #endif
 #ifdef SYS_UNIX
 #include "unix.h"
-#endif	/* defined(SYS_UNIX) */
-#if	defined(SYS_OS9)
+#endif
+#ifdef SYS_OS9
 #include "os9.h"
-#endif	/* defined(SYS_OS9) */
+#endif
 
-#if	!defined(SIZE_T)
+#ifndef SIZE_T
 #define SIZE_T	unsigned int
-#endif	/* !defined(SIZE_T) */
+#endif
 
 typedef unsigned char	CHAR;
 
 #define MEM_INC		64
 #define SCREEN_INC	256
 
-#define DISPOSE(p)	free((char *)(p))
-#define NEW(T, c)	\
-	((T *)malloc((unsigned int)(sizeof (T) * (c))))
-#define RENEW(p, T, c)	\
-	(p = (T *)realloc((char *)(p), (unsigned int)(sizeof (T) * (c))))
-#define COPYFROMTO(new, p, len)	\
-	(void)memcpy((char *)(new), (char *)(p), (int)(len))
-
+#define DISPOSE(p)		free((char *)(p))
+#define NEW(T, c)		((T *)malloc((unsigned int)(sizeof (T) * (c))))
+#define RENEW(p, T, c)	        (p = (T *)realloc((char *)(p), (unsigned int)(sizeof (T) * (c))))
+#define COPYFROMTO(new, p, len)	(void)memcpy((char *)(new), (char *)(p), (int)(len))
 
 /*
 **  Variables and routines internal to this package.
@@ -55,17 +51,17 @@ extern int	rl_erase;
 extern int	rl_intr;
 extern int	rl_kill;
 extern int	rl_quit;
-#if	defined(DO_SIGTSTP)
+#ifdef DO_SIGTSTP
 extern int	rl_susp;
-#endif	/* defined(DO_SIGTSTP) */
+#endif
 #ifdef COMPLETE
 extern char	*default_rl_complete();
 extern int	default_rl_list_possib(char *pathname, char ***avp);
 #endif
-extern void	rl_ttyset();
-extern void	rl_add_slash();
+extern void     rl_ttyset(int Reset);
+extern void	rl_add_slash(char *path, char *p);
 
-#if    !defined(HAVE_STDLIB_H)
+#ifndef HAVE_STDLIB_H
 extern char	*getenv();
 extern char	*malloc();
 extern char	*realloc();
@@ -78,10 +74,10 @@ extern char	*strdup();
 extern int	strcmp();
 extern int	strlen();
 extern int	strncmp();
-#endif	/* !defined(HAVE_STDLIB) */
+#endif/* !HAVE_STDLIB */
 
-#if	defined(NEED_STRDUP)
-extern char	*strdup();
+#ifdef NEED_STRDUP
+extern char	*strdup(const char *s);
 #endif
 
 #include "../include/editline.h"

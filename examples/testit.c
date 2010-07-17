@@ -5,55 +5,33 @@
 */
 #include <config.h>
 #include <stdio.h>
-#if	defined(HAVE_STDLIB_H)
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if	defined(HAVE_STRING_H)
+#ifdef HAVE_STRING_H
 #include <string.h>
 #endif
-#if	defined(HAVE_UNISTD_H)
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "editline.h"
 
-extern char	*readline();
-extern void	add_history();
-
-#if	!defined(HAVE_STDLIB_H)
-extern int	free();
-extern int	system();
-extern void	exit();
-extern char	*getenv();
-#endif	/* !defined(HAVE_STDLIB) */
-#if   !defined(HAVE_STRING_H)
-extern int	strncmp();
-#endif
-#if   !defined(HAVE_UNISTD_H)
-extern int	chdir();
-#endif
-
-#if	!defined(HAVE_PERROR)
-void
-perror(s)
-    char	*s;
+#ifndef HAVE_PERROR
+void perror(char *s)
 {
-    extern int	errno;
+    extern int errno;
 
-    (voidf)printf(stderr, "%s: error %d\n", s, errno);
+    (void)fprintf(stderr, "%s: error %d\n", s, errno);
 }
-#endif	/* defined(NEED_PERROR) */
+#endif /* !HAVE_PERROR */
 
-
-/* ARGSUSED1 */
-int
-main(ac, av)
-    int		ac;
-    char	*av[] __attribute__ ((unused));
+int main(int argc, char *argv[] __attribute__ ((unused)))
 {
     char	*prompt;
     char	*p;
     int		doit;
 
-    doit = ac == 1;
+    doit = argc == 1;
     if ((prompt = getenv("TESTPROMPT")) == NULL)
         prompt = "testit>  ";
 

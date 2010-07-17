@@ -19,3 +19,9 @@ src/editline.o
 src/libeditline.a
 src/sysunix.o
 stamp-h1
+*~
+*/.libs/
+libtool
+src/editline.lo
+src/libeditline.la
+src/sysunix.lo

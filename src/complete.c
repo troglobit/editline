@@ -23,7 +23,7 @@
 
 #define MAX_TOTAL_MATCHES (256 << sizeof(char *))
 
-#ifdef NEED_STRDUP
+#ifndef HAVE_STRDUP
 /* Return an allocated copy of a string. */
 char *strdup(const char *p)
 {

@@ -72,7 +72,7 @@ extern int	rl_quit;
 extern int	rl_susp;
 #endif
 #ifdef CONFIG_DEFAULT_COMPLETE
-extern char	*default_rl_complete();
+extern char	*default_rl_complete(char *pathname, int *unique);
 extern int	default_rl_list_possib(char *pathname, char ***avp);
 #endif
 extern void     rl_ttyset(int Reset);

@@ -10941,10 +10941,6 @@ $as_echo "$ac_cv_prog_gcc_traditional" >&6; }
   fi
 fi
 
-# Check for malloc.h instead of AC_FUNC_MALLOC/REALLOC AIX and others
-# mess up the traditional malloc check.
-#AC_FUNC_MALLOC
-#AC_FUNC_REALLOC
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether lstat correctly handles trailing slash" >&5
 $as_echo_n "checking whether lstat correctly handles trailing slash... " >&6; }
 if test "${ac_cv_func_lstat_dereferences_slashed_symlink+set}" = set; then :

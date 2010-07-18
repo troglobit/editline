@@ -35,10 +35,6 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_CLOSEDIR_VOID
 AC_PROG_GCC_TRADITIONAL
-# Check for malloc.h instead of AC_FUNC_MALLOC/REALLOC AIX and others
-# mess up the traditional malloc check.
-#AC_FUNC_MALLOC
-#AC_FUNC_REALLOC
 AC_FUNC_STAT
 AC_CHECK_FUNCS([strchr strdup strrchr tcgetattr perror])
 

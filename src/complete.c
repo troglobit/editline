@@ -240,3 +240,12 @@ int default_rl_list_possib(char *pathname, char ***avp)
 
     return ac;
 }
+
+/**
+ * Local Variables:
+ *  version-control: t
+ *  indent-tabs-mode: t
+ *  c-file-style: "ellemtel"
+ *  c-basic-offset: 4
+ * End:
+ */

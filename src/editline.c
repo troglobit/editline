@@ -27,7 +27,7 @@
 /*
 **  Manifest constants.
 */
-#define SCREEN_WIDTH    80
+#define SCREEN_COLS     80
 #define SCREEN_ROWS     24
 #define NO_ARG          (-1)
 #define DEL             127
@@ -107,7 +107,7 @@ static SIZE_T     Length;
 static SIZE_T     ScreenCount;
 static SIZE_T     ScreenSize;
 static char       *backspace;
-static int        tty_width;
+static int        tty_cols;
 static int        tty_rows;
 
 /* Display print 8-bit chars as `M-x' or as the actual 8-bit char? */
@@ -122,11 +122,10 @@ int (*rl_list_possib)(char *token, char ***av);
 **  Declarations.
 */
 static char     *editinput(void);
-#ifdef USE_TERMCAP
-extern char     *getenv(void);
-extern char     *tgetstr(void);
-extern int      tgetent(void);
-extern int      tgetnum(void);
+#ifdef CONFIG_USE_TERMCAP
+extern char     *tgetstr(const char *, char **);
+extern int      tgetent(char *, const char *);
+extern int      tgetnum(const char *);
 #endif
 
 /*
@@ -213,7 +212,7 @@ static void tty_backn(int n)
 static void tty_info(void)
 {
     static int          init;
-#ifdef USE_TERMCAP
+#ifdef CONFIG_USE_TERMCAP
     char                *term;
     char                buff[2048];
     char                *bp;
@@ -227,7 +226,7 @@ static void tty_info(void)
         /* Perhaps we got resized. */
         if (ioctl(0, TIOCGWINSZ, &W) >= 0
          && W.ws_col > 0 && W.ws_row > 0) {
-            tty_width = (int)W.ws_col;
+            tty_cols = (int)W.ws_col;
             tty_rows = (int)W.ws_row;
         }
 #endif
@@ -235,32 +234,31 @@ static void tty_info(void)
     }
     init++;
 
-    tty_width = tty_rows = 0;
-#ifdef USE_TERMCAP
+    /* Initialize to faulty values to trigger fallback if nothing else works. */
+    tty_cols = tty_rows = -1;
+#ifdef CONFIG_USE_TERMCAP
     bp = buff;
     if ((term = getenv("TERM")) == NULL)
         term = "dumb";
-    if (tgetent(buff, term) < 0) {
-       tty_width = SCREEN_WIDTH;
-       tty_rows = SCREEN_ROWS;
-       return;
+    if (-1 != tgetent(buff, term)) {
+       if ((backspace = tgetstr("le", &bp)) != NULL)
+          backspace = strdup(backspace);
+       tty_cols = tgetnum("co");
+       tty_rows = tgetnum("li");
     }
-    if ((backspace = tgetstr("le", &bp)) != NULL)
-        backspace = strdup(backspace);
-    tty_width = tgetnum("co");
-    tty_rows = tgetnum("li");
+    /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
 #endif
 
+    if (tty_cols <= 0 || tty_rows <= 0) {
 #ifdef TIOCGWINSZ
-    if (ioctl(0, TIOCGWINSZ, &W) >= 0) {
-        tty_width = (int)W.ws_col;
-        tty_rows = (int)W.ws_row;
-    }
+       if (-1 != ioctl(0, TIOCGWINSZ, &W)) {
+          tty_cols = (int)W.ws_col;
+          tty_rows = (int)W.ws_row;
+          return;
+       }
 #endif
-
-    if (tty_width <= 0 || tty_rows <= 0) {
-        tty_width = SCREEN_WIDTH;
-        tty_rows = SCREEN_ROWS;
+       tty_cols = SCREEN_COLS;
+       tty_rows = SCREEN_ROWS;
     }
 }
 
@@ -283,7 +281,7 @@ static void columns(int ac, char **av)
     for (longest = 0, i = 0; i < ac; i++)
         if ((j = strlen((char *)av[i])) > longest)
             longest = j;
-    cols = tty_width / (longest + 3);
+    cols = tty_cols / (longest + 3);
 
     tty_puts(NEWLINE);
     for (skip = ac / cols + 1, i = 0; i < skip; i++) {
@@ -1467,3 +1465,11 @@ static el_keymap_t   MetaMap[]= {
     {   0,              NULL            }
 };
 
+/**
+ * Local Variables:
+ *  version-control: t
+ *  indent-tabs-mode: t
+ *  c-file-style: "ellemtel"
+ *  c-basic-offset: 4
+ * End:
+ */

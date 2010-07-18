@@ -45,6 +45,13 @@
 #ifdef SYS_OS9
 #include "os9.h"
 #endif
+/* The following two are for TIOCGWINSZ */
+#ifdef HAVE_TERMIOS_H
+# include <termios.h>
+#endif
+#ifdef GWINSZ_IN_SYS_IOCTL
+# include <sys/ioctl.h>
+#endif
 
 #ifndef SIZE_T
 #define SIZE_T	unsigned int

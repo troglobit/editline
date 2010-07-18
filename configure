@@ -746,6 +746,7 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+TERMLIBS
 AM_CFLAGS
 CONFIG_DEFAULT_COMPLETE_FALSE
 CONFIG_DEFAULT_COMPLETE_TRUE
@@ -872,6 +873,7 @@ enable_default_complete
 enable_arrow_keys
 enable_sigstop
 enable_terminal_bell
+enable_termcap
 enable_history
 '
       ac_precious_vars='build_alias
@@ -1515,6 +1517,7 @@ Optional Features:
   --enable-arrow-keys            Enable ANSI arrow keys.
   --enable-sigstop               Enable SIGSTOP key.
   --enable-terminal-bell         Enable terminal bell on completion.
+  --enable-termcap               Use the termcap library for terminal size.
   --enable-history=LINES         Enable scrollback history, default off.
 
 Optional Packages:
@@ -4557,13 +4560,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4560: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4563: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4563: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4566: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4566: output\"" >&5)
+  (eval echo "\"\$as_me:4569: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5769,7 +5772,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5772 "configure"' > conftest.$ac_ext
+  echo '#line 5775 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7299,11 +7302,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7302: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7305: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7306: \$? = $ac_status" >&5
+   echo "$as_me:7309: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7638,11 +7641,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7641: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7644: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7645: \$? = $ac_status" >&5
+   echo "$as_me:7648: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7743,11 +7746,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7746: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7749: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7750: \$? = $ac_status" >&5
+   echo "$as_me:7753: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7798,11 +7801,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7801: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7804: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7805: \$? = $ac_status" >&5
+   echo "$as_me:7808: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10182,7 +10185,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10185 "configure"
+#line 10188 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10278,7 +10281,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10281 "configure"
+#line 10284 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10822,7 +10825,7 @@ fi
 
 # Check for malloc.h instead of AC_FUNC_MALLOC/REALLOC AIX and others
 # mess up the traditional malloc check.
-for ac_header in malloc.h signal.h sgtty.h stdlib.h string.h termio.h termios.h
+for ac_header in malloc.h signal.h stdlib.h string.h termcap.h termio.h termios.h sgtty.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -10835,6 +10838,68 @@ _ACEOF
 fi
 
 done
+
+
+# In termios.h or in sys/ioctl.g?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether termios.h defines TIOCGWINSZ" >&5
+$as_echo_n "checking whether termios.h defines TIOCGWINSZ... " >&6; }
+if test "${ac_cv_sys_tiocgwinsz_in_termios_h+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#include <termios.h>
+#ifdef TIOCGWINSZ
+  yes
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "yes" >/dev/null 2>&1; then :
+  ac_cv_sys_tiocgwinsz_in_termios_h=yes
+else
+  ac_cv_sys_tiocgwinsz_in_termios_h=no
+fi
+rm -f conftest*
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_tiocgwinsz_in_termios_h" >&5
+$as_echo "$ac_cv_sys_tiocgwinsz_in_termios_h" >&6; }
+
+if test $ac_cv_sys_tiocgwinsz_in_termios_h != yes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sys/ioctl.h defines TIOCGWINSZ" >&5
+$as_echo_n "checking whether sys/ioctl.h defines TIOCGWINSZ... " >&6; }
+if test "${ac_cv_sys_tiocgwinsz_in_sys_ioctl_h+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#ifdef TIOCGWINSZ
+  yes
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "yes" >/dev/null 2>&1; then :
+  ac_cv_sys_tiocgwinsz_in_sys_ioctl_h=yes
+else
+  ac_cv_sys_tiocgwinsz_in_sys_ioctl_h=no
+fi
+rm -f conftest*
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_tiocgwinsz_in_sys_ioctl_h" >&5
+$as_echo "$ac_cv_sys_tiocgwinsz_in_sys_ioctl_h" >&6; }
+
+  if test $ac_cv_sys_tiocgwinsz_in_sys_ioctl_h = yes; then
+
+$as_echo "#define GWINSZ_IN_SYS_IOCTL 1" >>confdefs.h
+
+  fi
+fi
 
 
 # Overrides and types, should be a check.
@@ -11103,6 +11168,14 @@ $as_echo "#define CONFIG_ANNOYING_NOISE /**/" >>confdefs.h
 fi
 
 
+# Check whether --enable-termcap was given.
+if test "${enable_termcap+set}" = set; then :
+  enableval=$enable_termcap;
+$as_echo "#define CONFIG_USE_TERMCAP /**/" >>confdefs.h
+
+fi
+
+
 # Default history size 1, i.e. disabled.
 let HIST_SIZE=1
 # Check whether --enable-history was given.
@@ -11193,6 +11266,146 @@ CFLAGS="$saved_cflags"
 
 AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow"
 
+
+### The following magic for determining the location of termcap library is from GNU Texinfo
+### http://www.tex.ac.uk/tex-archive/macros/texinfo/texinfo/configure.ac
+# Some GNU/Linux systems (e.g., SuSE 4.3, 1996) don't have curses, but
+# rather ncurses.  So we check for it.
+TERMLIBS=
+# Check for termlib before termcap because Solaris termcap needs libucb.
+TERMLIB_VARIANTS="termlib termcap terminfo ncurses curses"
+for termlib in ${TERMLIB_VARIANTS}; do
+  as_ac_Lib=`$as_echo "ac_cv_lib_${termlib}''_tgetent" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for tgetent in -l${termlib}" >&5
+$as_echo_n "checking for tgetent in -l${termlib}... " >&6; }
+if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l${termlib}  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char tgetent ();
+int
+main ()
+{
+return tgetent ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+eval as_val=\$$as_ac_Lib
+   if test "x$as_val" = x""yes; then :
+  TERMLIBS="${TERMLIBS} -l${termlib}"; break
+fi
+
+done
+# don't bother warning on djgpp, it doesn't have a term library, it
+# ports each termcap-needing program separately according to its needs.
+if test -z "$TERMLIBS" && echo "$build" | grep -v djgpp >/dev/null; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: probably need a terminal library, one of: ${TERMLIB_VARIANTS}" >&5
+$as_echo "$as_me: WARNING: probably need a terminal library, one of: ${TERMLIB_VARIANTS}" >&2;}
+fi
+
+# Checks for variables.
+# HP-UX 9 (at least) needs -lncurses which defines termcap variables PC etc.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library with termcap variables" >&5
+$as_echo_n "checking for library with termcap variables... " >&6; }
+if test "${ac_cv_var_ospeed+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  oldLIBS=$LIBS
+for trylib in $termlib ${TERMLIB_VARIANTS}; do
+   if test "x$trylib" != "x$termlib"; then
+     LIBS="$oldLIBS -l$termlib -l$trylib"
+   else
+     LIBS="$oldLIBS -l$termlib"
+   fi
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+#ifdef HAVE_NCURSES_TERMCAP_H
+#include <ncurses/termcap.h>
+#else
+#ifdef HAVE_TERMCAP_H
+#include <termcap.h>
+#else
+#undef PC
+char *BC;
+char **UP;
+char PC;
+short ospeed;
+#endif
+#endif
+/* Make sure all variables actually exist.  AIX 4.3 has ospeed but no BC.
+   --Andreas Ley <andy@rz.uni-karlsruhe.de> 24 Aug 2000.  */
+BC++;
+UP++;
+PC++;
+return ospeed != 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_var_ospeed=$trylib; break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+done
+LIBS=$oldLIBS
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_var_ospeed" >&5
+$as_echo "$ac_cv_var_ospeed" >&6; }
+if test -n "$ac_cv_var_ospeed" \
+   && test "x$termlib" != "x$ac_cv_var_ospeed"; then
+  TERMLIBS="${TERMLIBS} -l${ac_cv_var_ospeed}"
+fi
+#
+
+# Do not use <ncurses/termcap.h> unless we're linking with ncurses.
+# Must come after the termlib tests.
+if test "x$termlib" = xncurses; then
+  # Use AC_CHECK_HEADERS so the HAVE_*_H symbol gets defined.
+  for ac_header in ncurses/termcap.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ncurses/termcap.h" "ac_cv_header_ncurses_termcap_h" "$ac_includes_default"
+if test "x$ac_cv_header_ncurses_termcap_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NCURSES_TERMCAP_H 1
+_ACEOF
+
+fi
+
+done
+
+fi
+### End-of-Termcap magic from http://www.tex.ac.uk/tex-archive/macros/texinfo/texinfo/configure.ac
 
 ac_config_files="$ac_config_files Makefile src/Makefile include/Makefile man/Makefile examples/Makefile"
 

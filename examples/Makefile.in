@@ -52,14 +52,17 @@ PROGRAMS = $(noinst_PROGRAMS)
 cli_SOURCES = cli.c
 cli_OBJECTS = cli.$(OBJEXT)
 cli_LDADD = $(LDADD)
-cli_DEPENDENCIES = $(top_builddir)/src/libeditline.la
+am__DEPENDENCIES_1 =
+cli_DEPENDENCIES = $(top_builddir)/src/libeditline.la \
+	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
 testit_SOURCES = testit.c
 testit_OBJECTS = testit.$(OBJEXT)
 testit_LDADD = $(LDADD)
-testit_DEPENDENCIES = $(top_builddir)/src/libeditline.la
+testit_DEPENDENCIES = $(top_builddir)/src/libeditline.la \
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -151,6 +154,7 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+TERMLIBS = @TERMLIBS@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -205,7 +209,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-LDADD = $(top_builddir)/src/libeditline.la
+LDADD = $(top_builddir)/src/libeditline.la $(TERMLIBS)
 all: all-am
 
 .SUFFIXES:

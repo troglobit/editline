@@ -37,7 +37,7 @@ char *strdup(const char *p)
 #endif
 
 /* Wrap strcmp() for qsort() */
-static int compare(void *p1, void *p2)
+static int compare(const void *p1, const void *p2)
 {
     char **v1 = (char **)p1;
     char **v2 = (char **)p2;

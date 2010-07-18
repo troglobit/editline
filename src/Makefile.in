@@ -228,7 +228,6 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libeditline.la
 libeditline_la_SOURCES = editline.c editline.h sysunix.c unix.h \
 	$(am__append_1)
-@CONFIG_DEFAULT_COMPLETE_TRUE@AM_CPPFLAGS = -DCOMPLETE
 all: all-am
 
 .SUFFIXES:

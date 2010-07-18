@@ -9,6 +9,9 @@
 /* Define to include ANSI arrow keys support. */
 #undef CONFIG_ANSI_ARROWS
 
+/* Define to enable the default completion handler. */
+#undef CONFIG_DEFAULT_COMPLETE
+
 /* Define to enable SIGSTOP (Ctrl-Z) key. */
 #undef CONFIG_SIGSTOP
 

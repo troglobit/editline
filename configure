@@ -11066,20 +11066,9 @@ done
 
 # Check whether --enable-default-complete was given.
 if test "${enable_default_complete+set}" = set; then :
-  enableval=$enable_default_complete;
-   case "${enableval}" in
-       yes)
-        complete=true
-        ;;
-       no)
-        complete=false
-        ;;
-       *)
-        as_fn_error "bad value ${enableval} for --enable-default-complete" "$LINENO" 5
-        ;;
-   esac
-else
-  complete=false
+  enableval=$enable_default_complete; complete=true;
+$as_echo "#define CONFIG_DEFAULT_COMPLETE /**/" >>confdefs.h
+
 fi
 
  if test x$complete = xtrue; then
@@ -11091,50 +11080,29 @@ else
 fi
 
 
-ac_enable_arrow_keys=no
 # Check whether --enable-arrow-keys was given.
 if test "${enable_arrow_keys+set}" = set; then :
-  enableval=$enable_arrow_keys;  ac_enable_arrow_keys=$enableval
-else
-   ac_enable_arrow_keys=no
-fi
-
-
-if test "x${ac_enable_arrow_keys}" = xyes ; then
-
+  enableval=$enable_arrow_keys;
 $as_echo "#define CONFIG_ANSI_ARROWS /**/" >>confdefs.h
 
 fi
 
-ac_enable_sigstop=no
+
 # Check whether --enable-sigstop was given.
 if test "${enable_sigstop+set}" = set; then :
-  enableval=$enable_sigstop;  ac_enable_sigstop=$enableval
-else
-   ac_enable_sigstop=no
-fi
-
-
-if test "x${ac_enable_sigstop}" = xyes ; then
-
+  enableval=$enable_sigstop;
 $as_echo "#define CONFIG_SIGSTOP /**/" >>confdefs.h
 
 fi
 
-ac_enable_terminal_bell=no
+
 # Check whether --enable-terminal-bell was given.
 if test "${enable_terminal_bell+set}" = set; then :
-  enableval=$enable_terminal_bell;  ac_enable_terminal_bell=$enableval
-else
-   ac_enable_terminal_bell=no
-fi
-
-
-if test "x${ac_enable_terminal_bell}" = xyes ; then
-
+  enableval=$enable_terminal_bell;
 $as_echo "#define CONFIG_ANNOYING_NOISE /**/" >>confdefs.h
 
 fi
+
 
 ac_config_files="$ac_config_files Makefile src/Makefile include/Makefile man/Makefile examples/Makefile"
 

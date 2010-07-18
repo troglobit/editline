@@ -61,7 +61,7 @@ typedef enum {
 */
 typedef struct {
     int         Key;
-    el_status_t      (*Function)();
+    el_status_t (*Function)(void);
 } el_keymap_t;
 
 /*
@@ -604,7 +604,7 @@ static el_status_t h_search(void)
 {
     static int Searching;
     const char *old_prompt;
-    const char *(*move)();
+    const char *(*move)(void);
     const char *p;
 
     if (Searching)

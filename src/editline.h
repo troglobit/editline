@@ -91,7 +91,7 @@ extern char	*strdup(const char *s);
 extern int	strcmp(const char *s1, const char *s2);
 extern int	strlen(const char *s);
 extern int	strncmp(const char *s1, const char *s2, size_t n);
-#endif/* !HAVE_STDLIB */
+#endif/* !HAVE_STDLIB_H */
 
 #ifndef HAVE_STRDUP
 extern char	*strdup(const char *s);

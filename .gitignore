@@ -4,6 +4,7 @@ autom4te.cache
 config.h
 config.log
 config.status
+libtool
 examples/.deps
 examples/Makefile
 examples/cli
@@ -15,13 +16,10 @@ man/Makefile
 man/Makefile
 src/.deps
 src/Makefile
-src/editline.o
+src/*.o
+src/*.lo
 src/libeditline.a
-src/sysunix.o
+src/libeditline.la
 stamp-h1
 *~
 */.libs/
-libtool
-src/editline.lo
-src/libeditline.la
-src/sysunix.lo

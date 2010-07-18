@@ -37,9 +37,9 @@
 #define META(x)         ((x) | 0x80)
 #define ISMETA(x)       ((x) & 0x80)
 #define UNMETA(x)       ((x) & 0x7F)
-#if     !defined(HIST_SIZE)
-#define HIST_SIZE       20
-#endif  /* !defined(HIST_SIZE) */
+#ifndef HIST_SIZE       /* Default to one line history, i.e. disabled. */
+#define HIST_SIZE       1
+#endif
 #define SEPS "\"#$&'()*:;<=>?[\\]^`{|}~\n\t "
 
 /*
@@ -237,7 +237,7 @@ static void tty_info(void)
 
     tty_width = tty_rows = 0;
 #ifdef USE_TERMCAP
-    bp = &buff[0];
+    bp = buff;
     if ((term = getenv("TERM")) == NULL)
         term = "dumb";
     if (tgetent(buff, term) < 0) {

@@ -59,6 +59,16 @@ AC_ARG_ENABLE(terminal-bell,
    [  --enable-terminal-bell         Enable terminal bell on completion.],
    AC_DEFINE([CONFIG_ANNOYING_NOISE],, [Define to enable terminal bell on completion.]))
 
+# Default history size 1, i.e. disabled.
+let HIST_SIZE=1
+AC_ARG_ENABLE(history,
+   [  --enable-history=LINES         Enable scrollback history, default off.],
+   let HIST_SIZE=$enableval)
+if test $HIST_SIZE -lt 1; then
+   let HIST_SIZE=1
+fi
+AC_DEFINE_UNQUOTED(HIST_SIZE, $HIST_SIZE, [Number of lines in history.])
+
 # Restore gnu89 inline semantics on gcc 4.3 and newer
 saved_cflags="$CFLAGS"
 CFLAGS="$CFLAGS -fgnu89-inline"

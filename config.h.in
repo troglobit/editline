@@ -100,6 +100,9 @@
 /* Enable static keyword, hides internal methods. */
 #undef HIDE
 
+/* Number of lines in history. */
+#undef HIST_SIZE
+
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK

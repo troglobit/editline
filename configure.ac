@@ -112,6 +112,7 @@ AC_SUBST(AM_CFLAGS)
 
 ### The following magic for determining the location of termcap library is from GNU Texinfo
 ### http://www.tex.ac.uk/tex-archive/macros/texinfo/texinfo/configure.ac
+if test x$enable_termcap = "xyes"; then
 # Some GNU/Linux systems (e.g., SuSE 4.3, 1996) don't have curses, but
 # rather ncurses.  So we check for it.
 TERMLIBS=
@@ -167,6 +168,7 @@ if test -n "$ac_cv_var_ospeed" \
   TERMLIBS="${TERMLIBS} -l${ac_cv_var_ospeed}"
 fi
 AC_SUBST(TERMLIBS)#
+fi
 
 # Do not use <ncurses/termcap.h> unless we're linking with ncurses.
 # Must come after the termlib tests.

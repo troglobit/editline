@@ -87,17 +87,13 @@ int               rl_susp;
 
 static const char NIL[] = "";
 static const char *Input = NIL;
-static char       *Line;
 static const char *Prompt;
 static char       *Yanked;
 static char       *Screen;
 static char       NEWLINE[]= CRLF;
 static el_hist_t  H;
 static int        Repeat;
-static int        End;
-static int        Mark;
 static int        OldPoint;
-static int        Point;
 static int        PushBack;
 static int        Pushed;
 static int        Signal;
@@ -110,17 +106,19 @@ static char       *backspace;
 static int        tty_cols;
 static int        tty_rows;
 
-/* Display print 8-bit chars as `M-x' or as the actual 8-bit char? */
-int               rl_meta_chars = 1;
+int               rl_point;
+int               rl_mark;
+int               rl_end;
+int               rl_meta_chars = 1; /* Display print 8-bit chars as `M-x' or as the actual 8-bit char? */
+char             *rl_line_buffer;
+const char       *rl_readline_name;/* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 
 /* User definable callbacks. */
-char *(*rl_complete)(char *token, int *match); 
-int (*rl_list_possib)(char *token, char ***av);
+char **(*rl_attempted_completion_function)(const char *token, int start, int end);
+char  *(*rl_comlete)(char *token, int *match);
+int    (*rl_list_possib)(char *token, char ***av);
 
-
-/*
-**  Declarations.
-*/
+/* Declarations. */
 static char     *editinput(void);
 #ifdef CONFIG_USE_TERMCAP
 extern char     *tgetstr(const char *, char **);
@@ -303,30 +301,30 @@ static void reposition(void)
 
     tty_put('\r');
     tty_puts(Prompt);
-    for (i = Point, p = Line; --i >= 0; p++)
+    for (i = rl_point, p = rl_line_buffer; --i >= 0; p++)
         tty_show(*p);
 }
 
 static void left(el_status_t Change)
 {
     tty_back();
-    if (Point) {
-        if (ISCTL(Line[Point - 1]))
+    if (rl_point) {
+        if (ISCTL(rl_line_buffer[rl_point - 1]))
             tty_back();
-        else if (rl_meta_chars && ISMETA(Line[Point - 1])) {
+        else if (rl_meta_chars && ISMETA(rl_line_buffer[rl_point - 1])) {
             tty_back();
             tty_back();
         }
     }
     if (Change == CSmove)
-        Point--;
+        rl_point--;
 }
 
 static void right(el_status_t Change)
 {
-    tty_show(Line[Point]);
+    tty_show(rl_line_buffer[rl_point]);
     if (Change == CSmove)
-        Point++;
+        rl_point++;
 }
 
 static el_status_t ring_bell(void)
@@ -359,16 +357,16 @@ static el_status_t do_forward(el_status_t move)
 
     i = 0;
     do {
-        p = &Line[Point];
-        for ( ; Point < End && (*p == ' ' || !isalnum(*p)); Point++, p++)
+        p = &rl_line_buffer[rl_point];
+        for ( ; rl_point < rl_end && (*p == ' ' || !isalnum(*p)); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
-        for (; Point < End && isalnum(*p); Point++, p++)
+        for (; rl_point < rl_end && isalnum(*p); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
-        if (Point == End)
+        if (rl_point == rl_end)
             break;
     } while (++i < Repeat);
 
@@ -383,13 +381,13 @@ static el_status_t do_case(el_case_t type)
     char        *p;
 
     do_forward(CSstay);
-    if (OldPoint != Point) {
-        if ((count = Point - OldPoint) < 0)
+    if (OldPoint != rl_point) {
+        if ((count = rl_point - OldPoint) < 0)
             count = -count;
-        Point = OldPoint;
-        if ((end = Point + count) > End)
-            end = End;
-        for (i = Point, p = &Line[i]; i < end; i++, p++) {
+        rl_point = OldPoint;
+        if ((end = rl_point + count) > rl_end)
+            end = rl_end;
+        for (i = rl_point, p = &rl_line_buffer[i]; i < end; i++, p++) {
             if (type == TOupper) {
                 if (islower(*p))
                     *p = toupper(*p);
@@ -419,7 +417,7 @@ static void ceol(void)
     int         i;
     char        *p;
 
-    for (extras = 0, i = Point, p = &Line[i]; i <= End; i++, p++) {
+    for (extras = 0, i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
         tty_put(' ');
         if (ISCTL(*p)) {
             tty_put(' ');
@@ -432,18 +430,18 @@ static void ceol(void)
         }
     }
 
-    for (i += extras; i > Point; i--)
+    for (i += extras; i > rl_point; i--)
         tty_back();
 }
 
 static void clear_line(void)
 {
-    Point = -strlen(Prompt);
+    rl_point = -strlen(Prompt);
     tty_put('\r');
     ceol();
-    Point = 0;
-    End = 0;
-    Line[0] = '\0';
+    rl_point = 0;
+    rl_end = 0;
+    rl_line_buffer[0] = '\0';
 }
 
 static el_status_t insert_string(const char *p)
@@ -454,33 +452,33 @@ static el_status_t insert_string(const char *p)
     char        *q;
 
     len = strlen((char *)p);
-    if (End + len >= Length) {
+    if (rl_end + len >= Length) {
         if ((new = NEW(char, Length + len + MEM_INC)) == NULL)
             return CSstay;
         if (Length) {
-            COPYFROMTO(new, Line, Length);
-            DISPOSE(Line);
+            COPYFROMTO(new, rl_line_buffer, Length);
+            DISPOSE(rl_line_buffer);
         }
-        Line = new;
+        rl_line_buffer = new;
         Length += len + MEM_INC;
     }
 
-    for (q = &Line[Point], i = End - Point; --i >= 0; )
+    for (q = &rl_line_buffer[rl_point], i = rl_end - rl_point; --i >= 0; )
         q[len + i] = q[i];
-    COPYFROMTO(&Line[Point], p, len);
-    End += len;
-    Line[End] = '\0';
-    tty_string(&Line[Point]);
-    Point += len;
+    COPYFROMTO(&rl_line_buffer[rl_point], p, len);
+    rl_end += len;
+    rl_line_buffer[rl_end] = '\0';
+    tty_string(&rl_line_buffer[rl_point]);
+    rl_point += len;
 
-    return Point == End ? CSstay : CSmove;
+    return rl_point == rl_end ? CSstay : CSmove;
 }
 
 static el_status_t redisplay(void)
 {
     tty_puts(NEWLINE);
     tty_puts(Prompt);
-    tty_string(Line);
+    tty_string(rl_line_buffer);
     return CSmove;
 }
 
@@ -505,10 +503,10 @@ static el_status_t do_insert_hist(const char *p)
 {
     if (p == NULL)
         return ring_bell();
-    Point = 0;
+    rl_point = 0;
     reposition();
     ceol();
-    End = 0;
+    rl_end = 0;
     return insert_string(p);
 }
 
@@ -638,7 +636,7 @@ static el_status_t fd_char(void)
 
     i = 0;
     do {
-        if (Point >= End)
+        if (rl_point >= rl_end)
             break;
         right(CSmove);
     } while (++i < Repeat);
@@ -656,7 +654,7 @@ static void save_yank(int begin, int i)
         return;
 
     if ((Yanked = NEW(char, (SIZE_T)i + 1)) != NULL) {
-        COPYFROMTO(Yanked, &Line[begin], i);
+        COPYFROMTO(Yanked, &rl_line_buffer[begin], i);
         Yanked[i] = '\0';
     }
 }
@@ -666,13 +664,13 @@ static el_status_t delete_string(int count)
     int         i;
     char        *p;
 
-    if (count <= 0 || End == Point)
+    if (count <= 0 || rl_end == rl_point)
         return ring_bell();
 
-    if (count == 1 && Point == End - 1) {
+    if (count == 1 && rl_point == rl_end - 1) {
         /* Optimize common case of delete at end of line. */
-        End--;
-        p = &Line[Point];
+        rl_end--;
+        p = &rl_line_buffer[rl_point];
         i = 1;
         tty_put(' ');
         if (ISCTL(*p)) {
@@ -688,17 +686,17 @@ static el_status_t delete_string(int count)
         *p = '\0';
         return CSmove;
     }
-    if (Point + count > End && (count = End - Point) <= 0)
+    if (rl_point + count > rl_end && (count = rl_end - rl_point) <= 0)
         return CSstay;
 
     if (count > 1)
-        save_yank(Point, count);
+        save_yank(rl_point, count);
 
-    for (p = &Line[Point], i = End - (Point + count) + 1; --i >= 0; p++)
+    for (p = &rl_line_buffer[rl_point], i = rl_end - (rl_point + count) + 1; --i >= 0; p++)
         p[0] = p[count];
     ceol();
-    End -= count;
-    tty_string(&Line[Point]);
+    rl_end -= count;
+    tty_string(&rl_line_buffer[rl_point]);
     return CSmove;
 }
 
@@ -708,7 +706,7 @@ static el_status_t bk_char(void)
 
     i = 0;
     do {
-        if (Point == 0)
+        if (rl_point == 0)
             break;
         left(CSmove);
     } while (++i < Repeat);
@@ -722,7 +720,7 @@ static el_status_t bk_del_char(void)
 
     i = 0;
     do {
-        if (Point == 0)
+        if (rl_point == 0)
             break;
         left(CSmove);
     } while (++i < Repeat);
@@ -735,23 +733,23 @@ static el_status_t kill_line(void)
     int         i;
 
     if (Repeat != NO_ARG) {
-        if (Repeat < Point) {
-            i = Point;
-            Point = Repeat;
+        if (Repeat < rl_point) {
+            i = rl_point;
+            rl_point = Repeat;
             reposition();
-            delete_string(i - Point);
+            delete_string(i - rl_point);
         }
-        else if (Repeat > Point) {
+        else if (Repeat > rl_point) {
             right(CSmove);
-            delete_string(Repeat - Point - 1);
+            delete_string(Repeat - rl_point - 1);
         }
         return CSmove;
     }
 
-    save_yank(Point, End - Point);
-    Line[Point] = '\0';
+    save_yank(rl_point, rl_end - rl_point);
+    rl_line_buffer[rl_point] = '\0';
     ceol();
-    End = Point;
+    rl_end = rl_point;
     return CSstay;
 }
 
@@ -782,8 +780,8 @@ static el_status_t insert_char(int c)
 
 static el_status_t beg_line(void)
 {
-    if (Point) {
-        Point = 0;
+    if (rl_point) {
+        rl_point = 0;
         return CSmove;
     }
     return CSstay;
@@ -791,8 +789,8 @@ static el_status_t beg_line(void)
 
 static el_status_t end_line(void)
 {
-    if (Point != End) {
-        Point = End;
+    if (rl_point != rl_end) {
+        rl_point = rl_end;
         return CSmove;
     }
     return CSstay;
@@ -857,7 +855,7 @@ static el_status_t emacs(int c)
 #if 0 /* Debian patch removes this to be able to handle 8-bit input */
     /* This test makes it impossible to enter eight-bit characters when
      * meta-char mode is enabled. */
-    OldPoint = Point;
+    OldPoint = rl_point;
     if (rl_meta_chars && ISMETA(c)) {
         Pushed = 1;
         PushBack = UNMETA(c);
@@ -882,14 +880,14 @@ static el_status_t tty_special(int c)
     if (c == rl_erase || c == DEL)
         return bk_del_char();
     if (c == rl_kill) {
-        if (Point != 0) {
-            Point = 0;
+        if (rl_point != 0) {
+            rl_point = 0;
             reposition();
         }
         Repeat = NO_ARG;
         return kill_line();
     }
-    if (c == rl_eof && Point == 0 && End == 0)
+    if (c == rl_eof && rl_point == 0 && rl_end == 0)
         return CSeof;
     if (c == rl_intr) {
         Signal = SIGINT;
@@ -914,14 +912,14 @@ static char *editinput(void)
     int c;
 
     Repeat = NO_ARG;
-    OldPoint = Point = Mark = End = 0;
-    Line[0] = '\0';
+    OldPoint = rl_point = rl_mark = rl_end = 0;
+    rl_line_buffer[0] = '\0';
 
     Signal = -1;
     while ((c = tty_get()) != EOF)
         switch (tty_special(c)) {
         case CSdone:
-            return Line;
+            return rl_line_buffer;
         case CSeof:
             return NULL;
         case CSsignal:
@@ -932,7 +930,7 @@ static char *editinput(void)
         case CSdispatch:
             switch (emacs(c)) {
             case CSdone:
-                return Line;
+                return rl_line_buffer;
             case CSeof:
                 return NULL;
             case CSsignal:
@@ -1036,9 +1034,9 @@ char *readline(const char *prompt)
         return read_redirected();
     }
 
-    if (Line == NULL) {
+    if (rl_line_buffer == NULL) {
         Length = MEM_INC;
-        if ((Line = NEW(char, Length)) == NULL)
+        if ((rl_line_buffer = NEW(char, Length)) == NULL)
             return NULL;
     }
 
@@ -1102,10 +1100,10 @@ static char *find_word(void)
     char        *new;
     SIZE_T      len;
 
-    p = &Line[Point];
-    while (p > Line) {
+    p = &rl_line_buffer[rl_point];
+    while (p > rl_line_buffer) {
         p--;
-        if (p > Line && p[-1] == '\\') {
+        if (p > rl_line_buffer && p[-1] == '\\') {
             p--;
         } else {
             if (strchr(SEPS, (char) *p) != NULL) {
@@ -1114,13 +1112,13 @@ static char *find_word(void)
             }
         }
     }
-    len = Point - (p - Line) + 1;
+    len = rl_point - (p - rl_line_buffer) + 1;
     if ((new = NEW(char, len)) == NULL)
         return NULL;
     q = new;
-    while (p < &Line[Point]) {
+    while (p < &rl_line_buffer[rl_point]) {
         if (*p == '\\') {
-            if (++p == &Line[Point]) break;
+            if (++p == &rl_line_buffer[rl_point]) break;
         }
         *q++ = *p++;
     }
@@ -1196,7 +1194,7 @@ static el_status_t c_complete(void)
 
 static el_status_t accept_line(void)
 {
-    Line[End] = '\0';
+    rl_line_buffer[rl_end] = '\0';
     return CSdone;
 }
 
@@ -1204,14 +1202,14 @@ static el_status_t transpose(void)
 {
     char        c;
 
-    if (Point) {
-        if (Point == End)
+    if (rl_point) {
+        if (rl_point == rl_end)
             left(CSmove);
-        c = Line[Point - 1];
+        c = rl_line_buffer[rl_point - 1];
         left(CSstay);
-        Line[Point - 1] = Line[Point];
-        tty_show(Line[Point - 1]);
-        Line[Point++] = c;
+        rl_line_buffer[rl_point - 1] = rl_line_buffer[rl_point];
+        tty_show(rl_line_buffer[rl_point - 1]);
+        rl_line_buffer[rl_point++] = c;
         tty_show(c);
     }
     return CSstay;
@@ -1228,22 +1226,22 @@ static el_status_t wipe(void)
 {
     int         i;
 
-    if (Mark > End)
+    if (rl_mark > rl_end)
         return ring_bell();
 
-    if (Point > Mark) {
-        i = Point;
-        Point = Mark;
-        Mark = i;
+    if (rl_point > rl_mark) {
+        i = rl_point;
+        rl_point = rl_mark;
+        rl_mark = i;
         reposition();
     }
 
-    return delete_string(Mark - Point);
+    return delete_string(rl_mark - rl_point);
 }
 
 static el_status_t mk_set(void)
 {
-    Mark = Point;
+    rl_mark = rl_point;
     return CSstay;
 }
 
@@ -1254,9 +1252,9 @@ static el_status_t exchange(void)
     if ((c = tty_get()) != CTL('X'))
         return c == EOF ? CSeof : ring_bell();
 
-    if ((c = Mark) <= End) {
-        Mark = Point;
-        Point = c;
+    if ((c = rl_mark) <= rl_end) {
+        rl_mark = rl_point;
+        rl_point = c;
         return CSmove;
     }
     return CSstay;
@@ -1271,13 +1269,13 @@ static el_status_t yank(void)
 
 static el_status_t copy_region(void)
 {
-    if (Mark > End)
+    if (rl_mark > rl_end)
         return ring_bell();
 
-    if (Point > Mark)
-        save_yank(Mark, Point - Mark);
+    if (rl_point > rl_mark)
+        save_yank(rl_mark, rl_point - rl_mark);
     else
-        save_yank(Point, Mark - Point);
+        save_yank(rl_point, rl_mark - rl_point);
 
     return CSstay;
 }
@@ -1290,9 +1288,9 @@ static el_status_t move_to_char(void)
 
     if ((c = tty_get()) == EOF)
         return CSeof;
-    for (i = Point + 1, p = &Line[i]; i < End; i++, p++)
+    for (i = rl_point + 1, p = &rl_line_buffer[i]; i < rl_end; i++, p++)
         if (*p == c) {
-            Point = i;
+            rl_point = i;
             return CSmove;
         }
     return CSstay;
@@ -1308,9 +1306,9 @@ static el_status_t fd_kill_word(void)
     int         i;
 
     do_forward(CSstay);
-    if (OldPoint != Point) {
-        i = Point - OldPoint;
-        Point = OldPoint;
+    if (OldPoint != rl_point) {
+        i = rl_point - OldPoint;
+        rl_point = OldPoint;
         return delete_string(i);
     }
     return CSstay;
@@ -1323,13 +1321,13 @@ static el_status_t bk_word(void)
 
     i = 0;
     do {
-        for (p = &Line[Point]; p > Line && !isalnum(p[-1]); p--)
+        for (p = &rl_line_buffer[rl_point]; p > rl_line_buffer && !isalnum(p[-1]); p--)
             left(CSmove);
 
-        for (; p > Line && p[-1] != ' ' && isalnum(p[-1]); p--)
+        for (; p > rl_line_buffer && p[-1] != ' ' && isalnum(p[-1]); p--)
             left(CSmove);
 
-        if (Point == 0)
+        if (rl_point == 0)
             break;
     } while (++i < Repeat);
 
@@ -1339,8 +1337,8 @@ static el_status_t bk_word(void)
 static el_status_t bk_kill_word(void)
 {
     bk_word();
-    if (OldPoint != Point)
-        return delete_string(OldPoint - Point);
+    if (OldPoint != rl_point)
+        return delete_string(OldPoint - rl_point);
     return CSstay;
 }
 

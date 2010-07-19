@@ -24,12 +24,16 @@
 /* Display print 8-bit chars as `M-x' or as the actual 8-bit char?  (Default:1) */
 extern int rl_meta_chars;
 
-/* Assign these to get command completion, see cli.c for
- * example usage. */
-extern char *(*rl_complete)(char *token, int *match);
-extern int (*rl_list_possib)(char *token, char ***av);
+/* Assign these to get command completion, see cli.c for example usage. */
+extern char *(*rl_complete)   (char *token, int *match);
+extern int   (*rl_list_possib)(char *token, char ***av);
 
 /* For compatibility with FSF readline. */
+extern int         rl_point;
+extern int         rl_mark;
+extern int         rl_end;
+extern char       *rl_line_buffer;
+extern const char *rl_readline_name;
 extern void rl_reset_terminal(char *p);
 extern void rl_initialize(void);
 

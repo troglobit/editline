@@ -875,6 +875,7 @@ enable_sigstop
 enable_terminal_bell
 enable_termcap
 enable_history
+enable_unique_history
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1519,6 +1520,7 @@ Optional Features:
   --enable-terminal-bell         Enable terminal bell on completion.
   --enable-termcap               Use the termcap library for terminal size.
   --enable-history=LINES         Enable scrollback history, default off.
+  --enable-unique-history        Uniqify scrollback history, i.e., don't save dupes.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -4560,13 +4562,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4563: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4565: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4566: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4568: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4569: output\"" >&5)
+  (eval echo "\"\$as_me:4571: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5772,7 +5774,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5775 "configure"' > conftest.$ac_ext
+  echo '#line 5777 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7302,11 +7304,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7305: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7307: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7309: \$? = $ac_status" >&5
+   echo "$as_me:7311: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7641,11 +7643,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7644: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7646: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7648: \$? = $ac_status" >&5
+   echo "$as_me:7650: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7746,11 +7748,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7749: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7751: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7753: \$? = $ac_status" >&5
+   echo "$as_me:7755: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7801,11 +7803,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7804: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7806: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7808: \$? = $ac_status" >&5
+   echo "$as_me:7810: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10185,7 +10187,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10188 "configure"
+#line 10190 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10281,7 +10283,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10284 "configure"
+#line 10286 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11190,6 +11192,14 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HIST_SIZE $HIST_SIZE
 _ACEOF
+
+
+# Check whether --enable-unique-history was given.
+if test "${enable_unique_history+set}" = set; then :
+  enableval=$enable_unique_history;
+$as_echo "#define CONFIG_UNIQUE_HISTORY /**/" >>confdefs.h
+
+fi
 
 
 # Restore gnu89 inline semantics on gcc 4.3 and newer

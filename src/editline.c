@@ -1059,9 +1059,9 @@ char *readline(const char *prompt)
     DISPOSE(H.Lines[--H.Size]);
 
     if (line != NULL && *line != '\0'
-#if     defined(UNIQUE_HISTORY)
+#ifdef CONFIG_UNIQUE_HISTORY
         && !(H.Pos && strcmp((char *) line, (char *) H.Lines[H.Pos - 1]) == 0)
-#endif  /* defined(UNIQUE_HISTORY) */
+#endif
         && !(H.Size && strcmp((char *) line, (char *) H.Lines[H.Size - 1]) == 0)
     ) {
         hist_add(line);
@@ -1081,10 +1081,10 @@ void add_history(char *p __attribute__ ((unused)))
     if (p == NULL || *p == '\0')
         return;
 
-#if     defined(UNIQUE_HISTORY)
+#ifdef CONFIG_UNIQUE_HISTORY
     if (H.Pos && strcmp(p, (char *) H.Lines[H.Pos - 1]) == 0)
         return;
-#endif  /* defined(UNIQUE_HISTORY) */
+#endif
     if (H.Size && strcmp(p, (char *) H.Lines[H.Size - 1]) == 0)
         return;
     hist_add((char *)p);

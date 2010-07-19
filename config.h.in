@@ -18,6 +18,9 @@
 /* Define to enable SIGSTOP (Ctrl-Z) key. */
 #undef CONFIG_SIGSTOP
 
+/* Don't save command if same as last one. */
+#undef CONFIG_UNIQUE_HISTORY
+
 /* Define to use the termcap library for terminal size. */
 #undef CONFIG_USE_TERMCAP
 

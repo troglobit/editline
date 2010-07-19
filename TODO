@@ -1,8 +1,6 @@
 TODO
 
 * Port "fileman" example from BSD editline
-* Add --enable-FEATURE for remaining features defined in Makefile-minix.in
-* Check for tgetent to find termcap, e.g., http://www.tex.ac.uk/tex-archive/macros/texinfo/texinfo/configure.ac
 * Add support for rl_bind_key(), currently one needs to "hack" the Map[]
 * Add support for inhibiting completion: rl_inhibit_completion
 

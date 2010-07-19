@@ -83,6 +83,10 @@ if test $HIST_SIZE -lt 1; then
 fi
 AC_DEFINE_UNQUOTED(HIST_SIZE, $HIST_SIZE, [Number of lines in history.])
 
+AC_ARG_ENABLE(unique-history,
+   [  --enable-unique-history        Uniqify scrollback history, i.e., don't save dupes.],
+   AC_DEFINE([CONFIG_UNIQUE_HISTORY],, [Don't save command if same as last one.]))
+
 # Restore gnu89 inline semantics on gcc 4.3 and newer
 saved_cflags="$CFLAGS"
 CFLAGS="$CFLAGS -fgnu89-inline"

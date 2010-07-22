@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = testit$(EXEEXT) cli$(EXEEXT)
+noinst_PROGRAMS = testit$(EXEEXT) cli$(EXEEXT) fileman$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -58,6 +58,11 @@ cli_DEPENDENCIES = $(top_builddir)/src/libeditline.la \
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
+fileman_SOURCES = fileman.c
+fileman_OBJECTS = fileman.$(OBJEXT)
+fileman_LDADD = $(LDADD)
+fileman_DEPENDENCIES = $(top_builddir)/src/libeditline.la \
+	$(am__DEPENDENCIES_1)
 testit_SOURCES = testit.c
 testit_OBJECTS = testit.$(OBJEXT)
 testit_LDADD = $(LDADD)
@@ -89,8 +94,8 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = cli.c testit.c
-DIST_SOURCES = cli.c testit.c
+SOURCES = cli.c fileman.c testit.c
+DIST_SOURCES = cli.c fileman.c testit.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -256,6 +261,9 @@ clean-noinstPROGRAMS:
 cli$(EXEEXT): $(cli_OBJECTS) $(cli_DEPENDENCIES) 
 	@rm -f cli$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cli_OBJECTS) $(cli_LDADD) $(LIBS)
+fileman$(EXEEXT): $(fileman_OBJECTS) $(fileman_DEPENDENCIES) 
+	@rm -f fileman$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(fileman_OBJECTS) $(fileman_LDADD) $(LIBS)
 testit$(EXEEXT): $(testit_OBJECTS) $(testit_DEPENDENCIES) 
 	@rm -f testit$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(testit_OBJECTS) $(testit_LDADD) $(LIBS)
@@ -267,6 +275,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileman.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testit.Po@am__quote@
 
 .c.o:

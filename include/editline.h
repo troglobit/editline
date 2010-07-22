@@ -25,17 +25,24 @@
 extern int rl_meta_chars;
 
 /* Assign these to get command completion, see cli.c for example usage. */
-extern char *(*rl_complete)   (char *token, int *match);
-extern int   (*rl_list_possib)(char *token, char ***av);
+extern char  *(*rl_complete)   (char *token, int *match);
+extern int    (*rl_list_possib)(char *token, char ***av);
 
-/* For compatibility with FSF readline. */
+/* For compatibility with GNU Readline. */
+extern char  *(*rl_completion_entry_function)(const char *text, int state);
+extern char  *rl_filename_completion_function(const char *text, int state);
+
+extern int rl_attempted_completion_over;
+extern char **(*rl_attempted_completion_function)(const char *text, int start, int end);
+
 extern int         rl_point;
 extern int         rl_mark;
 extern int         rl_end;
 extern char       *rl_line_buffer;
 extern const char *rl_readline_name;
-extern void rl_reset_terminal(char *p);
+
 extern void rl_initialize(void);
+extern void rl_reset_terminal(char *p);
 
 extern char *readline(const char *prompt);
 extern void add_history(char *line); /* OBSOLETE: Made part of readline(). -- kjb */

@@ -70,7 +70,7 @@ typedef struct {
 typedef struct {
     int         Size;
     int         Pos;
-    const char  *Lines[HIST_SIZE];
+    char       *Lines[HIST_SIZE];
 } el_hist_t;
 
 /*
@@ -85,7 +85,7 @@ int               rl_quit;
 int               rl_susp;
 #endif
 
-static const char NIL[] = "";
+static char        NIL[] = "";
 static const char *Input = NIL;
 static const char *Prompt;
 static char       *Yanked;
@@ -145,7 +145,7 @@ static void tty_put(const char c)
     Screen[ScreenCount] = c;
     if (++ScreenCount >= ScreenSize - 1) {
         ScreenSize += SCREEN_INC;
-        RENEW(Screen, char, ScreenSize);
+        Screen = realloc(Screen, sizeof(char) * ScreenSize);
     }
 }
 
@@ -454,11 +454,12 @@ static el_status_t insert_string(const char *p)
 
     len = strlen((char *)p);
     if (rl_end + len >= Length) {
-        if ((new = NEW(char, Length + len + MEM_INC)) == NULL)
+	new = malloc(sizeof(char) * (Length + len + MEM_INC));
+        if (!new)
             return CSstay;
         if (Length) {
-            COPYFROMTO(new, rl_line_buffer, Length);
-            DISPOSE(rl_line_buffer);
+            memcpy(new, rl_line_buffer, Length);
+            free(rl_line_buffer);
         }
         rl_line_buffer = new;
         Length += len + MEM_INC;
@@ -466,7 +467,7 @@ static el_status_t insert_string(const char *p)
 
     for (q = &rl_line_buffer[rl_point], i = rl_end - rl_point; --i >= 0; )
         q[len + i] = q[i];
-    COPYFROMTO(&rl_line_buffer[rl_point], p, len);
+    memcpy(&rl_line_buffer[rl_point], p, len);
     rl_end += len;
     rl_line_buffer[rl_end] = '\0';
     tty_string(&rl_line_buffer[rl_point]);
@@ -549,7 +550,7 @@ static el_status_t h_last(void)
 */
 static int substrcmp(const char *text, const char *pat, size_t len)
 {
-    char        c;
+    char c;
 
     if ((c = *pat) == '\0')
         return *text == '\0';
@@ -570,7 +571,7 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     /* Save or get remembered search pattern. */
     if (search && *search) {
         if (old_search)
-            DISPOSE(old_search);
+            free(old_search);
         old_search = (char *)strdup((char *)search);
     }
     else {
@@ -594,6 +595,7 @@ static const char *search_hist(const char *search, const char *(*move)(void))
         if ((*match)((char *)H.Lines[H.Pos], pat, len) == 0)
             return H.Lines[H.Pos];
     H.Pos = pos;
+
     return NULL;
 }
 
@@ -647,15 +649,16 @@ static el_status_t fd_char(void)
 static void save_yank(int begin, int i)
 {
     if (Yanked) {
-        DISPOSE(Yanked);
+        free(Yanked);
         Yanked = NULL;
     }
 
     if (i < 1)
         return;
 
-    if ((Yanked = NEW(char, (SIZE_T)i + 1)) != NULL) {
-        COPYFROMTO(Yanked, &rl_line_buffer[begin], i);
+    Yanked = malloc(sizeof(char) * (i + 1));
+    if (Yanked) {
+        memcpy(Yanked, &rl_line_buffer[begin], i);
         Yanked[i] = '\0';
     }
 }
@@ -768,14 +771,17 @@ static el_status_t insert_char(int c)
         return insert_string(buff);
     }
 
-    if ((p = NEW(char, Repeat + 1)) == NULL)
+    p = malloc(sizeof(char) * (Repeat + 1));
+    if (!p)
         return CSstay;
+
     for (i = Repeat, q = p; --i >= 0; )
         *q++ = c;
     *q = '\0';
     Repeat = 0;
     s = insert_string(p);
-    DISPOSE(p);
+    free(p);
+
     return s;
 }
 
@@ -950,7 +956,7 @@ static char *editinput(void)
     return NULL;
 }
 
-static void hist_add(const char *p)
+static void hist_add(char *p)
 {
     int i;
 
@@ -959,7 +965,7 @@ static void hist_add(const char *p)
     if (H.Size < HIST_SIZE)
         H.Lines[H.Size++] = p;
     else {
-        DISPOSE(H.Lines[0]);
+        free(H.Lines[0]);
         for (i = 0; i < HIST_SIZE - 1; i++)
             H.Lines[i] = H.Lines[i + 1];
         H.Lines[i] = p;
@@ -974,14 +980,19 @@ static char *read_redirected(void)
     char        *line;
     char        *end;
 
-    p = line = NEW(char, size);
+    p = line = malloc(sizeof(char) * size);
+    if (!p)
+	return NULL;
+
     end = p + size;
     while (1) {
         if (p == end) {
             int oldpos = end - line;
 
             size += MEM_INC;
-            p = RENEW(line, char, size);
+            p = line = realloc(line, sizeof(char) * size);
+	    if (!p)
+		return NULL;
             end = p + size;
 
             p += oldpos;        /* Continue where we left off... */
@@ -996,6 +1007,7 @@ static char *read_redirected(void)
         p++;
     }
     *p = '\0';
+
     return line;
 }
 
@@ -1035,9 +1047,10 @@ char *readline(const char *prompt)
         return read_redirected();
     }
 
-    if (rl_line_buffer == NULL) {
+    if (!rl_line_buffer) {
         Length = MEM_INC;
-        if ((rl_line_buffer = NEW(char, Length)) == NULL)
+	rl_line_buffer = malloc(sizeof(char) * Length);
+        if (!rl_line_buffer)
             return NULL;
     }
 
@@ -1045,7 +1058,10 @@ char *readline(const char *prompt)
     rl_ttyset(0);
     hist_add(NIL);
     ScreenSize = SCREEN_INC;
-    Screen = NEW(char, ScreenSize);
+    Screen = malloc(sizeof(char) * ScreenSize);
+    if (!Screen)
+	return NULL;
+
     Prompt = prompt ? prompt : NIL;
     tty_puts(Prompt);
     if ((line = editinput()) != NULL) {
@@ -1054,14 +1070,14 @@ char *readline(const char *prompt)
         tty_flush();
     }
     rl_ttyset(1);
-    DISPOSE(Screen);
-    DISPOSE(H.Lines[--H.Size]);
+    free(Screen);
+    free(H.Lines[--H.Size]);
 
     if (line != NULL && *line != '\0'
 #ifdef CONFIG_UNIQUE_HISTORY
-        && !(H.Pos && strcmp((char *) line, (char *) H.Lines[H.Pos - 1]) == 0)
+        && !(H.Pos && strcmp(line, H.Lines[H.Pos - 1]) == 0)
 #endif
-        && !(H.Size && strcmp((char *) line, (char *) H.Lines[H.Size - 1]) == 0)
+        && !(H.Size && strcmp(line, H.Lines[H.Size - 1]) == 0)
     ) {
         hist_add(line);
     }
@@ -1071,7 +1087,8 @@ char *readline(const char *prompt)
         Signal = 0;
         kill(getpid(), s);
     }
-    return (char *)line;
+
+    return line;
 }
 
 void add_history(char *p __attribute__ ((unused)))
@@ -1113,17 +1130,22 @@ static char *find_word(void)
             }
         }
     }
+
     len = rl_point - (p - rl_line_buffer) + 1;
-    if ((new = NEW(char, len)) == NULL)
+    new = malloc(sizeof(char) * len);
+    if (!new)
         return NULL;
+
     q = new;
     while (p < &rl_line_buffer[rl_point]) {
         if (*p == '\\') {
-            if (++p == &rl_line_buffer[rl_point]) break;
+            if (++p == &rl_line_buffer[rl_point])
+		break;
         }
         *q++ = *p++;
     }
     *q = '\0';
+
     return new;
 }
 
@@ -1140,12 +1162,13 @@ static el_status_t c_possible(void)
     word = find_word();
     ac = rl_list_possib((char *)word, (char ***)&av);
     if (word)
-        DISPOSE(word);
+        free(word);
     if (ac) {
         columns(ac, av);
         while (--ac >= 0)
-            DISPOSE(av[ac]);
-        DISPOSE(av);
+            free(av[ac]);
+        free(av);
+
         return CSmove;
     }
     return ring_bell();
@@ -1166,11 +1189,13 @@ static el_status_t c_complete(void)
     word = find_word();
     p = (char *)rl_complete((char *)word, &unique);
     if (word)
-        DISPOSE(word);
+        free(word);
     if (p) {
         len = strlen((char *)p);
         word = p;
-        new = q = NEW(char, 2 * len + 1);
+        new = q = malloc(sizeof(char) * (2 * len + 1));
+	if (!new)
+	    return CSstay;
         while (*p) {
             if ((*p < ' ' || strchr(SEPS, (char) *p) != NULL)
                                 && (!unique || p[1] != 0)) {
@@ -1179,7 +1204,7 @@ static el_status_t c_complete(void)
             *q++ = *p++;
         }
         *q = '\0';
-        DISPOSE(word);
+        free(word);
         if (len > 0) {
             s = insert_string(new);
 #ifdef CONFIG_ANNOYING_NOISE
@@ -1187,8 +1212,9 @@ static el_status_t c_complete(void)
                 ring_bell();
 #endif
         }
-        DISPOSE(new);
-        if (len > 0) return s;
+        free(new);
+        if (len > 0)
+	    return s;
     }
     return c_possible();
 }
@@ -1352,7 +1378,8 @@ static int argify(char *line, char ***avp)
     int         i;
 
     i = MEM_INC;
-    if ((*avp = p = NEW(char *, i))== NULL)
+    *avp = p = malloc(sizeof(char *) * i);
+    if (!p)
          return 0;
 
     for (c = line; isspace(*c); c++)
@@ -1365,14 +1392,14 @@ static int argify(char *line, char ***avp)
             *c++ = '\0';
             if (*c && *c != '\n') {
                 if (ac + 1 == i) {
-                    new = NEW(char *, i + MEM_INC);
-                    if (new == NULL) {
+                    new = malloc(sizeof(char *) * (i + MEM_INC));
+                    if (!new) {
                         p[ac] = NULL;
                         return ac;
                     }
-                    COPYFROMTO(new, p, i * sizeof (char **));
+                    memcpy(new, p, i * sizeof(char **));
                     i += MEM_INC;
-                    DISPOSE(p);
+                    free(p);
                     *avp = p = new;
                 }
                 p[ac++] = c;
@@ -1406,8 +1433,9 @@ static el_status_t last_argument(void)
         s = ac ? insert_string(av[ac - 1]) : CSstay;
 
     if (ac)
-        DISPOSE(av);
-    DISPOSE(p);
+        free(av);
+    free(p);
+
     return s;
 }
 

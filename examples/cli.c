@@ -84,8 +84,8 @@ int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
    char	*prompt = "cli> ";
 
    /* Setup callbacks */
-   rl_complete = &my_rl_complete;
-   rl_list_possib = &my_rl_list_possib;
+   rl_set_complete_func(&my_rl_complete);
+   rl_set_list_possib_func(&my_rl_list_possib);
 
    while ((line = readline(prompt)) != NULL) {
       (void)printf("\t\t\t|%s|\n", line);

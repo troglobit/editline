@@ -21,12 +21,18 @@
 #ifndef __EDITLINE_H__
 #define __EDITLINE_H__
 
+/* Editline specific types, despite rl_ prefix.  From Heimdal project. */
+typedef char* (*rl_complete_func_t)(char*, int*);
+typedef int (*rl_list_possib_func_t)(char*, char***);
+
 /* Display print 8-bit chars as `M-x' or as the actual 8-bit char?  (Default:1) */
 extern int rl_meta_chars;
 
-/* Assign these to get command completion, see cli.c for example usage. */
-extern char *(*rl_complete)   (char *token, int *match);
-extern int   (*rl_list_possib)(char *token, char ***av);
+/* Use these functions to set custom command/file completion, see cli.c for example usage. */
+rl_complete_func_t    rl_set_complete_func(rl_complete_func_t func);
+rl_list_possib_func_t rl_set_list_possib_func(rl_list_possib_func_t func);
+
+/* Editline specific functions. */
 
 /* For compatibility with FSF readline. */
 extern int         rl_point;

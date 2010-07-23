@@ -115,8 +115,6 @@ const char       *rl_readline_name;/* Set by calling program, for conditional pa
 
 /* User definable callbacks. */
 char **(*rl_attempted_completion_function)(const char *token, int start, int end);
-char  *(*rl_comlete)(char *token, int *match);
-int    (*rl_list_possib)(char *token, char ***av);
 
 /* Declarations. */
 static char     *editinput(void);
@@ -1018,20 +1016,6 @@ void rl_reset_terminal(char *p __attribute__((__unused__)))
 
 void rl_initialize(void)
 {
-#ifdef CONFIG_DEFAULT_COMPLETE
-    int done = 0;
-
-    if (!done)
-    {
-        if (!rl_complete)
-            rl_complete = &default_rl_complete;
-
-        if (!rl_list_possib)
-            rl_list_possib = &default_rl_list_possib;
-
-        done = 1;
-    }
-#endif
 }
 
 char *readline(const char *prompt)
@@ -1155,10 +1139,6 @@ static el_status_t c_possible(void)
     char        *word;
     int         ac;
 
-    if (!rl_list_possib) {
-        return ring_bell();
-    }
-
     word = find_word();
     ac = rl_list_possib((char *)word, (char ***)&av);
     if (word)
@@ -1171,6 +1151,7 @@ static el_status_t c_possible(void)
 
         return CSmove;
     }
+
     return ring_bell();
 }
 
@@ -1181,10 +1162,6 @@ static el_status_t c_complete(void)
     SIZE_T      len;
     int         unique;
     el_status_t s = 0;
-
-    if (!rl_complete) {
-        return ring_bell();
-    }
 
     word = find_word();
     p = (char *)rl_complete((char *)word, &unique);

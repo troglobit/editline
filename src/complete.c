@@ -156,9 +156,19 @@ static int SplitPath(char *path, char **dirpart, char **filepart)
     return 0;
 }
 
+static rl_complete_func_t el_complete_func = NULL;
+
+/* For compatibility with the Heimdal project. */
+rl_complete_func_t rl_set_complete_func(rl_complete_func_t func)
+{
+    rl_complete_func_t old = el_complete_func;
+    el_complete_func = func;
+    return old;
+}
+
 /* Attempt to complete the pathname, returning an allocated copy.
- * Fill in *unique if we completed it, or set it to 0 if ambiguous. */
-char *default_rl_complete(char *pathname, int *unique)
+ * Fill in *match if we completed it, or set it to 0 if ambiguous. */
+char *el_filename_complete(char *pathname, int *match)
 {
     char        **av;
     char        *dir;
@@ -185,7 +195,7 @@ char *default_rl_complete(char *pathname, int *unique)
     len = strlen(file);
     if (ac == 1) {
         /* Exactly one match -- finish it off. */
-        *unique = 1;
+        *match = 1;
         j = strlen(av[0]) - len + 2;
 	p = malloc(sizeof(char) * (j + 1));
         if (p) {
@@ -200,7 +210,7 @@ char *default_rl_complete(char *pathname, int *unique)
         }
     }
     else {
-        *unique = 0;
+        *match = 0;
         if (len) {
             /* Find largest matching substring. */
             for (i = len, end = strlen(av[0]); i < end; i++)
@@ -229,8 +239,30 @@ char *default_rl_complete(char *pathname, int *unique)
     return p;
 }
 
-/* Return all possible completions. */
-int default_rl_list_possib(char *pathname, char ***avp)
+char *rl_complete(char *token, int *match)
+{
+    if (el_complete_func)
+	return el_complete_func(token, match);
+
+#ifdef CONFIG_DEFAULT_COMPLETE
+    return el_filename_complete(token, match);
+#else
+    return NULL;
+#endif
+}
+
+static rl_list_possib_func_t el_list_possib_func = NULL;
+
+/* For compatibility with the Heimdal project. */
+rl_list_possib_func_t rl_set_list_possib_func(rl_list_possib_func_t func)
+{
+    rl_list_possib_func_t old = el_list_possib_func;
+    el_list_possib_func = func;
+    return old;
+}
+
+/* Default possible completions. */
+int el_filename_list_possib(char *pathname, char ***av)
 {
     char        *dir;
     char        *file;
@@ -239,12 +271,26 @@ int default_rl_list_possib(char *pathname, char ***avp)
     if (SplitPath(pathname, &dir, &file) < 0)
         return 0;
 
-    ac = FindMatches(dir, file, avp);
+    ac = FindMatches(dir, file, av);
     free(dir);
     free(file);
 
     return ac;
 }
+
+/* Return all possible completions. */
+int rl_list_possib(char *token, char ***av)
+{
+    if (el_list_possib_func)
+	return el_list_possib_func(token, av);
+
+#ifdef CONFIG_DEFAULT_COMPLETE
+    return el_filename_list_possib(token, av);
+#else
+    return 0;
+#endif
+}
+
 
 /**
  * Local Variables:

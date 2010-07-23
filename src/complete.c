@@ -186,10 +186,9 @@ char *default_rl_complete(char *pathname, int *unique)
         j = strlen(av[0]) - len + 2;
         if ((p = NEW(char, j + 1)) != NULL) {
             COPYFROMTO(p, av[0] + len, j);
-            if ((new = NEW(char, strlen(dir) + strlen(av[0]) + 2)) != NULL) {
-                (void)strcpy(new, dir);
-                (void)strcat(new, "/");
-                (void)strcat(new, av[0]);
+	    len = strlen(dir) + strlen(av[0]) + 2;
+            if ((new = NEW(char, len)) != NULL) {
+		snprintf(new, len, "%s/%s", dir, av[0]);
                 rl_add_slash(new, p);
                 DISPOSE(new);
             }

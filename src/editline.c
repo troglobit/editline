@@ -182,7 +182,7 @@ static void tty_string(char *p)
 
 static int tty_get(void)
 {
-    char        c;
+    char c;
     int r;
 
     tty_flush();
@@ -194,9 +194,10 @@ static int tty_get(void)
         return *Input++;
     do
     {
-        r= read(0, &c, (SIZE_T)1);
+        r = read(0, &c, 1);
     } while (r == -1 && errno == EINTR);
-    return r  == 1 ? c : EOF;
+
+    return r == 1 ? c : EOF;
 }
 
 #define tty_back()       (backspace ? tty_puts(backspace) : tty_put('\b'))

@@ -23,11 +23,11 @@
 
 #define MAX_TOTAL_MATCHES (256 << sizeof(char *))
 
-/* Wrap strcmp() for qsort() */
+/* Wrap strcmp() for qsort() -- weird construct to pass -Wcast-qual */
 static int compare(const void *p1, const void *p2)
 {
-    char **v1 = (char **)p1;
-    char **v2 = (char **)p2;
+    char *const *v1 = (char *const *)p1;
+    char *const *v2 = (char *const *)p2;
 
     return strcmp(*v1, *v2);
 }

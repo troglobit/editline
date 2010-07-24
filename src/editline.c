@@ -452,7 +452,7 @@ static el_status_t insert_string(const char *p)
     char        *new;
     char        *q;
 
-    len = strlen((char *)p);
+    len = strlen(p);
     if (rl_end + len >= Length) {
 	new = malloc(sizeof(char) * (Length + len + MEM_INC));
         if (!new)
@@ -566,13 +566,13 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     int         len;
     int         pos;
     int         (*match)(const char *s1, const char *s2, size_t n);
-    char        *pat;
+    const char *pat;
 
     /* Save or get remembered search pattern. */
     if (search && *search) {
         if (old_search)
             free(old_search);
-        old_search = (char *)strdup((char *)search);
+        old_search = strdup(search);
     }
     else {
         if (old_search == NULL || *old_search == '\0')
@@ -583,16 +583,16 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     /* Set up pattern-finder. */
     if (*search == '^') {
         match = strncmp;
-        pat = (char *)(search + 1);
+        pat = search + 1;
     }
     else {
         match = substrcmp;
-        pat = (char *)search;
+        pat = search;
     }
     len = strlen(pat);
 
     for (pos = H.Pos; (*move)() != NULL; )
-        if ((*match)((char *)H.Lines[H.Pos], pat, len) == 0)
+        if (match(H.Lines[H.Pos], pat, len) == 0)
             return H.Lines[H.Pos];
     H.Pos = pos;
 

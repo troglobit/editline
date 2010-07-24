@@ -437,7 +437,7 @@ static void ceol(void)
 
 static void clear_line(void)
 {
-    rl_point = -strlen(Prompt);
+    rl_point = -(int)strlen(Prompt);
     tty_put('\r');
     ceol();
     rl_point = 0;

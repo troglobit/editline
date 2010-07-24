@@ -96,7 +96,7 @@ static int        Repeat;
 static int        OldPoint;
 static int        PushBack;
 static int        Pushed;
-static int        Signal;
+static int        el_intr_pending;
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
 static size_t     Length;
@@ -621,8 +621,8 @@ static el_status_t h_search(void)
     Prompt = old_prompt;
     Searching = 0;
     tty_puts(Prompt);
-    if (p == NULL && Signal > 0) {
-        Signal = 0;
+    if (p == NULL && el_intr_pending > 0) {
+        el_intr_pending = 0;
         clear_line();
         return redisplay();
     }
@@ -902,16 +902,16 @@ static el_status_t tty_special(int c)
     if (c == rl_eof && rl_point == 0 && rl_end == 0)
         return CSeof;
     if (c == rl_intr) {
-        Signal = SIGINT;
+        el_intr_pending = SIGINT;
         return CSsignal;
     }
     if (c == rl_quit) {
-        Signal = SIGQUIT;
+        el_intr_pending = SIGQUIT;
         return CSeof;
     }
 #ifdef CONFIG_SIGSTOP
     if (c == rl_susp) {
-        Signal = SIGTSTP;
+        el_intr_pending = SIGTSTP;
         return CSsignal;
     }
 #endif
@@ -927,7 +927,7 @@ static char *editinput(void)
     OldPoint = rl_point = rl_mark = rl_end = 0;
     rl_line_buffer[0] = '\0';
 
-    Signal = -1;
+    el_intr_pending = -1;
     while ((c = tty_get()) != EOF)
         switch (tty_special(c)) {
         case CSdone:
@@ -1028,7 +1028,6 @@ void rl_initialize(void)
 char *readline(const char *prompt)
 {
     char        *line;
-    int         s;
 
     /* Unless called by the user already. */
     rl_initialize();
@@ -1082,9 +1081,9 @@ char *readline(const char *prompt)
         hist_add(line);
     }
 
-    if (Signal > 0) {
-        s = Signal;
-        Signal = 0;
+    if (el_intr_pending > 0) {
+	int s = el_intr_pending;
+        el_intr_pending = 0;
         kill(getpid(), s);
     }
 

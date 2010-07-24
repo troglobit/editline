@@ -1392,12 +1392,13 @@ static int argify(char *line, char ***avp)
     }
     *c = '\0';
     p[ac] = NULL;
+
     return ac;
 }
 
 static el_status_t last_argument(void)
 {
-    char      **av;
+    char      **av = NULL;
     char       *p;
     el_status_t s;
     int         ac;
@@ -1414,7 +1415,7 @@ static el_status_t last_argument(void)
     else
         s = ac ? insert_string(av[ac - 1]) : CSstay;
 
-    if (ac)
+    if (av)
         free(av);
     free(p);
 

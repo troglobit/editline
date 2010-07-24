@@ -53,12 +53,6 @@
 # include <sys/ioctl.h>
 #endif
 
-#ifndef SIZE_T
-#define SIZE_T	unsigned int
-#endif
-
-typedef unsigned char	CHAR;
-
 #define MEM_INC		64
 #define SCREEN_INC	256
 

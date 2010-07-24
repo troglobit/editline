@@ -99,9 +99,9 @@ static int        Pushed;
 static int        Signal;
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
-static SIZE_T     Length;
-static SIZE_T     ScreenCount;
-static SIZE_T     ScreenSize;
+static size_t     Length;
+static size_t     ScreenCount;
+static size_t     ScreenSize;
 static char       *backspace;
 static int        tty_cols;
 static int        tty_rows;
@@ -447,7 +447,7 @@ static void clear_line(void)
 
 static el_status_t insert_string(const char *p)
 {
-    SIZE_T      len;
+    size_t      len;
     int         i;
     char        *new;
     char        *q;
@@ -1105,7 +1105,7 @@ static char *find_word(void)
 {
     char        *p, *q;
     char        *new;
-    SIZE_T      len;
+    size_t      len;
 
     p = &rl_line_buffer[rl_point];
     while (p > rl_line_buffer) {
@@ -1164,7 +1164,7 @@ static el_status_t c_complete(void)
 {
     char        *p, *q;
     char        *word, *new;
-    SIZE_T      len;
+    size_t      len;
     int         unique;
     el_status_t s = 0;
 

@@ -41,10 +41,10 @@ static int FindMatches(char *dir, char *file, char ***avp)
     char        *p;
     DIR         *dp;
     DIRENTRY    *ep;
-    SIZE_T      ac;
-    SIZE_T      len;
-    SIZE_T      choices;
-    SIZE_T      total;
+    size_t      ac;
+    size_t      len;
+    size_t      choices;
+    size_t      total;
 
     if ((dp = opendir(dir)) == NULL)
         return 0;
@@ -159,11 +159,11 @@ char *el_filename_complete(char *pathname, int *match)
     char        *file;
     char        *new;
     char        *p;
-    SIZE_T      ac;
-    SIZE_T      end;
-    SIZE_T      i;
-    SIZE_T      j;
-    SIZE_T      len;
+    size_t      ac;
+    size_t      end;
+    size_t      i;
+    size_t      j;
+    size_t      len;
 
     if (SplitPath(pathname, &dir, &file) < 0)
         return NULL;

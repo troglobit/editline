@@ -210,9 +210,9 @@ static void tty_info(void)
 {
     static int          init;
 #ifdef CONFIG_USE_TERMCAP
-    char                *term;
+    char               *term;
     char                buff[2048];
-    char                *bp;
+    char               *bp;
 #endif
 #ifdef TIOCGWINSZ
     struct winsize      W;
@@ -1142,7 +1142,7 @@ static el_status_t c_possible(void)
     int         ac;
 
     word = find_word();
-    ac = rl_list_possib((char *)word, (char ***)&av);
+    ac = rl_list_possib(word, &av);
     if (word)
         free(word);
     if (ac) {

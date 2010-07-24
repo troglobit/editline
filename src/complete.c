@@ -23,21 +23,6 @@
 
 #define MAX_TOTAL_MATCHES (256 << sizeof(char *))
 
-#ifndef HAVE_STRDUP
-/* Return an allocated copy of a string. */
-char *strdup(const char *p)
-{
-    char *new = malloc(sizeof(char) * strlen(p));
-
-    if (new) {
-        strcpy(new, p);
-	return new;
-    }
-
-    return NULL;
-}
-#endif
-
 /* Wrap strcmp() for qsort() */
 static int compare(const void *p1, const void *p2)
 {

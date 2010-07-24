@@ -142,6 +142,21 @@ void rl_ttyset(int Reset)
 #error Unsupported platform, missing tcgetattr(), termio.h and sgtty.h
 #endif /* Neither HAVE_SGTTY_H, HAVE_TERMIO_H or HAVE_TCGETATTR */
 
+#ifndef HAVE_STRDUP
+/* Return an allocated copy of a string. */
+char *strdup(const char *p)
+{
+    char *new = malloc(sizeof(char) * strlen(p));
+
+    if (new) {
+        strcpy(new, p);
+	return new;
+    }
+
+    return NULL;
+}
+#endif
+
 void rl_add_slash(char *path, char *p)
 {
     struct stat Sb;

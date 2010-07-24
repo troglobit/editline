@@ -815,25 +815,28 @@ static el_status_t meta(void)
 
     if ((c = tty_get()) == EOF)
         return CSeof;
+
 #ifdef CONFIG_ANSI_ARROWS
     /* Also include VT-100 arrows. */
     if (c == '[' || c == 'O') {
         c = tty_get();
-//        printf ("E[%c\n", c);
         switch (c) {
-        default:        return ring_bell();
-        case EOF:       return CSeof;
-        case '2':       tty_get(); return CSstay;     /* Insert */
-        case '3':       tty_get(); return del_char(); /* Delete */
-        case '5':       tty_get(); return CSstay;     /* PgUp */
-        case '6':       tty_get(); return CSstay;     /* PgDn */
-        case 'A':       return h_prev();              /* Up */
-        case 'B':       return h_next();              /* Down */
-        case 'C':       return fd_char();             /* Left */
-        case 'D':       return bk_char();             /* Right */
-        case 'F':       return end_line();            /* End */
-        case 'H':       return beg_line();            /* Home */
+	    case EOF:  return CSeof;
+	    case '2':  tty_get(); return CSstay;     /* Insert */
+	    case '3':  tty_get(); return del_char(); /* Delete */
+	    case '5':  tty_get(); return CSstay;     /* PgUp */
+	    case '6':  tty_get(); return CSstay;     /* PgDn */
+	    case 'A':  return h_prev();              /* Up */
+	    case 'B':  return h_next();              /* Down */
+	    case 'C':  return fd_char();             /* Left */
+	    case 'D':  return bk_char();             /* Right */
+	    case 'F':  return end_line();            /* End */
+	    case 'H':  return beg_line();            /* Home */
+	    default:                                 /* Fall through */
+		break;
         }
+
+	return ring_bell();
     }
 #endif /* CONFIG_ANSI_ARROWS */
 

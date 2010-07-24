@@ -238,10 +238,12 @@ static void tty_info(void)
     if ((term = getenv("TERM")) == NULL)
         term = "dumb";
     if (-1 != tgetent(buff, term)) {
-       if ((backspace = tgetstr("le", &bp)) != NULL)
-          backspace = strdup(backspace);
-       tty_cols = tgetnum("co");
-       tty_rows = tgetnum("li");
+	if ((backspace = tgetstr("le", &bp)) != NULL)
+	    backspace = strdup(backspace);
+	else
+	    backspace = "\b";
+	tty_cols = tgetnum("co");
+	tty_rows = tgetnum("li");
     }
     /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
 #endif

@@ -106,6 +106,7 @@ static char       *backspace;
 static int        tty_cols;
 static int        tty_rows;
 
+int               el_no_echo = 0; /* e.g., under Emacs */
 int               rl_point;
 int               rl_mark;
 int               rl_end;
@@ -133,7 +134,8 @@ static void tty_flush(void)
     ssize_t res;
 
     if (ScreenCount) {
-        res = write (1, Screen, ScreenCount);
+	if (!el_no_echo)
+	    res = write (1, Screen, ScreenCount);
         ScreenCount = 0;
     }
 }
@@ -1052,8 +1054,17 @@ char *readline(const char *prompt)
 	return NULL;
 
     Prompt = prompt ? prompt : NIL;
-    tty_puts(Prompt);
-    if ((line = editinput()) != NULL) {
+    if (el_no_echo) {
+	int old = el_no_echo;
+	el_no_echo = 0;
+	tty_puts(Prompt);
+	tty_flush();
+	el_no_echo = old;
+    } else {
+	tty_puts(Prompt);
+    }
+    line = editinput();
+    if (line) {
         line = strdup(line);
         tty_puts(NEWLINE);
         tty_flush();

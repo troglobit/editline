@@ -40,6 +40,7 @@ extern int         rl_mark;
 extern int         rl_end;
 extern char       *rl_line_buffer;
 extern const char *rl_readline_name;
+extern int         el_no_echo;  /* e.g under emacs, don't echo except prompt */
 extern void rl_reset_terminal(char *p);
 extern void rl_initialize(void);
 

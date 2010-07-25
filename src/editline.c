@@ -85,17 +85,16 @@ int               rl_quit;
 int               rl_susp;
 #endif
 
-static char        NIL[] = "";
-static const char *Input = NIL;
-static const char *Prompt;
+static char        NILSTR[] = "";
+static const char *el_input = NILSTR;
 static char       *Yanked;
 static char       *Screen;
 static char       NEWLINE[]= CRLF;
 static el_hist_t  H;
 static int        Repeat;
-static int        OldPoint;
-static int        PushBack;
-static int        Pushed;
+static int        old_point;
+static int        el_push_back;
+static int        el_pushed;
 static int        el_intr_pending;
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
@@ -112,6 +111,7 @@ int               rl_mark;
 int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 char             *rl_line_buffer;
+const char       *rl_prompt;
 const char       *rl_readline_name;/* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 
 /* User definable callbacks. */
@@ -189,12 +189,12 @@ static int tty_get(void)
     int r;
 
     tty_flush();
-    if (Pushed) {
-        Pushed = 0;
-        return PushBack;
+    if (el_pushed) {
+        el_pushed = 0;
+        return el_push_back;
     }
-    if (*Input)
-        return *Input++;
+    if (*el_input)
+        return *el_input++;
     do
     {
         r = read(0, &c, 1);
@@ -306,7 +306,7 @@ static void reposition(void)
     char        *p;
 
     tty_put('\r');
-    tty_puts(Prompt);
+    tty_puts(rl_prompt);
     for (i = rl_point, p = rl_line_buffer; --i >= 0; p++)
         tty_show(*p);
 }
@@ -349,8 +349,8 @@ static el_status_t do_macro(int c)
     name[2] = '_';
     name[3] = '\0';
 
-    if ((Input = (char *)getenv((char *)name)) == NULL) {
-        Input = NIL;
+    if ((el_input = (char *)getenv((char *)name)) == NULL) {
+        el_input = NILSTR;
         return ring_bell();
     }
     return CSstay;
@@ -387,10 +387,10 @@ static el_status_t do_case(el_case_t type)
     char        *p;
 
     do_forward(CSstay);
-    if (OldPoint != rl_point) {
-        if ((count = rl_point - OldPoint) < 0)
+    if (old_point != rl_point) {
+        if ((count = rl_point - old_point) < 0)
             count = -count;
-        rl_point = OldPoint;
+        rl_point = old_point;
         if ((end = rl_point + count) > rl_end)
             end = rl_end;
         for (i = rl_point, p = &rl_line_buffer[i]; i < end; i++, p++) {
@@ -442,7 +442,7 @@ static void ceol(void)
 
 static void clear_line(void)
 {
-    rl_point = -(int)strlen(Prompt);
+    rl_point = -(int)strlen(rl_prompt);
     tty_put('\r');
     ceol();
     rl_point = 0;
@@ -483,8 +483,8 @@ static el_status_t insert_string(const char *p)
 
 static el_status_t redisplay(void)
 {
-    tty_puts(NEWLINE);
-    tty_puts(Prompt);
+    tty_puts(NEWLINE); /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
+    tty_puts(rl_prompt);
     tty_string(rl_line_buffer);
     return CSmove;
 }
@@ -616,14 +616,14 @@ static el_status_t h_search(void)
     Searching = 1;
 
     clear_line();
-    old_prompt = Prompt;
-    Prompt = "Search: ";
-    tty_puts(Prompt);
+    old_prompt = rl_prompt;
+    rl_prompt = "Search: ";
+    tty_puts(rl_prompt);
     move = Repeat == NO_ARG ? prev_hist : next_hist;
     p = editinput();
-    Prompt = old_prompt;
+    rl_prompt = old_prompt;
     Searching = 0;
-    tty_puts(Prompt);
+    tty_puts(rl_prompt);
     if (p == NULL && el_intr_pending > 0) {
         el_intr_pending = 0;
         clear_line();
@@ -848,8 +848,8 @@ static el_status_t meta(void)
     if (isdigit(c)) {
         for (Repeat = c - '0'; (c = tty_get()) != EOF && isdigit(c); )
             Repeat = Repeat * 10 + c - '0';
-        Pushed = 1;
-        PushBack = c;
+        el_pushed = 1;
+        el_push_back = c;
         return CSstay;
     }
 
@@ -868,13 +868,13 @@ static el_status_t emacs(int c)
     el_keymap_t *kp;
 
     /* Save point before interpreting input character 'c'. */
-    OldPoint = rl_point;
+    old_point = rl_point;
 
     /* This test makes it impossible to enter eight-bit characters when
      * meta-char mode is enabled. */
     if (rl_meta_chars && ISMETA(c)) {
-        Pushed = 1;
-        PushBack = UNMETA(c);
+        el_pushed = 1;
+        el_push_back = UNMETA(c);
         return meta();
     }
 
@@ -883,7 +883,7 @@ static el_status_t emacs(int c)
             break;
     }
     s = kp->Function ? (*kp->Function)() : insert_char(c);
-    if (!Pushed) {
+    if (!el_pushed) {
         /* No pushback means no repeat count; hacky, but true. */
         Repeat = NO_ARG;
     }
@@ -931,40 +931,50 @@ static char *editinput(void)
     int c;
 
     Repeat = NO_ARG;
-    OldPoint = rl_point = rl_mark = rl_end = 0;
+    old_point = rl_point = rl_mark = rl_end = 0;
     rl_line_buffer[0] = '\0';
 
     el_intr_pending = -1;
-    while ((c = tty_get()) != EOF)
+    while ((c = tty_get()) != EOF) {
         switch (tty_special(c)) {
-        case CSdone:
-            return rl_line_buffer;
-        case CSeof:
-            return NULL;
-        case CSsignal:
-            return (char *)"";
-        case CSmove:
-            reposition();
-            break;
-        case CSdispatch:
-            switch (emacs(c)) {
-            case CSdone:
-                return rl_line_buffer;
-            case CSeof:
-                return NULL;
-            case CSsignal:
-                return (char *)"";
-            case CSmove:
-                reposition();
-                break;
-            case CSdispatch:
-            case CSstay:
-                break;
-            }
-            break;
-        case CSstay:
-            break;
+	    case CSdone:
+		return rl_line_buffer;
+
+	    case CSeof:
+		return NULL;
+
+	    case CSsignal:
+		return (char *)"";
+
+	    case CSmove:
+		reposition();
+		break;
+
+	    case CSdispatch:
+		switch (emacs(c)) {
+		    case CSdone:
+			return rl_line_buffer;
+
+		    case CSeof:
+			return NULL;
+
+		    case CSsignal:
+			return (char *)"";
+
+		    case CSmove:
+			reposition();
+			break;
+
+		    case CSdispatch:
+		    case CSstay:
+			break;
+		}
+		break;
+
+	    case CSstay:
+		break;
         }
+    }
     return NULL;
 }
 
@@ -1030,6 +1040,8 @@ void rl_reset_terminal(char *p __attribute__((__unused__)))
 
 void rl_initialize(void)
 {
+    if (!rl_prompt)
+	rl_prompt = "? ";
 }
 
 char *readline(const char *prompt)
@@ -1053,28 +1065,30 @@ char *readline(const char *prompt)
 
     tty_info();
     rl_ttyset(0);
-    hist_add(NIL);
+    hist_add(NILSTR);
     ScreenSize = SCREEN_INC;
     Screen = malloc(sizeof(char) * ScreenSize);
     if (!Screen)
 	return NULL;
 
-    Prompt = prompt ? prompt : NIL;
+    rl_prompt = prompt ? prompt : NILSTR;
     if (el_no_echo) {
 	int old = el_no_echo;
 	el_no_echo = 0;
-	tty_puts(Prompt);
+	tty_puts(rl_prompt);
 	tty_flush();
 	el_no_echo = old;
     } else {
-	tty_puts(Prompt);
+	tty_puts(rl_prompt);
     }
+
     line = editinput();
     if (line) {
         line = strdup(line);
         tty_puts(NEWLINE);
         tty_flush();
     }
+
     rl_ttyset(1);
     free(Screen);
     free(H.Lines[--H.Size]);
@@ -1315,9 +1329,9 @@ static el_status_t fd_kill_word(void)
     int         i;
 
     do_forward(CSstay);
-    if (OldPoint != rl_point) {
-        i = rl_point - OldPoint;
-        rl_point = OldPoint;
+    if (old_point != rl_point) {
+        i = rl_point - old_point;
+        rl_point = old_point;
         return delete_string(i);
     }
     return CSstay;
@@ -1346,8 +1360,9 @@ static el_status_t bk_word(void)
 static el_status_t bk_kill_word(void)
 {
     bk_word();
-    if (OldPoint != rl_point)
-        return delete_string(OldPoint - rl_point);
+    if (old_point != rl_point)
+        return delete_string(old_point - rl_point);
+
     return CSstay;
 }
 

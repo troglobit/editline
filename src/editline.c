@@ -47,7 +47,7 @@
 **  The type of case-changing to perform.
 */
 typedef enum {
-    TOupper, TOlower
+    TOupper, TOlower, TOcapitalize
 } el_case_t;
 
 /*
@@ -350,6 +350,7 @@ static el_status_t do_macro(int c)
     return CSstay;
 }
 
+/* Skip forward to start of next word. If @move is set we also move the cursor. */
 static el_status_t do_forward(el_status_t move)
 {
     int         i;
@@ -358,11 +359,14 @@ static el_status_t do_forward(el_status_t move)
     i = 0;
     do {
         p = &rl_line_buffer[rl_point];
-        for ( ; rl_point < rl_end && (*p == ' ' || !isalnum(*p)); rl_point++, p++)
+
+	/* Skip to end of word, if inside a word. */
+        for (; rl_point < rl_end && isalnum(p[0]); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
-        for (; rl_point < rl_end && isalnum(*p); rl_point++, p++)
+	/* Skip to next word, or skip leading white space if outside a word. */
+        for ( ; rl_point < rl_end && (p[0] == ' ' || !isalnum(p[0])); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
@@ -384,20 +388,22 @@ static el_status_t do_case(el_case_t type)
     if (old_point != rl_point) {
         if ((count = rl_point - old_point) < 0)
             count = -count;
+
         rl_point = old_point;
         if ((end = rl_point + count) > rl_end)
             end = rl_end;
-        for (i = rl_point, p = &rl_line_buffer[i]; i < end; i++, p++) {
-            if (type == TOupper) {
+
+        for (i = rl_point, p = &rl_line_buffer[i]; rl_point < end; p++) {
+	    if ((type == TOupper) || (type == TOcapitalize && rl_point == i)) {
                 if (islower(*p))
                     *p = toupper(*p);
-            }
-            else if (isupper(*p)) {
+            } else if (isupper(*p)) {
                 *p = tolower(*p);
             }
             right(CSmove);
         }
     }
+
     return CSstay;
 }
 
@@ -409,6 +415,11 @@ static el_status_t case_down_word(void)
 static el_status_t case_up_word(void)
 {
     return do_case(TOupper);
+}
+
+static el_status_t case_cap_word(void)
+{
+    return do_case(TOcapitalize);
 }
 
 static void ceol(void)
@@ -518,7 +529,7 @@ static el_status_t do_hist(const char *(*move)(void))
 
     i = 0;
     do {
-        if ((p = (*move)()) == NULL)
+        if ((p = move()) == NULL)
             return ring_bell();
     } while (++i < Repeat);
     return do_insert_hist(p);
@@ -590,7 +601,7 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     }
     len = strlen(pat);
 
-    for (pos = H.Pos; (*move)() != NULL; )
+    for (pos = H.Pos; move() != NULL; )
         if (match(H.Lines[H.Pos], pat, len) == 0)
             return H.Lines[H.Pos];
     H.Pos = pos;
@@ -851,7 +862,7 @@ static el_status_t meta(void)
         return do_macro(c);
     for (kp = MetaMap; kp->Function; kp++)
         if (kp->Key == c)
-            return (*kp->Function)();
+            return kp->Function();
 
     return ring_bell();
 }
@@ -876,7 +887,7 @@ static el_status_t emacs(int c)
         if (kp->Key == c)
             break;
     }
-    s = kp->Function ? (*kp->Function)() : insert_char(c);
+    s = kp->Function ? kp->Function() : insert_char(c);
     if (!el_pushed) {
         /* No pushback means no repeat count; hacky, but true. */
         Repeat = NO_ARG;
@@ -1486,6 +1497,7 @@ static el_keymap_t   MetaMap[64]= {
     {   '>',            h_last          },
     {   '?',            c_possible      },
     {   'b',            bk_word         },
+    {   'c',            case_cap_word   },
     {   'd',            fd_kill_word    },
     {   'f',            fd_word         },
     {   'l',            case_down_word  },

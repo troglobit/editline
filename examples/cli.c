@@ -88,7 +88,7 @@ int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
    rl_set_list_possib_func(&my_rl_list_possib);
 
    while ((line = readline(prompt)) != NULL) {
-      (void)printf("\t\t\t|%s|\n", line);
+      printf("\t\t\t|%s|\n", line);
       free(line);
    }
 

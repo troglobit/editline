@@ -110,7 +110,7 @@ int               el_no_echo = 0; /* e.g., under Emacs */
 int               rl_point;
 int               rl_mark;
 int               rl_end;
-int               rl_meta_chars = 1; /* Display print 8-bit chars as `M-x' or as the actual 8-bit char? */
+int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 char             *rl_line_buffer;
 const char       *rl_readline_name;/* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 
@@ -161,17 +161,20 @@ static void tty_show(char c)
         tty_put('^');
         tty_put('?');
     }
-    else if (ISCTL(c)) {
-        tty_put('^');
-        tty_put(UNCTL(c));
-    }
     else if (rl_meta_chars && ISMETA(c)) {
         tty_put('M');
         tty_put('-');
         tty_put(UNMETA(c));
     }
-    else
+#if 0
+   else if (ISCTL(c)) {
+        tty_put('^');
+        tty_put(UNCTL(c));
+    }
+#endif
+    else {
         tty_put(c);
+    }
 }
 
 static void tty_string(char *p)
@@ -861,26 +864,30 @@ static el_status_t meta(void)
 
 static el_status_t emacs(int c)
 {
-    el_status_t              s;
-    el_keymap_t              *kp;
+    el_status_t  s;
+    el_keymap_t *kp;
 
-#if 0 /* Debian patch removes this to be able to handle 8-bit input */
+    /* Save point before interpreting input character 'c'. */
+    OldPoint = rl_point;
+
     /* This test makes it impossible to enter eight-bit characters when
      * meta-char mode is enabled. */
-    OldPoint = rl_point;
     if (rl_meta_chars && ISMETA(c)) {
         Pushed = 1;
         PushBack = UNMETA(c);
         return meta();
     }
-#endif /* Debian patch removal. */
-    for (kp = Map; kp->Function; kp++)
+
+    for (kp = Map; kp->Function; kp++) {
         if (kp->Key == c)
             break;
-    s = kp->Function ? (*kp->Function)() : insert_char((int)c);
-    if (!Pushed)
+    }
+    s = kp->Function ? (*kp->Function)() : insert_char(c);
+    if (!Pushed) {
         /* No pushback means no repeat count; hacky, but true. */
         Repeat = NO_ARG;
+    }
+
     return s;
 }
 
@@ -1241,23 +1248,6 @@ static el_status_t quote(void)
     return (c = tty_get()) == EOF ? CSeof : insert_char((int)c);
 }
 
-static el_status_t wipe(void)
-{
-    int         i;
-
-    if (rl_mark > rl_end)
-        return ring_bell();
-
-    if (rl_point > rl_mark) {
-        i = rl_point;
-        rl_point = rl_mark;
-        rl_mark = i;
-        reposition();
-    }
-
-    return delete_string(rl_mark - rl_point);
-}
-
 static el_status_t mk_set(void)
 {
     rl_mark = rl_point;
@@ -1467,8 +1457,8 @@ static el_keymap_t Map[] = {
 };
 
 static el_keymap_t   MetaMap[]= {
-    {   CTL('H'),       wipe            },
-    {   DEL,            wipe            },
+    {   CTL('H'),       bk_kill_word    },
+    {   DEL,            bk_kill_word    },
     {   ' ',            mk_set          },
     {   '.',            last_argument   },
     {   '<',            h_first         },

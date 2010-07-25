@@ -25,7 +25,7 @@
 typedef char* (*rl_complete_func_t)(char*, int*);
 typedef int (*rl_list_possib_func_t)(char*, char***);
 
-/* Display print 8-bit chars as `M-x' or as the actual 8-bit char?  (Default:1) */
+/* Display 8-bit chars "as-is" or as `M-x'? Toggle with M-m. (Default:0 - "as-is") */
 extern int rl_meta_chars;
 
 /* Use these functions to set custom command/file completion, see cli.c for example usage. */

@@ -1,6 +1,7 @@
 /* Main editing routines for editline library.
  *
  * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz. All rights reserved.
+ * Copyright (c) 1998  Alan W. Black <awb@cstr.ed.ac.uk>, for Edinburgh Speech Tools.
  *
  * This software is not subject to any license of the American Telephone
  * and Telegraph Company or of the Regents of the University of California.
@@ -41,13 +42,6 @@
 #define HIST_SIZE       1
 #endif
 #define SEPS "\"#$&'()*:;<=>?[\\]^`{|}~\n\t "
-
-/*
-**  Command status codes.
-*/
-typedef enum {
-    CSdone, CSeof, CSmove, CSdispatch, CSstay, CSsignal
-} el_status_t;
 
 /*
 **  The type of case-changing to perform.
@@ -1238,6 +1232,14 @@ static el_status_t accept_line(void)
     return CSdone;
 }
 
+#ifdef SYSTEM_IS_WIN32
+static el_status_t end_of_input(void)
+{
+    rl_line_buffer[rl_end] = '\0';
+    return CSeof;
+}
+#endif
+
 static el_status_t transpose(void)
 {
     char        c;
@@ -1437,7 +1439,7 @@ static el_status_t last_argument(void)
     return s;
 }
 
-static el_keymap_t Map[] = {
+static el_keymap_t Map[33] = {
     {   CTL('@'),       mk_set          },
     {   CTL('A'),       beg_line        },
     {   CTL('B'),       bk_char         },
@@ -1463,7 +1465,11 @@ static el_keymap_t Map[] = {
     {   CTL('W'),       bk_kill_word    },
     {   CTL('X'),       exchange        },
     {   CTL('Y'),       yank            },
-    {   CTL('Z'),       end_line        },
+#ifdef SYSTEM_IS_WIN32
+    {   CTL('Z'),       end_of_input    },
+#else
+    {   CTL('Z'),       ring_bell       },
+#endif
     {   CTL('['),       meta            },
     {   CTL(']'),       move_to_char    },
     {   CTL('^'),       ring_bell       },
@@ -1471,7 +1477,7 @@ static el_keymap_t Map[] = {
     {   0,              NULL            }
 };
 
-static el_keymap_t   MetaMap[]= {
+static el_keymap_t   MetaMap[64]= {
     {   CTL('H'),       bk_kill_word    },
     {   DEL,            bk_kill_word    },
     {   ' ',            mk_set          },
@@ -1489,6 +1495,33 @@ static el_keymap_t   MetaMap[]= {
     {   'w',            copy_region     },
     {   0,              NULL            }
 };
+
+void el_bind_key_in_metamap(char c, el_keymap_func_t func)
+{
+    /* Add given function to key map for META keys */
+    int i;
+
+    for (i = 0; MetaMap[i].Key != 0; i++)
+    {
+	if (MetaMap[i].Key == c)
+	{
+	    MetaMap[i].Function = func;
+	    return;
+	}
+    }
+
+    /* A new key so have to add it to end */
+    if (i == 63)
+    {
+	fprintf(stderr,"editline: MetaMap table full, requires increase\n");
+	return;
+    }
+
+    MetaMap[i].Function = func;
+    MetaMap[i].Key = c;
+    MetaMap[i + 1].Function = 0;  /* Zero the last location */
+    MetaMap[i + 1].Key = 0;       /* Zero the last location */
+}
 
 /**
  * Local Variables:

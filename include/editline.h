@@ -21,9 +21,15 @@
 #ifndef __EDITLINE_H__
 #define __EDITLINE_H__
 
+/* Command status codes. */
+typedef enum {
+    CSdone, CSeof, CSmove, CSdispatch, CSstay, CSsignal
+} el_status_t;
+
 /* Editline specific types, despite rl_ prefix.  From Heimdal project. */
 typedef char* (*rl_complete_func_t)(char*, int*);
 typedef int (*rl_list_possib_func_t)(char*, char***);
+typedef el_status_t (*el_keymap_func_t)(void);
 
 /* Display 8-bit chars "as-is" or as `M-x'? Toggle with M-m. (Default:0 - "as-is") */
 extern int rl_meta_chars;
@@ -33,6 +39,7 @@ rl_complete_func_t    rl_set_complete_func(rl_complete_func_t func);
 rl_list_possib_func_t rl_set_list_possib_func(rl_list_possib_func_t func);
 
 /* Editline specific functions. */
+void el_bind_key_in_metamap(char c, el_keymap_func_t func);
 
 /* For compatibility with FSF readline. */
 extern int         rl_point;

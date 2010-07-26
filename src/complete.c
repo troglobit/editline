@@ -192,8 +192,7 @@ char *el_filename_complete(char *pathname, int *match)
                 free(new);
             }
         }
-    }
-    else {
+    } else {
         *match = 0;
         if (len) {
             /* Find largest matching substring. */

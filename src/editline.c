@@ -154,8 +154,7 @@ static void tty_show(char c)
     if (c == DEL) {
         tty_put('^');
         tty_put('?');
-    }
-    else if (rl_meta_chars && ISMETA(c)) {
+    } else if (rl_meta_chars && ISMETA(c)) {
         tty_put('M');
         tty_put('-');
         tty_put(UNMETA(c));
@@ -309,9 +308,9 @@ static void left(el_status_t Change)
 {
     tty_back();
     if (rl_point) {
-        if (ISCTL(rl_line_buffer[rl_point - 1]))
+        if (ISCTL(rl_line_buffer[rl_point - 1])) {
             tty_back();
-        else if (rl_meta_chars && ISMETA(rl_line_buffer[rl_point - 1])) {
+        } else if (rl_meta_chars && ISMETA(rl_line_buffer[rl_point - 1])) {
             tty_back();
             tty_back();
         }
@@ -433,8 +432,7 @@ static void ceol(void)
         if (ISCTL(*p)) {
             tty_put(' ');
             extras++;
-        }
-        else if (rl_meta_chars && ISMETA(*p)) {
+        } else if (rl_meta_chars && ISMETA(*p)) {
             tty_put(' ');
             tty_put(' ');
             extras += 2;
@@ -583,8 +581,7 @@ static const char *search_hist(const char *search, const char *(*move)(void))
         if (old_search)
             free(old_search);
         old_search = strdup(search);
-    }
-    else {
+    } else {
         if (old_search == NULL || *old_search == '\0')
             return NULL;
         search = old_search;
@@ -594,17 +591,18 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     if (*search == '^') {
         match = strncmp;
         pat = search + 1;
-    }
-    else {
+    } else {
         match = substrcmp;
         pat = search;
     }
     len = strlen(pat);
 
-    for (pos = H.Pos; move() != NULL; )
+    pos = H.Pos;		/* Save H.Pos */
+    while (move()) {
         if (match(H.Lines[H.Pos], pat, len) == 0)
             return H.Lines[H.Pos];
-    H.Pos = pos;
+    }
+    H.Pos = pos;		/* Restore H.Pos */
 
     return NULL;
 }
@@ -690,8 +688,7 @@ static el_status_t delete_string(int count)
         if (ISCTL(*p)) {
             i = 2;
             tty_put(' ');
-        }
-        else if (rl_meta_chars && ISMETA(*p)) {
+        } else if (rl_meta_chars && ISMETA(*p)) {
             i = 3;
             tty_put(' ');
             tty_put(' ');
@@ -752,8 +749,7 @@ static el_status_t kill_line(void)
             rl_point = Repeat;
             reposition();
             delete_string(i - rl_point);
-        }
-        else if (Repeat > rl_point) {
+        } else if (Repeat > rl_point) {
             right(CSmove);
             delete_string(Repeat - rl_point - 1);
         }
@@ -989,9 +985,9 @@ static void hist_add(char *p)
 
     if ((p = (char *)strdup((char *)p)) == NULL)
         return;
-    if (H.Size < HIST_SIZE)
+    if (H.Size < HIST_SIZE) {
         H.Lines[H.Size++] = p;
-    else {
+    } else {
         free(H.Lines[0]);
         for (i = 0; i < HIST_SIZE - 1; i++)
             H.Lines[i] = H.Lines[i + 1];
@@ -1414,9 +1410,9 @@ static int argify(char *line, char ***avp)
                 }
                 p[ac++] = c;
             }
-        }
-        else
+        } else {
             c++;
+	}
     }
     *c = '\0';
     p[ac] = NULL;

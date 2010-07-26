@@ -158,14 +158,10 @@ static void tty_show(char c)
         tty_put('M');
         tty_put('-');
         tty_put(UNMETA(c));
-    }
-#if 0
-   else if (ISCTL(c)) {
+    } else if (ISCTL(c) && !ISMETA(c)) {
         tty_put('^');
         tty_put(UNCTL(c));
-    }
-#endif
-    else {
+    } else {
         tty_put(c);
     }
 }

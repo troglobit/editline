@@ -1,8 +1,11 @@
 TODO
 
-* Port "fileman" example from BSD editline
+* Port "fileman" example from BSD libedit, http://www.thrysoee.dk/editline/
 * Add support for rl_bind_key(), currently one needs to "hack" the Map[]
 * Add support for inhibiting completion: rl_inhibit_completion
 * Make "char *rl_prompt" globally visible.
 * Add support for rl_set_prompt().
+* Add support for --enable-utf8 to configure
+* Use strcmp(nl_langinfo(CODESET), "UTF-8") to look for utf8 capable terminal.
+* Implement simple UTF-8 parser according to http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
 

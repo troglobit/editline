@@ -111,7 +111,7 @@ AC_COMPILE_IFELSE(AC_LANG_PROGRAM([]),
         nopointersign_cflags="-Wno-pointer-sign", nopointersign_cflags="")
 CFLAGS="$saved_cflags"
 
-AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow"
+AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow -Wcast-qual"
 AC_SUBST(AM_CFLAGS)
 
 ### The following magic for determining the location of termcap library is from GNU Texinfo

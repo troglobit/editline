@@ -1,6 +1,7 @@
 /* Main editing routines for editline library.
  *
  * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz. All rights reserved.
+ * Copyright (c) 1998  Alan W. Black <awb()cstr!ed.ac!uk>, for Edinburgh Speech Tools.
  *
  * This software is not subject to any license of the American Telephone
  * and Telegraph Company or of the Regents of the University of California.
@@ -43,17 +44,10 @@
 #define SEPS "\"#$&'()*:;<=>?[\\]^`{|}~\n\t "
 
 /*
-**  Command status codes.
-*/
-typedef enum {
-    CSdone, CSeof, CSmove, CSdispatch, CSstay, CSsignal
-} el_status_t;
-
-/*
 **  The type of case-changing to perform.
 */
 typedef enum {
-    TOupper, TOlower
+    TOupper, TOlower, TOcapitalize
 } el_case_t;
 
 /*
@@ -70,7 +64,7 @@ typedef struct {
 typedef struct {
     int         Size;
     int         Pos;
-    const char  *Lines[HIST_SIZE];
+    char       *Lines[HIST_SIZE];
 } el_hist_t;
 
 /*
@@ -85,38 +79,37 @@ int               rl_quit;
 int               rl_susp;
 #endif
 
-static const char NIL[] = "";
-static const char *Input = NIL;
-static const char *Prompt;
+static char        NILSTR[] = "";
+static const char *el_input = NILSTR;
 static char       *Yanked;
 static char       *Screen;
 static char       NEWLINE[]= CRLF;
 static el_hist_t  H;
 static int        Repeat;
-static int        OldPoint;
-static int        PushBack;
-static int        Pushed;
-static int        Signal;
+static int        old_point;
+static int        el_push_back;
+static int        el_pushed;
+static int        el_intr_pending;
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
-static SIZE_T     Length;
-static SIZE_T     ScreenCount;
-static SIZE_T     ScreenSize;
+static size_t     Length;
+static size_t     ScreenCount;
+static size_t     ScreenSize;
 static char       *backspace;
 static int        tty_cols;
 static int        tty_rows;
 
+int               el_no_echo = 0; /* e.g., under Emacs */
 int               rl_point;
 int               rl_mark;
 int               rl_end;
-int               rl_meta_chars = 1; /* Display print 8-bit chars as `M-x' or as the actual 8-bit char? */
+int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 char             *rl_line_buffer;
+const char       *rl_prompt;
 const char       *rl_readline_name;/* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 
 /* User definable callbacks. */
 char **(*rl_attempted_completion_function)(const char *token, int start, int end);
-char  *(*rl_comlete)(char *token, int *match);
-int    (*rl_list_possib)(char *token, char ***av);
 
 /* Declarations. */
 static char     *editinput(void);
@@ -126,6 +119,22 @@ extern int      tgetent(char *, const char *);
 extern int      tgetnum(const char *);
 #endif
 
+
+/*
+**  Misc. local helper functions.
+*/
+static int is_alpha_num(unsigned char c)
+{
+    if (isalnum(c))
+	return 1;
+    if (ISMETA(c))
+	return 1;
+    if (ISCTL(c))
+	return 1;
+
+    return 0;
+}
+
 /*
 **  TTY input/output functions.
 */
@@ -135,7 +144,8 @@ static void tty_flush(void)
     ssize_t res;
 
     if (ScreenCount) {
-        res = write (1, Screen, ScreenCount);
+	if (!el_no_echo)
+	    res = write(1, Screen, ScreenCount);
         ScreenCount = 0;
     }
 }
@@ -145,7 +155,7 @@ static void tty_put(const char c)
     Screen[ScreenCount] = c;
     if (++ScreenCount >= ScreenSize - 1) {
         ScreenSize += SCREEN_INC;
-        RENEW(Screen, char, ScreenSize);
+        Screen = realloc(Screen, sizeof(char) * ScreenSize);
     }
 }
 
@@ -155,23 +165,21 @@ static void tty_puts(const char *p)
         tty_put(*p++);
 }
 
-static void tty_show(char c)
+static void tty_show(unsigned char c)
 {
     if (c == DEL) {
         tty_put('^');
         tty_put('?');
-    }
-    else if (ISCTL(c)) {
+    } else if (ISCTL(c)) {
         tty_put('^');
         tty_put(UNCTL(c));
-    }
-    else if (rl_meta_chars && ISMETA(c)) {
+    } else if (rl_meta_chars && ISMETA(c)) {
         tty_put('M');
         tty_put('-');
         tty_put(UNMETA(c));
-    }
-    else
+    } else {
         tty_put(c);
+    }
 }
 
 static void tty_string(char *p)
@@ -180,23 +188,30 @@ static void tty_string(char *p)
         tty_show(*p++);
 }
 
+static void tty_push(int c)
+{
+    el_pushed = 1;
+    el_push_back = c;
+}
+
 static int tty_get(void)
 {
-    char        c;
+    char c;
     int r;
 
     tty_flush();
-    if (Pushed) {
-        Pushed = 0;
-        return PushBack;
+    if (el_pushed) {
+        el_pushed = 0;
+        return el_push_back;
     }
-    if (*Input)
-        return *Input++;
+    if (*el_input)
+        return *el_input++;
     do
     {
-        r= read(0, &c, (SIZE_T)1);
+        r = read(0, &c, 1);
     } while (r == -1 && errno == EINTR);
-    return r  == 1 ? c : EOF;
+
+    return r == 1 ? c : EOF;
 }
 
 #define tty_back()       (backspace ? tty_puts(backspace) : tty_put('\b'))
@@ -211,9 +226,9 @@ static void tty_info(void)
 {
     static int          init;
 #ifdef CONFIG_USE_TERMCAP
-    char                *term;
+    char               *term;
     char                buff[2048];
-    char                *bp;
+    char               *bp;
 #endif
 #ifdef TIOCGWINSZ
     struct winsize      W;
@@ -239,10 +254,12 @@ static void tty_info(void)
     if ((term = getenv("TERM")) == NULL)
         term = "dumb";
     if (-1 != tgetent(buff, term)) {
-       if ((backspace = tgetstr("le", &bp)) != NULL)
-          backspace = strdup(backspace);
-       tty_cols = tgetnum("co");
-       tty_rows = tgetnum("li");
+	if ((backspace = tgetstr("le", &bp)) != NULL)
+	    backspace = strdup(backspace);
+	else
+	    backspace = "\b";
+	tty_cols = tgetnum("co");
+	tty_rows = tgetnum("li");
     }
     /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
 #endif
@@ -296,23 +313,24 @@ static void columns(int ac, char **av)
 
 static void reposition(void)
 {
-    int         i;
-    char        *p;
+    int i;
 
     tty_put('\r');
-    tty_puts(Prompt);
-    for (i = rl_point, p = rl_line_buffer; --i >= 0; p++)
-        tty_show(*p);
+    tty_puts(rl_prompt);
+    for (i = 0; i < rl_point; i++)
+        tty_show(rl_line_buffer[i]);
 }
 
 static void left(el_status_t Change)
 {
-    tty_back();
     if (rl_point) {
-        if (ISCTL(rl_line_buffer[rl_point - 1]))
-            tty_back();
-        else if (rl_meta_chars && ISMETA(rl_line_buffer[rl_point - 1])) {
-            tty_back();
+	tty_back();
+	if (ISMETA(rl_line_buffer[rl_point - 1])) {
+	    if (rl_meta_chars) {
+		tty_back();
+		tty_back();
+	    }
+	} else if (ISCTL(rl_line_buffer[rl_point - 1])) {
             tty_back();
         }
     }
@@ -323,6 +341,7 @@ static void left(el_status_t Change)
 static void right(el_status_t Change)
 {
     tty_show(rl_line_buffer[rl_point]);
+
     if (Change == CSmove)
         rl_point++;
 }
@@ -343,13 +362,14 @@ static el_status_t do_macro(int c)
     name[2] = '_';
     name[3] = '\0';
 
-    if ((Input = (char *)getenv((char *)name)) == NULL) {
-        Input = NIL;
+    if ((el_input = (char *)getenv((char *)name)) == NULL) {
+        el_input = NILSTR;
         return ring_bell();
     }
     return CSstay;
 }
 
+/* Skip forward to start of next word. If @move is set we also move the cursor. */
 static el_status_t do_forward(el_status_t move)
 {
     int         i;
@@ -358,11 +378,14 @@ static el_status_t do_forward(el_status_t move)
     i = 0;
     do {
         p = &rl_line_buffer[rl_point];
-        for ( ; rl_point < rl_end && (*p == ' ' || !isalnum(*p)); rl_point++, p++)
+
+	/* Skip to end of word, if inside a word. */
+        for (; rl_point < rl_end && is_alpha_num(p[0]); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
-        for (; rl_point < rl_end && isalnum(*p); rl_point++, p++)
+	/* Skip to next word, or skip leading white space if outside a word. */
+        for ( ; rl_point < rl_end && (p[0] == ' ' || !is_alpha_num(p[0])); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
@@ -381,23 +404,25 @@ static el_status_t do_case(el_case_t type)
     char        *p;
 
     do_forward(CSstay);
-    if (OldPoint != rl_point) {
-        if ((count = rl_point - OldPoint) < 0)
+    if (old_point != rl_point) {
+        if ((count = rl_point - old_point) < 0)
             count = -count;
-        rl_point = OldPoint;
+
+        rl_point = old_point;
         if ((end = rl_point + count) > rl_end)
             end = rl_end;
-        for (i = rl_point, p = &rl_line_buffer[i]; i < end; i++, p++) {
-            if (type == TOupper) {
+
+        for (i = rl_point, p = &rl_line_buffer[i]; rl_point < end; p++) {
+	    if ((type == TOupper) || (type == TOcapitalize && rl_point == i)) {
                 if (islower(*p))
                     *p = toupper(*p);
-            }
-            else if (isupper(*p)) {
+            } else if (isupper(*p)) {
                 *p = tolower(*p);
             }
             right(CSmove);
         }
     }
+
     return CSstay;
 }
 
@@ -411,6 +436,11 @@ static el_status_t case_up_word(void)
     return do_case(TOupper);
 }
 
+static el_status_t case_cap_word(void)
+{
+    return do_case(TOcapitalize);
+}
+
 static void ceol(void)
 {
     int         extras;
@@ -419,14 +449,15 @@ static void ceol(void)
 
     for (extras = 0, i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
         tty_put(' ');
-        if (ISCTL(*p)) {
+        if (ISMETA(*p)) {
+	    if (rl_meta_chars) {
+		tty_put(' ');
+		tty_put(' ');
+		extras += 2;
+	    }
+	} if (ISCTL(*p)) {
             tty_put(' ');
             extras++;
-        }
-        else if (rl_meta_chars && ISMETA(*p)) {
-            tty_put(' ');
-            tty_put(' ');
-            extras += 2;
         }
     }
 
@@ -436,7 +467,7 @@ static void ceol(void)
 
 static void clear_line(void)
 {
-    rl_point = -strlen(Prompt);
+    rl_point = -(int)strlen(rl_prompt);
     tty_put('\r');
     ceol();
     rl_point = 0;
@@ -446,18 +477,19 @@ static void clear_line(void)
 
 static el_status_t insert_string(const char *p)
 {
-    SIZE_T      len;
+    size_t      len;
     int         i;
     char        *new;
     char        *q;
 
-    len = strlen((char *)p);
+    len = strlen(p);
     if (rl_end + len >= Length) {
-        if ((new = NEW(char, Length + len + MEM_INC)) == NULL)
+	new = malloc(sizeof(char) * (Length + len + MEM_INC));
+        if (!new)
             return CSstay;
         if (Length) {
-            COPYFROMTO(new, rl_line_buffer, Length);
-            DISPOSE(rl_line_buffer);
+            memcpy(new, rl_line_buffer, Length);
+            free(rl_line_buffer);
         }
         rl_line_buffer = new;
         Length += len + MEM_INC;
@@ -465,7 +497,7 @@ static el_status_t insert_string(const char *p)
 
     for (q = &rl_line_buffer[rl_point], i = rl_end - rl_point; --i >= 0; )
         q[len + i] = q[i];
-    COPYFROMTO(&rl_line_buffer[rl_point], p, len);
+    memcpy(&rl_line_buffer[rl_point], p, len);
     rl_end += len;
     rl_line_buffer[rl_end] = '\0';
     tty_string(&rl_line_buffer[rl_point]);
@@ -476,9 +508,10 @@ static el_status_t insert_string(const char *p)
 
 static el_status_t redisplay(void)
 {
-    tty_puts(NEWLINE);
-    tty_puts(Prompt);
+    tty_puts(NEWLINE); /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
+    tty_puts(rl_prompt);
     tty_string(rl_line_buffer);
+
     return CSmove;
 }
 
@@ -503,10 +536,12 @@ static el_status_t do_insert_hist(const char *p)
 {
     if (p == NULL)
         return ring_bell();
+
     rl_point = 0;
     reposition();
     ceol();
     rl_end = 0;
+
     return insert_string(p);
 }
 
@@ -517,7 +552,7 @@ static el_status_t do_hist(const char *(*move)(void))
 
     i = 0;
     do {
-        if ((p = (*move)()) == NULL)
+        if ((p = move()) == NULL)
             return ring_bell();
     } while (++i < Repeat);
     return do_insert_hist(p);
@@ -548,7 +583,7 @@ static el_status_t h_last(void)
 */
 static int substrcmp(const char *text, const char *pat, size_t len)
 {
-    char        c;
+    char c;
 
     if ((c = *pat) == '\0')
         return *text == '\0';
@@ -564,15 +599,14 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     int         len;
     int         pos;
     int         (*match)(const char *s1, const char *s2, size_t n);
-    char        *pat;
+    const char *pat;
 
     /* Save or get remembered search pattern. */
     if (search && *search) {
         if (old_search)
-            DISPOSE(old_search);
-        old_search = (char *)strdup((char *)search);
-    }
-    else {
+            free(old_search);
+        old_search = strdup(search);
+    } else {
         if (old_search == NULL || *old_search == '\0')
             return NULL;
         search = old_search;
@@ -581,18 +615,20 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     /* Set up pattern-finder. */
     if (*search == '^') {
         match = strncmp;
-        pat = (char *)(search + 1);
-    }
-    else {
+        pat = search + 1;
+    } else {
         match = substrcmp;
-        pat = (char *)search;
+        pat = search;
     }
     len = strlen(pat);
 
-    for (pos = H.Pos; (*move)() != NULL; )
-        if ((*match)((char *)H.Lines[H.Pos], pat, len) == 0)
+    pos = H.Pos;		/* Save H.Pos */
+    while (move()) {
+        if (match(H.Lines[H.Pos], pat, len) == 0)
             return H.Lines[H.Pos];
-    H.Pos = pos;
+    }
+    H.Pos = pos;		/* Restore H.Pos */
+
     return NULL;
 }
 
@@ -608,16 +644,16 @@ static el_status_t h_search(void)
     Searching = 1;
 
     clear_line();
-    old_prompt = Prompt;
-    Prompt = "Search: ";
-    tty_puts(Prompt);
+    old_prompt = rl_prompt;
+    rl_prompt = "Search: ";
+    tty_puts(rl_prompt);
     move = Repeat == NO_ARG ? prev_hist : next_hist;
     p = editinput();
-    Prompt = old_prompt;
+    rl_prompt = old_prompt;
     Searching = 0;
-    tty_puts(Prompt);
-    if (p == NULL && Signal > 0) {
-        Signal = 0;
+    tty_puts(rl_prompt);
+    if (p == NULL && el_intr_pending > 0) {
+        el_intr_pending = 0;
         clear_line();
         return redisplay();
     }
@@ -646,15 +682,16 @@ static el_status_t fd_char(void)
 static void save_yank(int begin, int i)
 {
     if (Yanked) {
-        DISPOSE(Yanked);
+        free(Yanked);
         Yanked = NULL;
     }
 
     if (i < 1)
         return;
 
-    if ((Yanked = NEW(char, (SIZE_T)i + 1)) != NULL) {
-        COPYFROMTO(Yanked, &rl_line_buffer[begin], i);
+    Yanked = malloc(sizeof(char) * (i + 1));
+    if (Yanked) {
+        memcpy(Yanked, &rl_line_buffer[begin], i);
         Yanked[i] = '\0';
     }
 }
@@ -676,8 +713,7 @@ static el_status_t delete_string(int count)
         if (ISCTL(*p)) {
             i = 2;
             tty_put(' ');
-        }
-        else if (rl_meta_chars && ISMETA(*p)) {
+        } else if (rl_meta_chars && ISMETA(*p)) {
             i = 3;
             tty_put(' ');
             tty_put(' ');
@@ -738,8 +774,7 @@ static el_status_t kill_line(void)
             rl_point = Repeat;
             reposition();
             delete_string(i - rl_point);
-        }
-        else if (Repeat > rl_point) {
+        } else if (Repeat > rl_point) {
             right(CSmove);
             delete_string(Repeat - rl_point - 1);
         }
@@ -767,14 +802,17 @@ static el_status_t insert_char(int c)
         return insert_string(buff);
     }
 
-    if ((p = NEW(char, Repeat + 1)) == NULL)
+    p = malloc(sizeof(char) * (Repeat + 1));
+    if (!p)
         return CSstay;
+
     for (i = Repeat, q = p; --i >= 0; )
         *q++ = c;
     *q = '\0';
     Repeat = 0;
     s = insert_string(p);
-    DISPOSE(p);
+    free(p);
+
     return s;
 }
 
@@ -808,73 +846,76 @@ static el_status_t meta(void)
 
     if ((c = tty_get()) == EOF)
         return CSeof;
+
 #ifdef CONFIG_ANSI_ARROWS
     /* Also include VT-100 arrows. */
     if (c == '[' || c == 'O') {
-        c = tty_get();
-//        printf ("E[%c\n", c);
-        switch (c) {
-        default:        return ring_bell();
-        case EOF:       return CSeof;
-        case '2':       tty_get(); return CSstay;     /* Insert */
-        case '3':       tty_get(); return del_char(); /* Delete */
-        case '5':       tty_get(); return CSstay;     /* PgUp */
-        case '6':       tty_get(); return CSstay;     /* PgDn */
-        case 'A':       return h_prev();              /* Up */
-        case 'B':       return h_next();              /* Down */
-        case 'C':       return fd_char();             /* Left */
-        case 'D':       return bk_char();             /* Right */
-        case 'F':       return end_line();            /* End */
-        case 'H':       return beg_line();            /* Home */
+        switch (tty_get()) {
+	    case EOF:  return CSeof;
+	    case '2':  tty_get(); return CSstay;     /* Insert */
+	    case '3':  tty_get(); return del_char(); /* Delete */
+	    case '5':  tty_get(); return CSstay;     /* PgUp */
+	    case '6':  tty_get(); return CSstay;     /* PgDn */
+	    case 'A':  return h_prev();              /* Up */
+	    case 'B':  return h_next();              /* Down */
+	    case 'C':  return fd_char();             /* Left */
+	    case 'D':  return bk_char();             /* Right */
+	    case 'F':  return end_line();            /* End */
+	    case 'H':  return beg_line();            /* Home */
+	    default:                                 /* Fall through */
+		break;
         }
+
+	return ring_bell();
     }
 #endif /* CONFIG_ANSI_ARROWS */
 
     if (isdigit(c)) {
         for (Repeat = c - '0'; (c = tty_get()) != EOF && isdigit(c); )
             Repeat = Repeat * 10 + c - '0';
-        Pushed = 1;
-        PushBack = c;
+	tty_push(c);
         return CSstay;
     }
 
     if (isupper(c))
         return do_macro(c);
-    for (kp = MetaMap; kp->Function; kp++)
+    for (kp = MetaMap; kp->Function; kp++) {
         if (kp->Key == c)
-            return (*kp->Function)();
+            return kp->Function();
+    }
 
     return ring_bell();
 }
 
 static el_status_t emacs(int c)
 {
-    el_status_t              s;
-    el_keymap_t              *kp;
+    el_status_t  s;
+    el_keymap_t *kp;
 
-#if 0 /* Debian patch removes this to be able to handle 8-bit input */
-    /* This test makes it impossible to enter eight-bit characters when
-     * meta-char mode is enabled. */
-    OldPoint = rl_point;
+    /* Save point before interpreting input character 'c'. */
+    old_point = rl_point;
+
     if (rl_meta_chars && ISMETA(c)) {
-        Pushed = 1;
-        PushBack = UNMETA(c);
+	tty_push(UNMETA(c));
         return meta();
     }
-#endif /* Debian patch removal. */
-    for (kp = Map; kp->Function; kp++)
+
+    for (kp = Map; kp->Function; kp++) {
         if (kp->Key == c)
             break;
-    s = kp->Function ? (*kp->Function)() : insert_char((int)c);
-    if (!Pushed)
+    }
+    s = kp->Function ? kp->Function() : insert_char(c);
+    if (!el_pushed) {
         /* No pushback means no repeat count; hacky, but true. */
         Repeat = NO_ARG;
+    }
+
     return s;
 }
 
 static el_status_t tty_special(int c)
 {
-    if (rl_meta_chars && ISMETA(c))
+   if (rl_meta_chars && ISMETA(c))
         return CSdispatch;
 
     if (c == rl_erase || c == DEL)
@@ -890,16 +931,16 @@ static el_status_t tty_special(int c)
     if (c == rl_eof && rl_point == 0 && rl_end == 0)
         return CSeof;
     if (c == rl_intr) {
-        Signal = SIGINT;
+        el_intr_pending = SIGINT;
         return CSsignal;
     }
     if (c == rl_quit) {
-        Signal = SIGQUIT;
+        el_intr_pending = SIGQUIT;
         return CSeof;
     }
 #ifdef CONFIG_SIGSTOP
     if (c == rl_susp) {
-        Signal = SIGTSTP;
+        el_intr_pending = SIGTSTP;
         return CSsignal;
     }
 #endif
@@ -912,53 +953,63 @@ static char *editinput(void)
     int c;
 
     Repeat = NO_ARG;
-    OldPoint = rl_point = rl_mark = rl_end = 0;
+    old_point = rl_point = rl_mark = rl_end = 0;
     rl_line_buffer[0] = '\0';
 
-    Signal = -1;
-    while ((c = tty_get()) != EOF)
+    el_intr_pending = -1;
+    while ((c = tty_get()) != EOF) {
         switch (tty_special(c)) {
-        case CSdone:
-            return rl_line_buffer;
-        case CSeof:
-            return NULL;
-        case CSsignal:
-            return (char *)"";
-        case CSmove:
-            reposition();
-            break;
-        case CSdispatch:
-            switch (emacs(c)) {
-            case CSdone:
-                return rl_line_buffer;
-            case CSeof:
-                return NULL;
-            case CSsignal:
-                return (char *)"";
-            case CSmove:
-                reposition();
-                break;
-            case CSdispatch:
-            case CSstay:
-                break;
-            }
-            break;
-        case CSstay:
-            break;
+	    case CSdone:
+		return rl_line_buffer;
+
+	    case CSeof:
+		return NULL;
+
+	    case CSsignal:
+		return (char *)"";
+
+	    case CSmove:
+		reposition();
+		break;
+
+	    case CSdispatch:
+		switch (emacs(c)) {
+		    case CSdone:
+			return rl_line_buffer;
+
+		    case CSeof:
+			return NULL;
+
+		    case CSsignal:
+			return (char *)"";
+
+		    case CSmove:
+			reposition();
+			break;
+
+		    case CSdispatch:
+		    case CSstay:
+			break;
+		}
+		break;
+
+	    case CSstay:
+		break;
         }
+    }
     return NULL;
 }
 
-static void hist_add(const char *p)
+static void hist_add(char *p)
 {
     int i;
 
     if ((p = (char *)strdup((char *)p)) == NULL)
         return;
-    if (H.Size < HIST_SIZE)
+    if (H.Size < HIST_SIZE) {
         H.Lines[H.Size++] = p;
-    else {
-        DISPOSE(H.Lines[0]);
+    } else {
+        free(H.Lines[0]);
         for (i = 0; i < HIST_SIZE - 1; i++)
             H.Lines[i] = H.Lines[i + 1];
         H.Lines[i] = p;
@@ -973,14 +1024,19 @@ static char *read_redirected(void)
     char        *line;
     char        *end;
 
-    p = line = NEW(char, size);
+    p = line = malloc(sizeof(char) * size);
+    if (!p)
+	return NULL;
+
     end = p + size;
     while (1) {
         if (p == end) {
             int oldpos = end - line;
 
             size += MEM_INC;
-            p = RENEW(line, char, size);
+            p = line = realloc(line, sizeof(char) * size);
+	    if (!p)
+		return NULL;
             end = p + size;
 
             p += oldpos;        /* Continue where we left off... */
@@ -995,6 +1051,7 @@ static char *read_redirected(void)
         p++;
     }
     *p = '\0';
+
     return line;
 }
 
@@ -1005,26 +1062,13 @@ void rl_reset_terminal(char *p __attribute__((__unused__)))
 
 void rl_initialize(void)
 {
-#ifdef CONFIG_DEFAULT_COMPLETE
-    int done = 0;
-
-    if (!done)
-    {
-        if (!rl_complete)
-            rl_complete = &default_rl_complete;
-
-        if (!rl_list_possib)
-            rl_list_possib = &default_rl_list_possib;
-
-        done = 1;
-    }
-#endif
+    if (!rl_prompt)
+	rl_prompt = "? ";
 }
 
 char *readline(const char *prompt)
 {
     char        *line;
-    int         s;
 
     /* Unless called by the user already. */
     rl_initialize();
@@ -1034,43 +1078,59 @@ char *readline(const char *prompt)
         return read_redirected();
     }
 
-    if (rl_line_buffer == NULL) {
+    if (!rl_line_buffer) {
         Length = MEM_INC;
-        if ((rl_line_buffer = NEW(char, Length)) == NULL)
+	rl_line_buffer = malloc(sizeof(char) * Length);
+        if (!rl_line_buffer)
             return NULL;
     }
 
     tty_info();
     rl_ttyset(0);
-    hist_add(NIL);
+    hist_add(NILSTR);
     ScreenSize = SCREEN_INC;
-    Screen = NEW(char, ScreenSize);
-    Prompt = prompt ? prompt : NIL;
-    tty_puts(Prompt);
-    if ((line = editinput()) != NULL) {
+    Screen = malloc(sizeof(char) * ScreenSize);
+    if (!Screen)
+	return NULL;
+
+    rl_prompt = prompt ? prompt : NILSTR;
+    if (el_no_echo) {
+	int old = el_no_echo;
+	el_no_echo = 0;
+	tty_puts(rl_prompt);
+	tty_flush();
+	el_no_echo = old;
+    } else {
+	tty_puts(rl_prompt);
+    }
+
+    line = editinput();
+    if (line) {
         line = strdup(line);
         tty_puts(NEWLINE);
         tty_flush();
     }
+
     rl_ttyset(1);
-    DISPOSE(Screen);
-    DISPOSE(H.Lines[--H.Size]);
+    free(Screen);
+    free(H.Lines[--H.Size]);
 
     if (line != NULL && *line != '\0'
 #ifdef CONFIG_UNIQUE_HISTORY
-        && !(H.Pos && strcmp((char *) line, (char *) H.Lines[H.Pos - 1]) == 0)
+        && !(H.Pos && strcmp(line, H.Lines[H.Pos - 1]) == 0)
 #endif
-        && !(H.Size && strcmp((char *) line, (char *) H.Lines[H.Size - 1]) == 0)
+        && !(H.Size && strcmp(line, H.Lines[H.Size - 1]) == 0)
     ) {
         hist_add(line);
     }
 
-    if (Signal > 0) {
-        s = Signal;
-        Signal = 0;
+    if (el_intr_pending > 0) {
+	int s = el_intr_pending;
+        el_intr_pending = 0;
         kill(getpid(), s);
     }
-    return (char *)line;
+
+    return line;
 }
 
 void add_history(char *p __attribute__ ((unused)))
@@ -1098,7 +1158,7 @@ static char *find_word(void)
 {
     char        *p, *q;
     char        *new;
-    SIZE_T      len;
+    size_t      len;
 
     p = &rl_line_buffer[rl_point];
     while (p > rl_line_buffer) {
@@ -1112,17 +1172,22 @@ static char *find_word(void)
             }
         }
     }
+
     len = rl_point - (p - rl_line_buffer) + 1;
-    if ((new = NEW(char, len)) == NULL)
+    new = malloc(sizeof(char) * len);
+    if (!new)
         return NULL;
+
     q = new;
     while (p < &rl_line_buffer[rl_point]) {
         if (*p == '\\') {
-            if (++p == &rl_line_buffer[rl_point]) break;
+            if (++p == &rl_line_buffer[rl_point])
+		break;
         }
         *q++ = *p++;
     }
     *q = '\0';
+
     return new;
 }
 
@@ -1132,21 +1197,19 @@ static el_status_t c_possible(void)
     char        *word;
     int         ac;
 
-    if (!rl_list_possib) {
-        return ring_bell();
-    }
-
     word = find_word();
-    ac = rl_list_possib((char *)word, (char ***)&av);
+    ac = rl_list_possib(word, &av);
     if (word)
-        DISPOSE(word);
+        free(word);
     if (ac) {
         columns(ac, av);
         while (--ac >= 0)
-            DISPOSE(av[ac]);
-        DISPOSE(av);
+            free(av[ac]);
+        free(av);
+
         return CSmove;
     }
+
     return ring_bell();
 }
 
@@ -1154,22 +1217,20 @@ static el_status_t c_complete(void)
 {
     char        *p, *q;
     char        *word, *new;
-    SIZE_T      len;
+    size_t      len;
     int         unique;
     el_status_t s = 0;
-
-    if (!rl_complete) {
-        return ring_bell();
-    }
 
     word = find_word();
     p = (char *)rl_complete((char *)word, &unique);
     if (word)
-        DISPOSE(word);
+        free(word);
     if (p) {
         len = strlen((char *)p);
         word = p;
-        new = q = NEW(char, 2 * len + 1);
+        new = q = malloc(sizeof(char) * (2 * len + 1));
+	if (!new)
+	    return CSstay;
         while (*p) {
             if ((*p < ' ' || strchr(SEPS, (char) *p) != NULL)
                                 && (!unique || p[1] != 0)) {
@@ -1178,7 +1239,7 @@ static el_status_t c_complete(void)
             *q++ = *p++;
         }
         *q = '\0';
-        DISPOSE(word);
+        free(word);
         if (len > 0) {
             s = insert_string(new);
 #ifdef CONFIG_ANNOYING_NOISE
@@ -1186,8 +1247,9 @@ static el_status_t c_complete(void)
                 ring_bell();
 #endif
         }
-        DISPOSE(new);
-        if (len > 0) return s;
+        free(new);
+        if (len > 0)
+	    return s;
     }
     return c_possible();
 }
@@ -1197,6 +1259,14 @@ static el_status_t accept_line(void)
     rl_line_buffer[rl_end] = '\0';
     return CSdone;
 }
+
+#ifdef SYSTEM_IS_WIN32
+static el_status_t end_of_input(void)
+{
+    rl_line_buffer[rl_end] = '\0';
+    return CSeof;
+}
+#endif
 
 static el_status_t transpose(void)
 {
@@ -1220,23 +1290,6 @@ static el_status_t quote(void)
     int c;
 
     return (c = tty_get()) == EOF ? CSeof : insert_char((int)c);
-}
-
-static el_status_t wipe(void)
-{
-    int         i;
-
-    if (rl_mark > rl_end)
-        return ring_bell();
-
-    if (rl_point > rl_mark) {
-        i = rl_point;
-        rl_point = rl_mark;
-        rl_mark = i;
-        reposition();
-    }
-
-    return delete_string(rl_mark - rl_point);
 }
 
 static el_status_t mk_set(void)
@@ -1306,9 +1359,9 @@ static el_status_t fd_kill_word(void)
     int         i;
 
     do_forward(CSstay);
-    if (OldPoint != rl_point) {
-        i = rl_point - OldPoint;
-        rl_point = OldPoint;
+    if (old_point != rl_point) {
+        i = rl_point - old_point;
+        rl_point = old_point;
         return delete_string(i);
     }
     return CSstay;
@@ -1321,10 +1374,10 @@ static el_status_t bk_word(void)
 
     i = 0;
     do {
-        for (p = &rl_line_buffer[rl_point]; p > rl_line_buffer && !isalnum(p[-1]); p--)
+        for (p = &rl_line_buffer[rl_point]; p > rl_line_buffer && !is_alpha_num(p[-1]); p--)
             left(CSmove);
 
-        for (; p > rl_line_buffer && p[-1] != ' ' && isalnum(p[-1]); p--)
+        for (; p > rl_line_buffer && !isblank(p[-1]) && is_alpha_num(p[-1]); p--)
             left(CSmove);
 
         if (rl_point == 0)
@@ -1337,8 +1390,9 @@ static el_status_t bk_word(void)
 static el_status_t bk_kill_word(void)
 {
     bk_word();
-    if (OldPoint != rl_point)
-        return delete_string(OldPoint - rl_point);
+    if (old_point != rl_point)
+        return delete_string(old_point - rl_point);
+
     return CSstay;
 }
 
@@ -1351,7 +1405,8 @@ static int argify(char *line, char ***avp)
     int         i;
 
     i = MEM_INC;
-    if ((*avp = p = NEW(char *, i))== NULL)
+    *avp = p = malloc(sizeof(char *) * i);
+    if (!p)
          return 0;
 
     for (c = line; isspace(*c); c++)
@@ -1364,30 +1419,31 @@ static int argify(char *line, char ***avp)
             *c++ = '\0';
             if (*c && *c != '\n') {
                 if (ac + 1 == i) {
-                    new = NEW(char *, i + MEM_INC);
-                    if (new == NULL) {
+                    new = malloc(sizeof(char *) * (i + MEM_INC));
+                    if (!new) {
                         p[ac] = NULL;
                         return ac;
                     }
-                    COPYFROMTO(new, p, i * sizeof (char **));
+                    memcpy(new, p, i * sizeof(char **));
                     i += MEM_INC;
-                    DISPOSE(p);
+                    free(p);
                     *avp = p = new;
                 }
                 p[ac++] = c;
             }
-        }
-        else
+        } else {
             c++;
+	}
     }
     *c = '\0';
     p[ac] = NULL;
+
     return ac;
 }
 
 static el_status_t last_argument(void)
 {
-    char      **av;
+    char      **av = NULL;
     char       *p;
     el_status_t s;
     int         ac;
@@ -1404,13 +1460,14 @@ static el_status_t last_argument(void)
     else
         s = ac ? insert_string(av[ac - 1]) : CSstay;
 
-    if (ac)
-        DISPOSE(av);
-    DISPOSE(p);
+    if (av)
+        free(av);
+    free(p);
+
     return s;
 }
 
-static el_keymap_t Map[] = {
+static el_keymap_t Map[33] = {
     {   CTL('@'),       mk_set          },
     {   CTL('A'),       beg_line        },
     {   CTL('B'),       bk_char         },
@@ -1436,7 +1493,11 @@ static el_keymap_t Map[] = {
     {   CTL('W'),       bk_kill_word    },
     {   CTL('X'),       exchange        },
     {   CTL('Y'),       yank            },
-    {   CTL('Z'),       end_line        },
+#ifdef SYSTEM_IS_WIN32
+    {   CTL('Z'),       end_of_input    },
+#else
+    {   CTL('Z'),       ring_bell       },
+#endif
     {   CTL('['),       meta            },
     {   CTL(']'),       move_to_char    },
     {   CTL('^'),       ring_bell       },
@@ -1444,15 +1505,16 @@ static el_keymap_t Map[] = {
     {   0,              NULL            }
 };
 
-static el_keymap_t   MetaMap[]= {
-    {   CTL('H'),       wipe            },
-    {   DEL,            wipe            },
+static el_keymap_t   MetaMap[64]= {
+    {   CTL('H'),       bk_kill_word    },
+    {   DEL,            bk_kill_word    },
     {   ' ',            mk_set          },
     {   '.',            last_argument   },
     {   '<',            h_first         },
     {   '>',            h_last          },
     {   '?',            c_possible      },
     {   'b',            bk_word         },
+    {   'c',            case_cap_word   },
     {   'd',            fd_kill_word    },
     {   'f',            fd_word         },
     {   'l',            case_down_word  },
@@ -1462,6 +1524,33 @@ static el_keymap_t   MetaMap[]= {
     {   'w',            copy_region     },
     {   0,              NULL            }
 };
+
+void el_bind_key_in_metamap(char c, el_keymap_func_t func)
+{
+    /* Add given function to key map for META keys */
+    int i;
+
+    for (i = 0; MetaMap[i].Key != 0; i++)
+    {
+	if (MetaMap[i].Key == c)
+	{
+	    MetaMap[i].Function = func;
+	    return;
+	}
+    }
+
+    /* A new key so have to add it to end */
+    if (i == 63)
+    {
+	fprintf(stderr,"editline: MetaMap table full, requires increase\n");
+	return;
+    }
+
+    MetaMap[i].Function = func;
+    MetaMap[i].Key = c;
+    MetaMap[i + 1].Function = 0;  /* Zero the last location */
+    MetaMap[i + 1].Key = 0;       /* Zero the last location */
+}
 
 /**
  * Local Variables:

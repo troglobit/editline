@@ -33,39 +33,44 @@
 #include "editline.h"
 
 #ifndef HAVE_PERROR
+extern int errno;
 void perror(char *s)
 {
-    extern int errno;
-
-    (void)fprintf(stderr, "%s: error %d\n", s, errno);
+    fprintf(stderr, "%s: error %d\n", s, errno);
 }
 #endif /* !HAVE_PERROR */
 
 int main(int argc, char *argv[] __attribute__ ((unused)))
 {
-    char	*prompt;
-    char	*p;
-    int		doit;
+    int doit;
+    char *prompt, *p;
 
     doit = argc == 1;
     if ((prompt = getenv("TESTPROMPT")) == NULL)
-        prompt = "testit>  ";
+	prompt = "testit>  ";
 
     while ((p = readline(prompt)) != NULL) {
-	(void)printf("\t\t\t|%s|\n", p);
+	printf("\t\t\t|%s|\n", p);
 	if (doit) {
 	    if (strncmp(p, "cd ", 3) == 0) {
-		if (chdir(&p[3]) < 0) {
+		if (chdir(&p[3]) < 0)
 		    perror(&p[3]);
-                }
-	    }
-	    else if (system(p) != 0) {
+	    } else if (system(p) != 0) {
 		perror(p);
-            }
-        }
+	    }
+	}
 	add_history(p);
 	free(p);
     }
 
     return 0;
 }
+
+/**
+ * Local Variables:
+ *  version-control: t
+ *  indent-tabs-mode: t
+ *  c-file-style: "ellemtel"
+ *  c-basic-offset: 4
+ * End:
+ */

@@ -21,12 +21,18 @@
 #ifndef __EDITLINE_H__
 #define __EDITLINE_H__
 
-/* Display print 8-bit chars as `M-x' or as the actual 8-bit char?  (Default:1) */
-extern int rl_meta_chars;
+/* Command status codes. */
+typedef enum {
+    CSdone, CSeof, CSmove, CSdispatch, CSstay, CSsignal
+} el_status_t;
 
-/* Assign these to get command completion, see cli.c for example usage. */
-extern char  *(*rl_complete)   (char *token, int *match);
-extern int    (*rl_list_possib)(char *token, char ***av);
+/* Editline specific types, despite rl_ prefix.  From Heimdal project. */
+typedef char* (*rl_complete_func_t)(char*, int*);
+typedef int (*rl_list_possib_func_t)(char*, char***);
+typedef el_status_t (*el_keymap_func_t)(void);
+
+/* Display 8-bit chars "as-is" or as `M-x'? Toggle with M-m. (Default:0 - "as-is") */
+extern int rl_meta_chars;
 
 /* For compatibility with GNU Readline. */
 extern char  *(*rl_completion_entry_function)(const char *text, int state);
@@ -35,14 +41,22 @@ extern char  *rl_filename_completion_function(const char *text, int state);
 extern int rl_attempted_completion_over;
 extern char **(*rl_attempted_completion_function)(const char *text, int start, int end);
 
+/* Use these functions to set custom command/file completion, see cli.c for example usage. */
+rl_complete_func_t    rl_set_complete_func(rl_complete_func_t func);
+rl_list_possib_func_t rl_set_list_possib_func(rl_list_possib_func_t func);
+
+/* Editline specific functions. */
+void el_bind_key_in_metamap(char c, el_keymap_func_t func);
+
+/* For compatibility with FSF readline. */
 extern int         rl_point;
 extern int         rl_mark;
 extern int         rl_end;
 extern char       *rl_line_buffer;
 extern const char *rl_readline_name;
-
-extern void rl_initialize(void);
+extern int         el_no_echo;  /* e.g under emacs, don't echo except prompt */
 extern void rl_reset_terminal(char *p);
+extern void rl_initialize(void);
 
 extern char *readline(const char *prompt);
 extern void add_history(char *line); /* OBSOLETE: Made part of readline(). -- kjb */

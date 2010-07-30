@@ -43,7 +43,9 @@ void rl_ttyset(int Reset)
 
         new = old;
         new.c_lflag &= ~(ECHO | ICANON | ISIG);
-        new.c_iflag &= ~(ISTRIP | INPCK);
+        new.c_iflag &= ~(ISTRIP | INPCK); /* | PARENB  */
+//        new.c_cflag &= ~(CSIZE);
+//        new.c_cflag |= (CS8 | CLOCAL);
         new.c_cc[VMIN] = 1;
         new.c_cc[VTIME] = 0;
         if (-1 == tcsetattr(0, TCSADRAIN, &new))
@@ -76,7 +78,9 @@ void rl_ttyset(int Reset)
 
         new = old;
         new.c_lflag &= ~(ECHO | ICANON | ISIG);
-        new.c_iflag &= ~(ISTRIP | INPCK);
+        new.c_iflag &= ~(ISTRIP | INPCK); /*  | PARENB */
+//        new.c_cflag &= ~(CSIZE);
+//        new.c_cflag |= (CS8 | CLOCAL);
         new.c_cc[VMIN] = 1;
         new.c_cc[VTIME] = 0;
         if (-1 == ioctl(0, TCSETAW, &new))

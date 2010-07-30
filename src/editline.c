@@ -135,6 +135,16 @@ static int is_alpha_num(unsigned char c)
     return 0;
 }
 
+/* http://www.utf8-chartable.de/unicode-utf8-table.pl */
+int isutf8(unsigned char c)
+ {
+    if (c >= 0xC2 && c <= 0xCF)
+	return 1;
+
+    return 0;
+}
+
+
 /*
 **  TTY input/output functions.
 */
@@ -167,7 +177,15 @@ static void tty_puts(const char *p)
 
 static void tty_show(unsigned char c)
 {
-    if (c == DEL) {
+    static int mode_compose = 0;
+
+    if (mode_compose) {
+	tty_put(c);
+	mode_compose = 0;
+    } else if (isutf8(c)) {
+	mode_compose = 1;
+	tty_put(c);
+    } else if (c == DEL) {
         tty_put('^');
         tty_put('?');
     } else if (ISCTL(c)) {
@@ -325,7 +343,9 @@ static void left(el_status_t Change)
 {
     if (rl_point) {
 	tty_back();
-	if (ISMETA(rl_line_buffer[rl_point - 1])) {
+	if (isutf8(rl_line_buffer[rl_point - 2])) {
+	    rl_point--;
+	} else if (ISMETA(rl_line_buffer[rl_point - 1])) {
 	    if (rl_meta_chars) {
 		tty_back();
 		tty_back();
@@ -341,6 +361,9 @@ static void left(el_status_t Change)
 static void right(el_status_t Change)
 {
     tty_show(rl_line_buffer[rl_point]);
+
+    if (isutf8(rl_line_buffer[rl_point]))
+	tty_show(rl_line_buffer[++rl_point]);
 
     if (Change == CSmove)
         rl_point++;
@@ -713,6 +736,9 @@ static el_status_t delete_string(int count)
         if (ISCTL(*p)) {
             i = 2;
             tty_put(' ');
+	} else if (isutf8(*p)) {
+            i = 2;
+            tty_put(' ');
         } else if (rl_meta_chars && ISMETA(*p)) {
             i = 3;
             tty_put(' ');
@@ -887,6 +913,20 @@ static el_status_t meta(void)
     return ring_bell();
 }
 
+static el_status_t utf8(int c)
+{
+    char buff[3];
+
+    if (!isutf8(c))
+	return CSeof;
+
+    buff[0] = c;
+    buff[1] = tty_get();
+    buff[2] = '\0';
+
+    return insert_string(buff);
+}
+
 static el_status_t emacs(int c)
 {
     el_status_t  s;
@@ -894,6 +934,10 @@ static el_status_t emacs(int c)
 
     /* Save point before interpreting input character 'c'. */
     old_point = rl_point;
+
+    if (isutf8(c)) {
+	return utf8(c);
+    }
 
     if (rl_meta_chars && ISMETA(c)) {
 	tty_push(UNMETA(c));
@@ -915,7 +959,10 @@ static el_status_t emacs(int c)
 
 static el_status_t tty_special(int c)
 {
-   if (rl_meta_chars && ISMETA(c))
+    if (isutf8(c))
+        return CSdispatch;
+
+    if (rl_meta_chars && ISMETA(c))
         return CSdispatch;
 
     if (c == rl_erase || c == DEL)

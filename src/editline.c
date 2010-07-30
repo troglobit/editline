@@ -119,6 +119,22 @@ extern int      tgetent(char *, const char *);
 extern int      tgetnum(const char *);
 #endif
 
+
+/*
+**  Misc. local helper functions.
+*/
+static int is_alpha_num(unsigned char c)
+{
+    if (isalnum(c))
+	return 1;
+    if (ISMETA(c))
+	return 1;
+    if (ISCTL(c))
+	return 1;
+
+    return 0;
+}
+
 /*
 **  TTY input/output functions.
 */
@@ -129,7 +145,7 @@ static void tty_flush(void)
 
     if (ScreenCount) {
 	if (!el_no_echo)
-	    res = write (1, Screen, ScreenCount);
+	    res = write(1, Screen, ScreenCount);
         ScreenCount = 0;
     }
 }
@@ -149,18 +165,18 @@ static void tty_puts(const char *p)
         tty_put(*p++);
 }
 
-static void tty_show(char c)
+static void tty_show(unsigned char c)
 {
     if (c == DEL) {
         tty_put('^');
         tty_put('?');
+    } else if (ISCTL(c)) {
+        tty_put('^');
+        tty_put(UNCTL(c));
     } else if (rl_meta_chars && ISMETA(c)) {
         tty_put('M');
         tty_put('-');
         tty_put(UNMETA(c));
-    } else if (ISCTL(c) && !ISMETA(c)) {
-        tty_put('^');
-        tty_put(UNCTL(c));
     } else {
         tty_put(c);
     }
@@ -170,6 +186,12 @@ static void tty_string(char *p)
 {
     while (*p)
         tty_show(*p++);
+}
+
+static void tty_push(int c)
+{
+    el_pushed = 1;
+    el_push_back = c;
 }
 
 static int tty_get(void)
@@ -291,23 +313,24 @@ static void columns(int ac, char **av)
 
 static void reposition(void)
 {
-    int         i;
-    char        *p;
+    int i;
 
     tty_put('\r');
     tty_puts(rl_prompt);
-    for (i = rl_point, p = rl_line_buffer; --i >= 0; p++)
-        tty_show(*p);
+    for (i = 0; i < rl_point; i++)
+        tty_show(rl_line_buffer[i]);
 }
 
 static void left(el_status_t Change)
 {
-    tty_back();
     if (rl_point) {
-        if (ISCTL(rl_line_buffer[rl_point - 1])) {
-            tty_back();
-        } else if (rl_meta_chars && ISMETA(rl_line_buffer[rl_point - 1])) {
-            tty_back();
+	tty_back();
+	if (ISMETA(rl_line_buffer[rl_point - 1])) {
+	    if (rl_meta_chars) {
+		tty_back();
+		tty_back();
+	    }
+	} else if (ISCTL(rl_line_buffer[rl_point - 1])) {
             tty_back();
         }
     }
@@ -318,6 +341,7 @@ static void left(el_status_t Change)
 static void right(el_status_t Change)
 {
     tty_show(rl_line_buffer[rl_point]);
+
     if (Change == CSmove)
         rl_point++;
 }
@@ -356,12 +380,12 @@ static el_status_t do_forward(el_status_t move)
         p = &rl_line_buffer[rl_point];
 
 	/* Skip to end of word, if inside a word. */
-        for (; rl_point < rl_end && isalnum(p[0]); rl_point++, p++)
+        for (; rl_point < rl_end && is_alpha_num(p[0]); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
 	/* Skip to next word, or skip leading white space if outside a word. */
-        for ( ; rl_point < rl_end && (p[0] == ' ' || !isalnum(p[0])); rl_point++, p++)
+        for ( ; rl_point < rl_end && (p[0] == ' ' || !is_alpha_num(p[0])); rl_point++, p++)
             if (move == CSmove)
                 right(CSstay);
 
@@ -425,13 +449,15 @@ static void ceol(void)
 
     for (extras = 0, i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
         tty_put(' ');
-        if (ISCTL(*p)) {
+        if (ISMETA(*p)) {
+	    if (rl_meta_chars) {
+		tty_put(' ');
+		tty_put(' ');
+		extras += 2;
+	    }
+	} if (ISCTL(*p)) {
             tty_put(' ');
             extras++;
-        } else if (rl_meta_chars && ISMETA(*p)) {
-            tty_put(' ');
-            tty_put(' ');
-            extras += 2;
         }
     }
 
@@ -485,6 +511,7 @@ static el_status_t redisplay(void)
     tty_puts(NEWLINE); /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
     tty_puts(rl_prompt);
     tty_string(rl_line_buffer);
+
     return CSmove;
 }
 
@@ -509,10 +536,12 @@ static el_status_t do_insert_hist(const char *p)
 {
     if (p == NULL)
         return ring_bell();
+
     rl_point = 0;
     reposition();
     ceol();
     rl_end = 0;
+
     return insert_string(p);
 }
 
@@ -821,8 +850,7 @@ static el_status_t meta(void)
 #ifdef CONFIG_ANSI_ARROWS
     /* Also include VT-100 arrows. */
     if (c == '[' || c == 'O') {
-        c = tty_get();
-        switch (c) {
+        switch (tty_get()) {
 	    case EOF:  return CSeof;
 	    case '2':  tty_get(); return CSstay;     /* Insert */
 	    case '3':  tty_get(); return del_char(); /* Delete */
@@ -845,16 +873,16 @@ static el_status_t meta(void)
     if (isdigit(c)) {
         for (Repeat = c - '0'; (c = tty_get()) != EOF && isdigit(c); )
             Repeat = Repeat * 10 + c - '0';
-        el_pushed = 1;
-        el_push_back = c;
+	tty_push(c);
         return CSstay;
     }
 
     if (isupper(c))
         return do_macro(c);
-    for (kp = MetaMap; kp->Function; kp++)
+    for (kp = MetaMap; kp->Function; kp++) {
         if (kp->Key == c)
             return kp->Function();
+    }
 
     return ring_bell();
 }
@@ -867,11 +895,8 @@ static el_status_t emacs(int c)
     /* Save point before interpreting input character 'c'. */
     old_point = rl_point;
 
-    /* This test makes it impossible to enter eight-bit characters when
-     * meta-char mode is enabled. */
     if (rl_meta_chars && ISMETA(c)) {
-        el_pushed = 1;
-        el_push_back = UNMETA(c);
+	tty_push(UNMETA(c));
         return meta();
     }
 
@@ -890,7 +915,7 @@ static el_status_t emacs(int c)
 
 static el_status_t tty_special(int c)
 {
-    if (rl_meta_chars && ISMETA(c))
+   if (rl_meta_chars && ISMETA(c))
         return CSdispatch;
 
     if (c == rl_erase || c == DEL)
@@ -1349,10 +1374,10 @@ static el_status_t bk_word(void)
 
     i = 0;
     do {
-        for (p = &rl_line_buffer[rl_point]; p > rl_line_buffer && !isalnum(p[-1]); p--)
+        for (p = &rl_line_buffer[rl_point]; p > rl_line_buffer && !is_alpha_num(p[-1]); p--)
             left(CSmove);
 
-        for (; p > rl_line_buffer && p[-1] != ' ' && isalnum(p[-1]); p--)
+        for (; p > rl_line_buffer && !isblank(p[-1]) && is_alpha_num(p[-1]); p--)
             left(CSmove);
 
         if (rl_point == 0)

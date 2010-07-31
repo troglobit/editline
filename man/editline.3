@@ -3,54 +3,43 @@
 editline \- command-line editing library with history
 .SH SYNOPSIS
 .nf
-.B "char *"
-.B "readline(prompt)"
-.B "     char	*prompt;"
-
-.B "void"
-.B "add_history(line)"
-.B "    char	*line;"
+.B "char *readline(char *prompt);"
 .fi
 .SH DESCRIPTION
 .I Editline
-is a library that provides an line-editing interface with text recall.
-It is intended to be compatible with the
+is a library that provides an line-editing interface with history.
+It is intended to be functionally equivalent with the
 .I readline
 library provided by the Free Software Foundation, but much smaller.
 The bulk of this manual page describes the user interface.
 .PP
 The
-.I readline
-routine returns a line of text with the trailing newline removed.
-The data is returned in a buffer allocated with
+.I readline()
+function displays the given
+.I prompt
+on stdout, waits for user input on stdin and then
+returns a line of text with the trailing newline removed.  The data is returned in a
+buffer allocated with
 .IR malloc (3),
 so the space should be released with
 .IR free (3)
 when the calling program is done with it.
-Before accepting input from the user, the specified
-.I prompt
-is displayed on the terminal.
 .PP
 Each line returned is copied to the internal history list, unless it happens
-to be equal to the previous line.
+to be equal to the previous line.  This is configurable if you are building editline
+from source.
 .SS "User Interface"
-A program that uses this library provides a simple emacs-like editing
-interface to its users.
-A line may be edited before it is sent to the calling program by typing either
-control characters or escape sequences.
-A control character, shown as a caret followed by a letter, is typed by
-holding down the ``control'' key while the letter is typed.
-For example, ``^A'' is a control-A.
-An escape sequence is entered by typing the ``escape'' key followed by one or
-more characters.
-The escape key is abbreviated as ``ESC''.
-Note that unlike control keys, case matters in escape sequences; ``ESC\ F''
-is not the same as ``ESC\ f''.
+A program that uses this library provides a simple emacs-like editing interface to
+its users.  A line may be edited before it is sent to the calling program by typing
+either control characters or escape sequences.  A control character, shown as a caret
+followed by a letter, is typed by holding down the ``control'' key while the letter
+is typed.  For example, ``^A'' is a control-A.  An escape sequence is entered by
+typing the ``escape'' key followed by one or more characters.  The escape key is
+abbreviated as ``ESC''.  Note that unlike control keys, case matters in escape
+sequences; ``ESC\ F'' is not the same as ``ESC\ f''.
 .PP
-An editing command may be typed anywhere on the line, not just at the
-beginning.
-In addition, a return may also be typed anywhere on the line, not just at
-the end.
+An editing command may be typed anywhere on the line, not just at the beginning.  In
+addition, a return may also be typed anywhere on the line, not just at the end.
 .PP
 Most editing commands may be given a repeat count,
 .IR n ,
@@ -81,8 +70,8 @@ The following control characters are accepted:
 ^M	Done with line (alternate return key)
 ^N	Get next line from history [n]
 ^P	Get previous line from history [n]
-^R	Search backward (forward if [n]) through history for text;
-\&	must start line if text begins with an uparrow
+^R	Search backward (forward if [n]) through history for
+\&	text; must start line if text begins with an uparrow
 ^T	Transpose characters
 ^V	Insert next character, even if it is an edit command
 ^W	Wipe to the mark
@@ -109,7 +98,8 @@ ESC\ b	Move backward a word [n]
 ESC\ d	Delete word under cursor [n]
 ESC\ f	Move forward a word [n]
 ESC\ l	Make word lowercase [n]
-ESC\ m	Toggle if 8bit chars display normally or with ``M\-'' prefix
+ESC\ m	Toggle if 8bit chars display normally or with an
+\&	``M\-'' prefix
 ESC\ u	Make word uppercase [n]
 ESC\ y	Yank back last killed text
 ESC\ v	Show library version
@@ -164,11 +154,41 @@ for you:
 .RE
 The tab key is shown by ``[TAB]'' and the automatically-entered text
 is shown in italics.
-.SH "BUGS AND LIMITATIONS"
-Doesn't know how to handle multiple lines.
-.SH AUTHORS
-Simmule R. Turner <uunet.uu.net!capitol!sysgo!simmy>
-and Rich $alz <rsalz@osf.org>.
-Original manual page by DaviD W. Sanderson <dws@ssec.wisc.edu>.
 
-.\" $PchId: editline.3,v 1.3 1996/02/22 21:18:51 philip Exp $
+.SH "USAGE"
+To include
+.I readline()
+in your program, simply call it as you do any other function. Just make sure to link
+your program with libeditline.
+
+.SS "Example"
+The following brief example lets you enter a line and edit it, then displays it.
+
+.nf
+.B "#include <stdlib.h>"
+.B ""
+.B "extern char *readline(char *prompt);"
+.B ""
+.B "int main (void)"
+.B "{"
+.B "    char *p;"
+.B ""
+.B "    while ((p = readline(``CLI> '')) != NULL) {"
+.B "        printf(\"%s\n\", p);"
+.B "        free(p);"
+.B "    }"
+.B ""
+.B "    return 0;"
+.B "}"
+.fi
+
+.SH "BUGS AND LIMITATIONS"
+Doesn't know how to handle multiple lines or unicode characters well.  See the TODO
+file in the distribution if you want to help out.
+
+.SH AUTHORS
+The original editline library was created by Simmule R. Turner and Rich $alz.  It is
+now maintained in several forks: Heimdal, Festival speech tools, Mozilla, Google
+Gadgets for Linux, and many other places.  The original manual page was made by DaviD
+W. Sanderson.  This version was made by Joachim Nilsson <troglobit@gmail.com>.
+

@@ -1000,19 +1000,27 @@ static char *editinput(void)
     return NULL;
 }
 
-static void hist_add(char *p)
+static void hist_add(const char *p)
 {
     int i;
+    char *s;
 
-    if ((p = (char *)strdup((char *)p)) == NULL)
+#ifdef CONFIG_UNIQUE_HISTORY
+    if (H.Pos && strcmp(p, H.Lines[H.Pos - 1]) == 0)
+        return;
+#endif
+    if (H.Size && strcmp(p, H.Lines[H.Size - 1]) == 0)
+        return;
+
+    if ((s = strdup(p)) == NULL)
         return;
     if (H.Size < HIST_SIZE) {
-        H.Lines[H.Size++] = p;
+        H.Lines[H.Size++] = s;
     } else {
         free(H.Lines[0]);
         for (i = 0; i < HIST_SIZE - 1; i++)
             H.Lines[i] = H.Lines[i + 1];
-        H.Lines[i] = p;
+        H.Lines[i] = s;
     }
     H.Pos = H.Size - 1;
 }
@@ -1068,7 +1076,7 @@ void rl_initialize(void)
 
 char *readline(const char *prompt)
 {
-    char        *line;
+    char *line;
 
     /* Unless called by the user already. */
     rl_initialize();
@@ -1115,14 +1123,9 @@ char *readline(const char *prompt)
     free(Screen);
     free(H.Lines[--H.Size]);
 
-    if (line != NULL && *line != '\0'
-#ifdef CONFIG_UNIQUE_HISTORY
-        && !(H.Pos && strcmp(line, H.Lines[H.Pos - 1]) == 0)
-#endif
-        && !(H.Size && strcmp(line, H.Lines[H.Size - 1]) == 0)
-    ) {
+    /* Always add history, if it's a sane line. */
+    if (line != NULL && *line != '\0')
         hist_add(line);
-    }
 
     if (el_intr_pending > 0) {
 	int s = el_intr_pending;
@@ -1133,20 +1136,14 @@ char *readline(const char *prompt)
     return line;
 }
 
-void add_history(char *p __attribute__ ((unused)))
+/* Even though readline() itself adds history automatically, the user can also add
+ * lines.  This is for compat with GNU Readline. */
+void add_history(const char *p)
 {
-#ifdef obsolete         /* Made part of readline(). -- kjb */
     if (p == NULL || *p == '\0')
         return;
 
-#ifdef CONFIG_UNIQUE_HISTORY
-    if (H.Pos && strcmp(p, (char *) H.Lines[H.Pos - 1]) == 0)
-        return;
-#endif
-    if (H.Size && strcmp(p, (char *) H.Lines[H.Size - 1]) == 0)
-        return;
-    hist_add((char *)p);
-#endif
+    hist_add(p);
 }
 
 

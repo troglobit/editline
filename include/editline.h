@@ -52,6 +52,6 @@ extern void rl_reset_terminal(char *p);
 extern void rl_initialize(void);
 
 extern char *readline(const char *prompt);
-extern void add_history(char *line); /* OBSOLETE: Made part of readline(). -- kjb */
+extern void add_history(const char *line);
 
 #endif  /* __EDITLINE_H__ */

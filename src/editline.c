@@ -38,9 +38,6 @@
 #define META(x)         ((x) | 0x80)
 #define ISMETA(x)       ((x) & 0x80)
 #define UNMETA(x)       ((x) & 0x7F)
-#ifndef HIST_SIZE       /* Default to one line history, i.e. disabled. */
-#define HIST_SIZE       1
-#endif
 #define SEPS "\"#$&'()*:;<=>?[\\]^`{|}~\n\t "
 
 /*
@@ -64,7 +61,7 @@ typedef struct {
 typedef struct {
     int         Size;
     int         Pos;
-    char       *Lines[HIST_SIZE];
+    char      **Lines;
 } el_hist_t;
 
 /*
@@ -79,12 +76,18 @@ int               rl_quit;
 int               rl_susp;
 #endif
 
+int               el_hist_size = 15;
+static el_hist_t  H = {
+    .Size  = 0,
+    .Pos   = 0,
+    .Lines = NULL,
+};
+
 static char        NILSTR[] = "";
 static const char *el_input = NILSTR;
 static char       *Yanked;
 static char       *Screen;
 static char       NEWLINE[]= CRLF;
-static el_hist_t  H;
 static int        Repeat;
 static int        old_point;
 static int        el_push_back;
@@ -1000,6 +1003,12 @@ static char *editinput(void)
     return NULL;
 }
 
+static void hist_alloc(void)
+{
+    if (!H.Lines)
+	H.Lines = calloc(el_hist_size, sizeof(char *));
+}
+
 static void hist_add(const char *p)
 {
     int i;
@@ -1014,11 +1023,11 @@ static void hist_add(const char *p)
 
     if ((s = strdup(p)) == NULL)
         return;
-    if (H.Size < HIST_SIZE) {
+    if (H.Size < el_hist_size) {
         H.Lines[H.Size++] = s;
     } else {
         free(H.Lines[0]);
-        for (i = 0; i < HIST_SIZE - 1; i++)
+        for (i = 0; i < el_hist_size - 1; i++)
             H.Lines[i] = H.Lines[i + 1];
         H.Lines[i] = s;
     }
@@ -1072,6 +1081,8 @@ void rl_initialize(void)
 {
     if (!rl_prompt)
 	rl_prompt = "? ";
+
+    hist_alloc();
 }
 
 char *readline(const char *prompt)

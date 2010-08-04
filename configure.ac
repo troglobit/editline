@@ -52,6 +52,11 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_STAT
 AC_CHECK_FUNCS([strchr strdup strrchr tcgetattr perror])
 
+AC_ARG_ENABLE(unique-history,
+   [AS_HELP_STRING([--disable-unique-history],
+                   [Disable uniqify of scrollback. Default: duplicate entries are ignored. Use this to save dupes.])],
+   , AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.]))
+
 AC_ARG_ENABLE(default-complete,
    [  --enable-default-complete      Enable default completion handler.],
    complete=true; AC_DEFINE(CONFIG_DEFAULT_COMPLETE,, [Define to enable the default completion handler.]))
@@ -72,20 +77,6 @@ AC_ARG_ENABLE(terminal-bell,
 AC_ARG_ENABLE(termcap,
    [  --enable-termcap               Use the termcap library for terminal size.],
    AC_DEFINE([CONFIG_USE_TERMCAP],, [Define to use the termcap library for terminal size.]))
-
-# Default history size 1, i.e. disabled.
-let HIST_SIZE=1
-AC_ARG_ENABLE(history,
-   [  --enable-history=LINES         Enable scrollback history, default off.],
-   let HIST_SIZE=$enableval)
-if test $HIST_SIZE -lt 1; then
-   let HIST_SIZE=1
-fi
-AC_DEFINE_UNQUOTED(HIST_SIZE, $HIST_SIZE, [Number of lines in history.])
-
-AC_ARG_ENABLE(unique-history,
-   [  --enable-unique-history        Uniqify scrollback history, i.e., don't save dupes.],
-   AC_DEFINE([CONFIG_UNIQUE_HISTORY],, [Don't save command if same as last one.]))
 
 # Restore gnu89 inline semantics on gcc 4.3 and newer
 saved_cflags="$CFLAGS"

@@ -869,13 +869,12 @@ with_pic
 enable_fast_install
 with_gnu_ld
 enable_libtool_lock
+enable_unique_history
 enable_default_complete
 enable_arrow_keys
 enable_sigstop
 enable_terminal_bell
 enable_termcap
-enable_history
-enable_unique_history
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1514,13 +1513,14 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --disable-unique-history
+                          Disable uniqify of scrollback. Default: duplicate
+                          entries are ignored. Use this to save dupes.
   --enable-default-complete      Enable default completion handler.
   --enable-arrow-keys            Enable ANSI arrow keys.
   --enable-sigstop               Enable SIGSTOP key.
   --enable-terminal-bell         Enable terminal bell on completion.
   --enable-termcap               Use the termcap library for terminal size.
-  --enable-history=LINES         Enable scrollback history, default off.
-  --enable-unique-history        Uniqify scrollback history, i.e., don't save dupes.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -11130,6 +11130,16 @@ fi
 done
 
 
+# Check whether --enable-unique-history was given.
+if test "${enable_unique_history+set}" = set; then :
+  enableval=$enable_unique_history;
+else
+
+$as_echo "#define CONFIG_UNIQUE_HISTORY 1" >>confdefs.h
+
+fi
+
+
 # Check whether --enable-default-complete was given.
 if test "${enable_default_complete+set}" = set; then :
   enableval=$enable_default_complete; complete=true;
@@ -11174,30 +11184,6 @@ fi
 if test "${enable_termcap+set}" = set; then :
   enableval=$enable_termcap;
 $as_echo "#define CONFIG_USE_TERMCAP /**/" >>confdefs.h
-
-fi
-
-
-# Default history size 1, i.e. disabled.
-let HIST_SIZE=1
-# Check whether --enable-history was given.
-if test "${enable_history+set}" = set; then :
-  enableval=$enable_history; let HIST_SIZE=$enableval
-fi
-
-if test $HIST_SIZE -lt 1; then
-   let HIST_SIZE=1
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HIST_SIZE $HIST_SIZE
-_ACEOF
-
-
-# Check whether --enable-unique-history was given.
-if test "${enable_unique_history+set}" = set; then :
-  enableval=$enable_unique_history;
-$as_echo "#define CONFIG_UNIQUE_HISTORY /**/" >>confdefs.h
 
 fi
 

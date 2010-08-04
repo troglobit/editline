@@ -63,6 +63,11 @@ typedef struct {
     char      **Lines;
 } el_hist_t;
 
+rl_getc_func_t rl_getc_function = rl_getc;
+rl_hook_func_t rl_event_hook;
+rl_vintfunc_t  rl_prep_term_function   = rl_prep_terminal;
+rl_voidfunc_t  rl_deprep_term_function = rl_deprep_terminal;
+
 /*
 **  Globals.
 */
@@ -109,6 +114,7 @@ int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0
 char             *rl_line_buffer;
 const char       *rl_prompt;
 const char       *rl_readline_name;/* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
+FILE             *rl_instream;
 
 /* User definable callbacks. */
 char **(*rl_attempted_completion_function)(const char *token, int start, int end);
@@ -196,11 +202,20 @@ static void tty_push(int c)
     el_push_back = c;
 }
 
+int rl_getc(void)
+{
+    int r;
+    char c;
+
+    do {
+	r = read(0, &c, 1);
+    } while (r == -1 && errno == EINTR);
+
+    return r == 1 ? c : EOF;
+}
+
 static int tty_get(void)
 {
-    char c;
-    int r;
-
     tty_flush();
     if (el_pushed) {
         el_pushed = 0;
@@ -208,12 +223,8 @@ static int tty_get(void)
     }
     if (*el_input)
         return *el_input++;
-    do
-    {
-        r = read(0, &c, 1);
-    } while (r == -1 && errno == EINTR);
 
-    return r == 1 ? c : EOF;
+    return rl_getc_function();
 }
 
 #define tty_back()       (backspace ? tty_puts(backspace) : tty_put('\b'))
@@ -279,6 +290,20 @@ static void tty_info(void)
     }
 }
 
+
+/*
+**  Glue routines to rl_ttyset()
+*/
+void rl_prep_terminal(int meta_flag)
+{
+    rl_meta_chars = !meta_flag;
+    rl_ttyset(0);
+}
+
+void rl_deprep_terminal(void)
+{
+    rl_ttyset(1);
+}
 
 /*
 **  Print an array of words in columns.
@@ -1104,7 +1129,7 @@ char *readline(const char *prompt)
     }
 
     tty_info();
-    rl_ttyset(0);
+    rl_prep_term_function(!rl_meta_chars);
     hist_add(NILSTR);
     ScreenSize = SCREEN_INC;
     Screen = malloc(sizeof(char) * ScreenSize);
@@ -1129,7 +1154,7 @@ char *readline(const char *prompt)
         tty_flush();
     }
 
-    rl_ttyset(1);
+    rl_deprep_term_function();
     free(Screen);
     free(H.Lines[--H.Size]);
 

@@ -58,25 +58,24 @@ AC_ARG_ENABLE(unique-history,
    , AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.]))
 
 AC_ARG_ENABLE(default-complete,
-   [  --enable-default-complete      Enable default completion handler.],
-   complete=true; AC_DEFINE(CONFIG_DEFAULT_COMPLETE,, [Define to enable the default completion handler.]))
-AM_CONDITIONAL([CONFIG_DEFAULT_COMPLETE], [test x$complete = xtrue])
+   [AS_HELP_STRING([--disable-default-complete], [Disable default (filename) completion handler.])],
+   , AC_DEFINE(CONFIG_DEFAULT_COMPLETE, 1, [Define to enable the default completion handler.]))
 
 AC_ARG_ENABLE(arrow-keys,
-   [  --enable-arrow-keys            Enable ANSI arrow keys.],
-   AC_DEFINE([CONFIG_ANSI_ARROWS],, [Define to include ANSI arrow keys support.]))
+   [AS_HELP_STRING([--disable-arrow-keys], [Disable ANSI arrow keys.])],
+   , AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))
 
 AC_ARG_ENABLE(sigstop,
-   [  --enable-sigstop               Enable SIGSTOP key.],
-   AC_DEFINE([CONFIG_SIGSTOP],, [Define to enable SIGSTOP (Ctrl-Z) key.]))
+   [AS_HELP_STRING([--enable-sigstop], [Enable SIGSTOP key.])],
+   AC_DEFINE([CONFIG_SIGSTOP], 1, [Define to enable SIGSTOP (Ctrl-Z) key.]))
 
 AC_ARG_ENABLE(terminal-bell,
-   [  --enable-terminal-bell         Enable terminal bell on completion.],
-   AC_DEFINE([CONFIG_ANNOYING_NOISE],, [Define to enable terminal bell on completion.]))
+   [AS_HELP_STRING([--enable-terminal-bell], [Enable terminal bell on completion.])],
+   AC_DEFINE([CONFIG_ANNOYING_NOISE], 1, [Define to enable terminal bell on completion.]))
 
 AC_ARG_ENABLE(termcap,
-   [  --enable-termcap               Use the termcap library for terminal size.],
-   AC_DEFINE([CONFIG_USE_TERMCAP],, [Define to use the termcap library for terminal size.]))
+   [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],
+   AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.]))
 
 # Restore gnu89 inline semantics on gcc 4.3 and newer
 saved_cflags="$CFLAGS"

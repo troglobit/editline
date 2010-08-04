@@ -1155,6 +1155,50 @@ void add_history(const char *p)
 
     hist_add(p);
 }
+
+
+int read_history(const char *filename)
+{
+    FILE *fp;
+    char buf[SCREEN_INC];
+
+    hist_alloc();
+    fp = fopen(filename, "r");
+    if (fp) {
+	H.Size = 0;
+	while (H.Size < el_hist_size) {
+	    if (!fgets(buf, SCREEN_INC, fp))
+		break;
+	    buf[strlen(buf) - 1] = 0; /* Remove '\n' */
+	    add_history(buf);
+	}
+	fclose(fp);
+
+	return 0;
+    }
+
+    return errno;
+}
+
+int write_history(const char *filename)
+{
+    FILE *fp;
+
+    hist_alloc();
+    fp = fopen(filename, "w");
+    if (fp) {
+	int i = 0;
+
+	while (i < H.Size) {
+	    fprintf(fp, "%s\n", H.Lines[i++]);
+	}
+	fclose(fp);
+
+	return 0;
+    }
+
+    return errno;
+}
 
 
 /*

@@ -22,6 +22,8 @@
 #include "editline.h"
 #include <string.h>
 
+#define HISTORY "/tmp/.cli-history"
+
 static char *list[] = {
    "foo ", "bar ", "bsd ", "cli ", "ls ", "cd ", "malloc ", "tee ", NULL
 };
@@ -86,11 +88,14 @@ int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
    /* Setup callbacks */
    rl_set_complete_func(&my_rl_complete);
    rl_set_list_possib_func(&my_rl_list_possib);
+   read_history(HISTORY);
 
    while ((line = readline(prompt)) != NULL) {
       printf("\t\t\t|%s|\n", line);
       free(line);
    }
+
+   write_history(HISTORY);
 
    return 0;
 }

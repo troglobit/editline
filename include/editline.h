@@ -56,4 +56,7 @@ extern void rl_reset_terminal(char *p);
 extern char *readline(const char *prompt);
 extern void add_history(const char *line);
 
+extern int read_history(const char *filename);
+extern int write_history(const char *filename);
+
 #endif  /* __EDITLINE_H__ */

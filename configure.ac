@@ -43,7 +43,6 @@ AC_HEADER_TIOCGWINSZ
 
 # Overrides and types, should be a check.
 AC_DEFINE([SYS_UNIX], [1], [Default to UNIX backend, should be detected.])
-AC_DEFINE([HIDE], [1], [Enable static keyword, hides internal methods.])
 AC_TYPE_SIZE_T
 
 # Checks for library functions.

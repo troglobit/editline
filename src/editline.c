@@ -63,10 +63,10 @@ typedef struct {
     char      **Lines;
 } el_hist_t;
 
-rl_getc_func_t rl_getc_function = rl_getc;
-rl_hook_func_t rl_event_hook;
-rl_vintfunc_t  rl_prep_term_function   = rl_prep_terminal;
-rl_voidfunc_t  rl_deprep_term_function = rl_deprep_terminal;
+rl_getc_func_t *rl_getc_function = rl_getc;
+rl_hook_func_t *rl_event_hook;
+rl_vintfunc_t  *rl_prep_term_function   = rl_prep_terminal;
+rl_voidfunc_t  *rl_deprep_term_function = rl_deprep_terminal;
 
 /*
 **  Globals.

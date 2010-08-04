@@ -140,12 +140,12 @@ static int SplitPath(char *path, char **dirpart, char **filepart)
     return 0;
 }
 
-static rl_complete_func_t el_complete_func = NULL;
+static rl_complete_func_t *el_complete_func = NULL;
 
 /* For compatibility with the Heimdal project. */
-rl_complete_func_t rl_set_complete_func(rl_complete_func_t func)
+rl_complete_func_t *rl_set_complete_func(rl_complete_func_t *func)
 {
-    rl_complete_func_t old = el_complete_func;
+    rl_complete_func_t *old = el_complete_func;
     el_complete_func = func;
     return old;
 }
@@ -234,12 +234,12 @@ char *rl_complete(char *token, int *match)
 #endif
 }
 
-static rl_list_possib_func_t el_list_possib_func = NULL;
+static rl_list_possib_func_t *el_list_possib_func = NULL;
 
 /* For compatibility with the Heimdal project. */
-rl_list_possib_func_t rl_set_list_possib_func(rl_list_possib_func_t func)
+rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func)
 {
-    rl_list_possib_func_t old = el_list_possib_func;
+    rl_list_possib_func_t *old = el_list_possib_func;
     el_list_possib_func = func;
     return old;
 }

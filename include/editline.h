@@ -27,13 +27,13 @@ typedef enum {
 } el_status_t;
 
 /* Editline specific types, despite rl_ prefix.  From Heimdal project. */
-typedef char* (*rl_complete_func_t)(char*, int*);
-typedef int (*rl_list_possib_func_t)(char*, char***);
-typedef el_status_t (*el_keymap_func_t)(void);
-typedef int  (*rl_hook_func_t) (void);
-typedef int  (*rl_getc_func_t)(void);
-typedef void (*rl_voidfunc_t)(void);
-typedef void (*rl_vintfunc_t)(int);
+typedef char* rl_complete_func_t(char*, int*);
+typedef int rl_list_possib_func_t(char*, char***);
+typedef el_status_t el_keymap_func_t(void);
+typedef int  rl_hook_func_t(void);
+typedef int  rl_getc_func_t(void);
+typedef void rl_voidfunc_t(void);
+typedef void rl_vintfunc_t(int);
 
 /* Display 8-bit chars "as-is" or as `M-x'? Toggle with M-m. (Default:0 - "as-is") */
 extern int rl_meta_chars;
@@ -59,8 +59,8 @@ extern void add_history(const char *line);
 extern int read_history(const char *filename);
 extern int write_history(const char *filename);
 
-rl_complete_func_t    rl_set_complete_func(rl_complete_func_t func);
-rl_list_possib_func_t rl_set_list_possib_func(rl_list_possib_func_t func);
+rl_complete_func_t    *rl_set_complete_func(rl_complete_func_t *func);
+rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func);
 
 void rl_prep_terminal(int meta_flag);
 void rl_deprep_terminal(void);

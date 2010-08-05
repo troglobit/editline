@@ -113,8 +113,9 @@ int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 char             *rl_line_buffer;
 const char       *rl_prompt;
-const char       *rl_readline_name;/* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
-FILE             *rl_instream;
+const char       *rl_readline_name; /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
+FILE             *rl_instream = NULL; /* The stdio stream from which input is read. Defaults to stdin if NULL - Not supported yet! */
+FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL - Not supported yet! */
 
 /* User definable callbacks. */
 char **(*rl_attempted_completion_function)(const char *token, int start, int end);

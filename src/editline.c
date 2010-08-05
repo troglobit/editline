@@ -309,7 +309,7 @@ void rl_deprep_terminal(void)
 /*
 **  Print an array of words in columns.
 */
-static void columns(int ac, char **av)
+void el_print_columns(int ac, char **av)
 {
     char        *p;
     int         i;
@@ -374,7 +374,7 @@ static void right(el_status_t Change)
         rl_point++;
 }
 
-static el_status_t ring_bell(void)
+el_status_t el_ring_bell(void)
 {
     tty_put('\07');
     tty_flush();
@@ -392,7 +392,7 @@ static el_status_t do_macro(int c)
 
     if ((el_input = (char *)getenv((char *)name)) == NULL) {
         el_input = NILSTR;
-        return ring_bell();
+        return el_ring_bell();
     }
     return CSstay;
 }
@@ -563,7 +563,7 @@ static const char *prev_hist(void)
 static el_status_t do_insert_hist(const char *p)
 {
     if (p == NULL)
-        return ring_bell();
+        return el_ring_bell();
 
     rl_point = 0;
     reposition();
@@ -581,7 +581,7 @@ static el_status_t do_hist(const char *(*move)(void))
     i = 0;
     do {
         if ((p = move()) == NULL)
-            return ring_bell();
+            return el_ring_bell();
     } while (++i < Repeat);
     return do_insert_hist(p);
 }
@@ -668,7 +668,7 @@ static el_status_t h_search(void)
     const char *p;
 
     if (Searching)
-        return ring_bell();
+        return el_ring_bell();
     Searching = 1;
 
     clear_line();
@@ -688,7 +688,7 @@ static el_status_t h_search(void)
     p = search_hist(p, move);
     clear_line();
     if (p == NULL) {
-        ring_bell();
+        el_ring_bell();
         return redisplay();
     }
     return do_insert_hist(p);
@@ -730,7 +730,7 @@ static el_status_t delete_string(int count)
     char        *p;
 
     if (count <= 0 || rl_end == rl_point)
-        return ring_bell();
+        return el_ring_bell();
 
     if (count == 1 && rl_point == rl_end - 1) {
         /* Optimize common case of delete at end of line. */
@@ -894,7 +894,7 @@ static el_status_t meta(void)
 		break;
         }
 
-	return ring_bell();
+	return el_ring_bell();
     }
 #endif /* CONFIG_ANSI_ARROWS */
 
@@ -912,7 +912,7 @@ static el_status_t meta(void)
             return kp->Function();
     }
 
-    return ring_bell();
+    return el_ring_bell();
 }
 
 static el_status_t emacs(int c)
@@ -1231,7 +1231,7 @@ int write_history(const char *filename)
 **  Move back to the beginning of the current word and return an
 **  allocated copy of it.
 */
-static char *find_word(void)
+char *el_find_word(void)
 {
     char        *p, *q;
     char        *new;
@@ -1274,12 +1274,12 @@ static el_status_t c_possible(void)
     char        *word;
     int         ac;
 
-    word = find_word();
+    word = el_find_word();
     ac = rl_list_possib(word, &av);
     if (word)
         free(word);
     if (ac) {
-        columns(ac, av);
+        el_print_columns(ac, av);
         while (--ac >= 0)
             free(av[ac]);
         free(av);
@@ -1287,7 +1287,7 @@ static el_status_t c_possible(void)
         return CSmove;
     }
 
-    return ring_bell();
+    return el_ring_bell();
 }
 
 static el_status_t c_complete(void)
@@ -1298,7 +1298,7 @@ static el_status_t c_complete(void)
     int         unique;
     el_status_t s = 0;
 
-    word = find_word();
+    word = el_find_word();
     p = (char *)rl_complete((char *)word, &unique);
     if (word)
         free(word);
@@ -1321,7 +1321,7 @@ static el_status_t c_complete(void)
             s = insert_string(new);
 #ifdef CONFIG_ANNOYING_NOISE
             if (!unique)
-                ring_bell();
+                el_ring_bell();
 #endif
         }
         free(new);
@@ -1380,7 +1380,7 @@ static el_status_t exchange(void)
     int c;
 
     if ((c = tty_get()) != CTL('X'))
-        return c == EOF ? CSeof : ring_bell();
+        return c == EOF ? CSeof : el_ring_bell();
 
     if ((c = rl_mark) <= rl_end) {
         rl_mark = rl_point;
@@ -1400,7 +1400,7 @@ static el_status_t yank(void)
 static el_status_t copy_region(void)
 {
     if (rl_mark > rl_end)
-        return ring_bell();
+        return el_ring_bell();
 
     if (rl_point > rl_mark)
         save_yank(rl_mark, rl_point - rl_mark);
@@ -1526,14 +1526,14 @@ static el_status_t last_argument(void)
     int         ac;
 
     if (H.Size == 1 || (p = (char *)H.Lines[H.Size - 2]) == NULL)
-        return ring_bell();
+        return el_ring_bell();
 
     if ((p = strdup(p)) == NULL)
         return CSstay;
     ac = argify(p, &av);
 
     if (Repeat != NO_ARG)
-        s = Repeat < ac ? insert_string(av[Repeat]) : ring_bell();
+        s = Repeat < ac ? insert_string(av[Repeat]) : el_ring_bell();
     else
         s = ac ? insert_string(av[ac - 1]) : CSstay;
 
@@ -1544,14 +1544,14 @@ static el_status_t last_argument(void)
     return s;
 }
 
-static el_keymap_t Map[33] = {
+static el_keymap_t Map[64] = {
     {   CTL('@'),       mk_set          },
     {   CTL('A'),       beg_line        },
     {   CTL('B'),       bk_char         },
     {   CTL('D'),       del_char        },
     {   CTL('E'),       end_line        },
     {   CTL('F'),       fd_char         },
-    {   CTL('G'),       ring_bell       },
+    {   CTL('G'),       el_ring_bell    },
     {   CTL('H'),       bk_del_char     },
     {   CTL('I'),       c_complete      },
     {   CTL('J'),       accept_line     },
@@ -1559,13 +1559,13 @@ static el_keymap_t Map[33] = {
     {   CTL('L'),       redisplay       },
     {   CTL('M'),       accept_line     },
     {   CTL('N'),       h_next          },
-    {   CTL('O'),       ring_bell       },
+    {   CTL('O'),       el_ring_bell    },
     {   CTL('P'),       h_prev          },
-    {   CTL('Q'),       ring_bell       },
+    {   CTL('Q'),       el_ring_bell    },
     {   CTL('R'),       h_search        },
-    {   CTL('S'),       ring_bell       },
+    {   CTL('S'),       el_ring_bell    },
     {   CTL('T'),       transpose       },
-    {   CTL('U'),       ring_bell       },
+    {   CTL('U'),       el_ring_bell    },
     {   CTL('V'),       quote           },
     {   CTL('W'),       bk_kill_word    },
     {   CTL('X'),       exchange        },
@@ -1573,12 +1573,12 @@ static el_keymap_t Map[33] = {
 #ifdef SYSTEM_IS_WIN32
     {   CTL('Z'),       end_of_input    },
 #else
-    {   CTL('Z'),       ring_bell       },
+    {   CTL('Z'),       el_ring_bell    },
 #endif
     {   CTL('['),       meta            },
     {   CTL(']'),       move_to_char    },
-    {   CTL('^'),       ring_bell       },
-    {   CTL('_'),       ring_bell       },
+    {   CTL('^'),       el_ring_bell    },
+    {   CTL('_'),       el_ring_bell    },
     {   0,              NULL            }
 };
 
@@ -1602,31 +1602,40 @@ static el_keymap_t   MetaMap[64]= {
     {   0,              NULL            }
 };
 
-void el_bind_key_in_metamap(char c, el_keymap_func_t func)
+static void el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t map[], size_t mapsz)
 {
-    /* Add given function to key map for META keys */
-    int i;
+    size_t i;
 
-    for (i = 0; MetaMap[i].Key != 0; i++)
+    for (i = 0; Map[i].Function != NULL; i++)
     {
-	if (MetaMap[i].Key == c)
+	if (map[i].Key == key)
 	{
-	    MetaMap[i].Function = func;
+	    map[i].Function = function;
 	    return;
 	}
     }
 
     /* A new key so have to add it to end */
-    if (i == 63)
+    if (i == mapsz)
     {
-	fprintf(stderr,"editline: MetaMap table full, requires increase\n");
+	fprintf(stderr,"editline: failed binding key 0x%x, keymap full.\n", key);
 	return;
     }
 
-    MetaMap[i].Function = func;
-    MetaMap[i].Key = c;
-    MetaMap[i + 1].Function = 0;  /* Zero the last location */
-    MetaMap[i + 1].Key = 0;       /* Zero the last location */
+    map[i].Key = key;
+    map[i].Function = function;
+
+    map[i + 1].Function = NULL;	/* Terminate list */
+}
+
+void el_bind_key(int key, el_keymap_func_t function)
+{
+    el_bind_key_in_map(key, function, Map, ARRAY_ELEMENTS(Map));
+}
+
+void el_bind_key_in_metamap(int key, el_keymap_func_t function)
+{
+    el_bind_key_in_map(key, function, MetaMap, ARRAY_ELEMENTS(MetaMap));
 }
 
 /**

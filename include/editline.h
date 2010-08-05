@@ -39,7 +39,15 @@ typedef void rl_vintfunc_t(int);
 extern int rl_meta_chars;
 
 /* Editline specific functions. */
-void el_bind_key_in_metamap(char c, el_keymap_func_t func);
+extern char *      el_find_word(void);
+extern void        el_print_columns(int ac, char **av);
+extern el_status_t el_ring_bell(void);
+
+extern void        el_bind_key(int key, el_keymap_func_t function);
+extern void        el_bind_key_in_metamap(int key, el_keymap_func_t function);
+
+extern char       *rl_complete(char *token, int *match);
+extern int         rl_list_possib(char *token, char ***av);
 
 /* For compatibility with FSF readline. */
 extern int         rl_point;

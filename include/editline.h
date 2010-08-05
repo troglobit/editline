@@ -61,7 +61,7 @@ extern int         el_no_echo;   /* e.g under emacs, don't echo except prompt */
 extern int         el_hist_size; /* size of history scrollback buffer, default: 15 */
 
 extern void rl_initialize(void);
-extern void rl_reset_terminal(char *p);
+extern void rl_reset_terminal(const char *terminal_name);
 
 extern char *readline(const char *prompt);
 extern void add_history(const char *line);

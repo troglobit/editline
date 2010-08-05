@@ -29,6 +29,8 @@
 */
 #define SCREEN_COLS     80
 #define SCREEN_ROWS     24
+#define EL_STDIN        0
+#define EL_STDOUT       1
 #define NO_ARG          (-1)
 #define DEL             127
 #define CTL(x)          ((x) & 0x1F)
@@ -92,21 +94,22 @@ static const char *el_input = NILSTR;
 static char       *Yanked;
 static char       *Screen;
 static char       NEWLINE[]= CRLF;
+static const char *el_term = "dumb";
 static int        Repeat;
 static int        old_point;
 static int        el_push_back;
 static int        el_pushed;
 static int        el_intr_pending;
-static int        el_infd  = 0;	/* STDIN */
-static int        el_outfd = 1;	/* STDOUT */
+static int        el_infd  = EL_STDIN;
+static int        el_outfd = EL_STDOUT;
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
 static size_t     Length;
 static size_t     ScreenCount;
 static size_t     ScreenSize;
-static char       *backspace;
-static int        tty_cols;
-static int        tty_rows;
+static char       *backspace = "\b";
+static int        tty_cols = SCREEN_COLS;
+static int        tty_rows = SCREEN_ROWS;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
 int               rl_point;
@@ -230,7 +233,7 @@ static int tty_get(void)
     return rl_getc_function();
 }
 
-#define tty_back()       (backspace ? tty_puts(backspace) : tty_put('\b'))
+#define tty_back()  tty_puts(backspace)
 
 static void tty_backn(int n)
 {
@@ -240,21 +243,13 @@ static void tty_backn(int n)
 
 static void tty_info(void)
 {
-    static int          init;
-#ifdef CONFIG_USE_TERMCAP
-    char               *term;
-    char                buff[2048];
-    char               *bp;
-#endif
-#ifdef TIOCGWINSZ
-    struct winsize      W;
-#endif
+    static int init;
 
     if (init) {
 #ifdef TIOCGWINSZ
-        /* Perhaps we got resized. */
-        if (ioctl(0, TIOCGWINSZ, &W) >= 0
-         && W.ws_col > 0 && W.ws_row > 0) {
+	struct winsize W;
+
+        if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
             tty_cols = (int)W.ws_col;
             tty_rows = (int)W.ws_row;
         }
@@ -265,32 +260,7 @@ static void tty_info(void)
 
     /* Initialize to faulty values to trigger fallback if nothing else works. */
     tty_cols = tty_rows = -1;
-#ifdef CONFIG_USE_TERMCAP
-    bp = buff;
-    if ((term = getenv("TERM")) == NULL)
-        term = "dumb";
-    if (-1 != tgetent(buff, term)) {
-	if ((backspace = tgetstr("le", &bp)) != NULL)
-	    backspace = strdup(backspace);
-	else
-	    backspace = "\b";
-	tty_cols = tgetnum("co");
-	tty_rows = tgetnum("li");
-    }
-    /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
-#endif
-
-    if (tty_cols <= 0 || tty_rows <= 0) {
-#ifdef TIOCGWINSZ
-       if (-1 != ioctl(0, TIOCGWINSZ, &W)) {
-          tty_cols = (int)W.ws_col;
-          tty_rows = (int)W.ws_row;
-          return;
-       }
-#endif
-       tty_cols = SCREEN_COLS;
-       tty_rows = SCREEN_ROWS;
-    }
+    rl_reset_terminal(NULL);
 }
 
 
@@ -1100,8 +1070,46 @@ static char *read_redirected(void)
 }
 
 /* For compatibility with FSF readline. */
-void rl_reset_terminal(char *p __attribute__((__unused__)))
+void rl_reset_terminal(const char *terminal_name)
 {
+#ifdef CONFIG_USE_TERMCAP
+    char                buff[2048];
+    char               *bp;
+#endif
+#ifdef TIOCGWINSZ
+    struct winsize      W;
+#endif
+
+    if (terminal_name) {
+        el_term = terminal_name;
+	return;
+    }
+
+    if ((el_term = getenv("TERM")) == NULL)
+        el_term = "dumb";
+
+#ifdef CONFIG_USE_TERMCAP
+    bp = buff;
+    if (-1 != tgetent(buff, el_term)) {
+	if ((backspace = tgetstr("le", &bp)) != NULL)
+	    backspace = strdup(backspace);
+	tty_cols = tgetnum("co");
+	tty_rows = tgetnum("li");
+    }
+    /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
+#endif
+
+    if (tty_cols <= 0 || tty_rows <= 0) {
+#ifdef TIOCGWINSZ
+       if (-1 != ioctl(el_outfd, TIOCGWINSZ, &W)) {
+          tty_cols = (int)W.ws_col;
+          tty_rows = (int)W.ws_row;
+          return;
+       }
+#endif
+       tty_cols = SCREEN_COLS;
+       tty_rows = SCREEN_ROWS;
+    }
 }
 
 void rl_initialize(void)
@@ -1112,12 +1120,12 @@ void rl_initialize(void)
     hist_alloc();
 
     /* Setup I/O descriptors */
-    if (!rl_instream)  el_infd  = 0;
+    if (!rl_instream)  el_infd  = EL_STDIN;
     else               el_infd  = fileno(rl_instream);
-    if (el_infd < 0)   el_infd  = 0;
-    if (!rl_outstream) el_outfd = 1;
+    if (el_infd < 0)   el_infd  = EL_STDIN;
+    if (!rl_outstream) el_outfd = EL_STDOUT;
     else               el_outfd = fileno(rl_outstream);
-    if (el_outfd < 0)  el_outfd = 1;
+    if (el_outfd < 0)  el_outfd = EL_STDOUT;
 }
 
 char *readline(const char *prompt)

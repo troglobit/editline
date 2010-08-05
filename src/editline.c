@@ -97,6 +97,8 @@ static int        old_point;
 static int        el_push_back;
 static int        el_pushed;
 static int        el_intr_pending;
+static int        el_infd  = 0;	/* STDIN */
+static int        el_outfd = 1;	/* STDOUT */
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
 static size_t     Length;
@@ -113,9 +115,9 @@ int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 char             *rl_line_buffer;
 const char       *rl_prompt;
-const char       *rl_readline_name; /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
-FILE             *rl_instream = NULL; /* The stdio stream from which input is read. Defaults to stdin if NULL - Not supported yet! */
-FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL - Not supported yet! */
+const char       *rl_readline_name;    /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
+FILE             *rl_instream = NULL;  /* The stdio stream from which input is read. Defaults to stdin if NULL */
+FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL */
 
 /* User definable callbacks. */
 char **(*rl_attempted_completion_function)(const char *token, int start, int end);
@@ -154,7 +156,7 @@ static void tty_flush(void)
 
     if (ScreenCount) {
 	if (!el_no_echo)
-	    res = write(1, Screen, ScreenCount);
+	    res = write(el_outfd, Screen, ScreenCount);
         ScreenCount = 0;
     }
 }
@@ -209,7 +211,7 @@ int rl_getc(void)
     char c;
 
     do {
-	r = read(0, &c, 1);
+	r = read(el_infd, &c, 1);
     } while (r == -1 && errno == EINTR);
 
     return r == 1 ? c : EOF;
@@ -1083,7 +1085,7 @@ static char *read_redirected(void)
 
             p += oldpos;        /* Continue where we left off... */
         }
-        if (read(0, p, 1) <= 0) {
+        if (read(el_infd, p, 1) <= 0) {
             /* Ignore "incomplete" lines at EOF, just like we do for a tty. */
             free(line);
             return NULL;
@@ -1108,6 +1110,14 @@ void rl_initialize(void)
 	rl_prompt = "? ";
 
     hist_alloc();
+
+    /* Setup I/O descriptors */
+    if (!rl_instream)  el_infd  = 0;
+    else               el_infd  = fileno(rl_instream);
+    if (el_infd < 0)   el_infd  = 0;
+    if (!rl_outstream) el_outfd = 1;
+    else               el_outfd = fileno(rl_outstream);
+    if (el_outfd < 0)  el_outfd = 1;
 }
 
 char *readline(const char *prompt)

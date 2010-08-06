@@ -150,16 +150,43 @@ static int is_alpha_num(unsigned char c)
 }
 
 /*
+** Returns the number of characters printed from beginning of line
+** includes the size of the prompt and and meta/ctl char expansions
+*/
+static int tty_pos(void)
+{
+    int p = strlen(rl_prompt);
+    int i;
+
+    for (i = 0; i < rl_point; i++)
+	if (rl_line_buffer[i] == DEL || ISCTL(rl_line_buffer[i]))
+	    p += 2;
+	else if (rl_meta_chars && ISMETA(rl_line_buffer[i]))
+	    p += 3;
+	else
+	    p += 1;
+
+    return p;
+}
+
+/*
 **  TTY input/output functions.
 */
 
 static void tty_flush(void)
 {
+    int i = 0;
     ssize_t res;
+    int len = (int)strlen(rl_prompt);
 
     if (ScreenCount) {
-	if (!el_no_echo)
-	    res = write(el_outfd, Screen, ScreenCount);
+	if (!el_no_echo) {
+	    if (ScreenCount >= (size_t)tty_cols) {
+		i = ScreenCount - tty_cols - len;
+		ScreenCount = tty_cols - len;
+	    }
+	    res = write(el_outfd, &Screen[i], ScreenCount);
+	}
         ScreenCount = 0;
     }
 }
@@ -314,10 +341,16 @@ void el_print_columns(int ac, char **av)
 static void reposition(void)
 {
     int i;
+    int offset = 0, pos = tty_pos();
 
-    tty_put('\r');
+    tty_puts("\r");
+    tty_puts("\e[K");
+    tty_flush();
     tty_puts(rl_prompt);
-    for (i = 0; i < rl_point; i++)
+    if (pos > tty_cols) {
+	offset = pos - tty_cols - strlen(rl_prompt);
+    }
+    for (i = offset; i < rl_point; i++)
         tty_show(rl_line_buffer[i]);
 }
 
@@ -508,9 +541,12 @@ static el_status_t insert_string(const char *p)
 
 static el_status_t redisplay(void)
 {
-    tty_puts(NEWLINE); /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
+//    tty_puts(NEWLINE); /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
+    tty_puts("\r\e[K");
     tty_puts(rl_prompt);
+    tty_flush();
     tty_string(rl_line_buffer);
+    tty_flush();
 
     return CSmove;
 }
@@ -996,7 +1032,10 @@ static char *editinput(void)
 	    case CSstay:
 		break;
         }
+
+	reposition();
     }
+
     return NULL;
 }
 

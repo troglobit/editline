@@ -114,7 +114,8 @@ int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
    read_history(HISTORY);
 
    while ((line = readline(prompt)) != NULL) {
-      printf("\t\t\t|%s|\n", line);
+      if (*line != '\0')
+         printf("\t\t\t|%s|\n", line);
       free(line);
    }
 

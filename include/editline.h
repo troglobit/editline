@@ -27,38 +27,60 @@ typedef enum {
 } el_status_t;
 
 /* Editline specific types, despite rl_ prefix.  From Heimdal project. */
-typedef char* (*rl_complete_func_t)(char*, int*);
-typedef int (*rl_list_possib_func_t)(char*, char***);
-typedef el_status_t (*el_keymap_func_t)(void);
+typedef char* rl_complete_func_t(char*, int*);
+typedef int rl_list_possib_func_t(char*, char***);
+typedef el_status_t el_keymap_func_t(void);
+typedef int  rl_hook_func_t(void);
+typedef int  rl_getc_func_t(void);
+typedef void rl_voidfunc_t(void);
+typedef void rl_vintfunc_t(int);
 
 /* Display 8-bit chars "as-is" or as `M-x'? Toggle with M-m. (Default:0 - "as-is") */
 extern int rl_meta_chars;
 
-/* For compatibility with GNU Readline. */
-extern char  *(*rl_completion_entry_function)(const char *text, int state);
-extern char  *rl_filename_completion_function(const char *text, int state);
-
-extern int rl_attempted_completion_over;
-extern char **(*rl_attempted_completion_function)(const char *text, int start, int end);
-
-/* Use these functions to set custom command/file completion, see cli.c for example usage. */
-rl_complete_func_t    rl_set_complete_func(rl_complete_func_t func);
-rl_list_possib_func_t rl_set_list_possib_func(rl_list_possib_func_t func);
-
 /* Editline specific functions. */
-void el_bind_key_in_metamap(char c, el_keymap_func_t func);
+extern char *      el_find_word(void);
+extern void        el_print_columns(int ac, char **av);
+extern el_status_t el_ring_bell(void);
 
-/* For compatibility with FSF readline. */
+extern void        el_bind_key(int key, el_keymap_func_t function);
+extern void        el_bind_key_in_metamap(int key, el_keymap_func_t function);
+
+extern char       *rl_complete(char *token, int *match);
+extern int         rl_list_possib(char *token, char ***av);
+
+/* For compatibility with GNU Readline. */
 extern int         rl_point;
 extern int         rl_mark;
 extern int         rl_end;
 extern char       *rl_line_buffer;
 extern const char *rl_readline_name;
-extern int         el_no_echo;  /* e.g under emacs, don't echo except prompt */
-extern void rl_reset_terminal(char *p);
+extern FILE       *rl_instream;  /* The stdio stream from which input is read. Defaults to stdin if NULL - Not supported yet! */
+extern FILE       *rl_outstream; /* The stdio stream to which output is flushed. Defaults to stdout if NULL - Not supported yet! */
+extern int         el_no_echo;   /* e.g under emacs, don't echo except prompt */
+extern int         el_hist_size; /* size of history scrollback buffer, default: 15 */
+
 extern void rl_initialize(void);
+extern void rl_reset_terminal(const char *terminal_name);
+
+extern void rl_prep_terminal(int meta_flag);
+extern void rl_deprep_terminal(void);
+
+extern int rl_getc(void);
 
 extern char *readline(const char *prompt);
-extern void add_history(char *line); /* OBSOLETE: Made part of readline(). -- kjb */
+extern void add_history(const char *line);
+
+extern int read_history(const char *filename);
+extern int write_history(const char *filename);
+
+extern rl_complete_func_t    *rl_set_complete_func(rl_complete_func_t *func);
+extern rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func);
+
+extern char  *(*rl_completion_entry_function)(const char *text, int state);
+extern char  *rl_filename_completion_function(const char *text, int state);
+
+extern int rl_attempted_completion_over;
+extern char **(*rl_attempted_completion_function)(const char *text, int start, int end);
 
 #endif  /* __EDITLINE_H__ */

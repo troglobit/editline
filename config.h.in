@@ -18,7 +18,7 @@
 /* Define to enable SIGSTOP (Ctrl-Z) key. */
 #undef CONFIG_SIGSTOP
 
-/* Don't save command if same as last one. */
+/* Define to skip duplicate lines in the scrollback history. */
 #undef CONFIG_UNIQUE_HISTORY
 
 /* Define to use the termcap library for terminal size. */
@@ -111,12 +111,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Enable static keyword, hides internal methods. */
-#undef HIDE
-
-/* Number of lines in history. */
-#undef HIST_SIZE
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */

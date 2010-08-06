@@ -43,7 +43,11 @@ void rl_ttyset(int Reset)
 
         new = old;
         new.c_lflag &= ~(ECHO | ICANON | ISIG);
-        new.c_iflag &= ~(ISTRIP | INPCK);
+        new.c_iflag &= ~INPCK;
+	if (rl_meta_chars)
+	    new.c_iflag |= ISTRIP;
+	else
+	    new.c_iflag &= ~ISTRIP;
         new.c_cc[VMIN] = 1;
         new.c_cc[VTIME] = 0;
         if (-1 == tcsetattr(0, TCSADRAIN, &new))
@@ -76,7 +80,12 @@ void rl_ttyset(int Reset)
 
         new = old;
         new.c_lflag &= ~(ECHO | ICANON | ISIG);
-        new.c_iflag &= ~(ISTRIP | INPCK);
+        new.c_iflag &= ~INPCK;
+	if (rl_meta_chars)
+	    new.c_iflag |= ISTRIP;
+	else
+	    new.c_iflag &= ~ISTRIP;
+
         new.c_cc[VMIN] = 1;
         new.c_cc[VTIME] = 0;
         if (-1 == ioctl(0, TCSETAW, &new))
@@ -121,9 +130,10 @@ void rl_ttyset(int Reset)
         new_sgttyb = old_sgttyb;
         new_sgttyb.sg_flags &= ~ECHO;
         new_sgttyb.sg_flags |= RAW;
-#ifdef PASS8
-        new_sgttyb.sg_flags |= PASS8;
-#endif
+	if (rl_meta_chars)
+	    new_sgttyb.sg_flags &= ~PASS8;
+	else
+	    new_sgttyb.sg_flags |= PASS8;
         if (-1 == ioctl(0, TIOCSETP, &new_sgttyb))
 	    perror("Failed TIOCSETP");
         new_tchars = old_tchars;

@@ -34,8 +34,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-# Built-in completion handler.
-@CONFIG_DEFAULT_COMPLETE_TRUE@am__append_1 = complete.c
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -73,10 +71,7 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libeditline_la_LIBADD =
-am__libeditline_la_SOURCES_DIST = editline.c editline.h sysunix.c \
-	unix.h complete.c
-@CONFIG_DEFAULT_COMPLETE_TRUE@am__objects_1 = complete.lo
-am_libeditline_la_OBJECTS = editline.lo sysunix.lo $(am__objects_1)
+am_libeditline_la_OBJECTS = editline.lo complete.lo sysunix.lo
 libeditline_la_OBJECTS = $(am_libeditline_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -108,7 +103,7 @@ AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(libeditline_la_SOURCES)
-DIST_SOURCES = $(am__libeditline_la_SOURCES_DIST)
+DIST_SOURCES = $(libeditline_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -228,8 +223,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libeditline.la
-libeditline_la_SOURCES = editline.c editline.h sysunix.c unix.h \
-	$(am__append_1)
+libeditline_la_SOURCES = editline.c editline.h complete.c sysunix.c unix.h
 all: all-am
 
 .SUFFIXES:

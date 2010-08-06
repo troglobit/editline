@@ -43,7 +43,6 @@ AC_HEADER_TIOCGWINSZ
 
 # Overrides and types, should be a check.
 AC_DEFINE([SYS_UNIX], [1], [Default to UNIX backend, should be detected.])
-AC_DEFINE([HIDE], [1], [Enable static keyword, hides internal methods.])
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
@@ -52,40 +51,30 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_STAT
 AC_CHECK_FUNCS([strchr strdup strrchr tcgetattr perror])
 
+AC_ARG_ENABLE(unique-history,
+   [AS_HELP_STRING([--disable-unique-history],
+                   [Disable uniqify of scrollback. Default: duplicate entries are ignored. Use this to save dupes.])],
+   , AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.]))
+
 AC_ARG_ENABLE(default-complete,
-   [  --enable-default-complete      Enable default completion handler.],
-   complete=true; AC_DEFINE(CONFIG_DEFAULT_COMPLETE,, [Define to enable the default completion handler.]))
-AM_CONDITIONAL([CONFIG_DEFAULT_COMPLETE], [test x$complete = xtrue])
+   [AS_HELP_STRING([--disable-default-complete], [Disable default (filename) completion handler.])],
+   , AC_DEFINE(CONFIG_DEFAULT_COMPLETE, 1, [Define to enable the default completion handler.]))
 
 AC_ARG_ENABLE(arrow-keys,
-   [  --enable-arrow-keys            Enable ANSI arrow keys.],
-   AC_DEFINE([CONFIG_ANSI_ARROWS],, [Define to include ANSI arrow keys support.]))
+   [AS_HELP_STRING([--disable-arrow-keys], [Disable ANSI arrow keys.])],
+   , AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))
 
 AC_ARG_ENABLE(sigstop,
-   [  --enable-sigstop               Enable SIGSTOP key.],
-   AC_DEFINE([CONFIG_SIGSTOP],, [Define to enable SIGSTOP (Ctrl-Z) key.]))
+   [AS_HELP_STRING([--enable-sigstop], [Enable SIGSTOP key.])],
+   AC_DEFINE([CONFIG_SIGSTOP], 1, [Define to enable SIGSTOP (Ctrl-Z) key.]))
 
 AC_ARG_ENABLE(terminal-bell,
-   [  --enable-terminal-bell         Enable terminal bell on completion.],
-   AC_DEFINE([CONFIG_ANNOYING_NOISE],, [Define to enable terminal bell on completion.]))
+   [AS_HELP_STRING([--enable-terminal-bell], [Enable terminal bell on completion.])],
+   AC_DEFINE([CONFIG_ANNOYING_NOISE], 1, [Define to enable terminal bell on completion.]))
 
 AC_ARG_ENABLE(termcap,
-   [  --enable-termcap               Use the termcap library for terminal size.],
-   AC_DEFINE([CONFIG_USE_TERMCAP],, [Define to use the termcap library for terminal size.]))
-
-# Default history size 1, i.e. disabled.
-let HIST_SIZE=1
-AC_ARG_ENABLE(history,
-   [  --enable-history=LINES         Enable scrollback history, default off.],
-   let HIST_SIZE=$enableval)
-if test $HIST_SIZE -lt 1; then
-   let HIST_SIZE=1
-fi
-AC_DEFINE_UNQUOTED(HIST_SIZE, $HIST_SIZE, [Number of lines in history.])
-
-AC_ARG_ENABLE(unique-history,
-   [  --enable-unique-history        Uniqify scrollback history, i.e., don't save dupes.],
-   AC_DEFINE([CONFIG_UNIQUE_HISTORY],, [Don't save command if same as last one.]))
+   [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],
+   AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.]))
 
 # Restore gnu89 inline semantics on gcc 4.3 and newer
 saved_cflags="$CFLAGS"

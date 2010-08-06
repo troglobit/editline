@@ -30,6 +30,8 @@
 */
 #define SCREEN_COLS     80
 #define SCREEN_ROWS     24
+#define EL_STDIN        0
+#define EL_STDOUT       1
 #define NO_ARG          (-1)
 #define DEL             127
 #define CTL(x)          ((x) & 0x1F)
@@ -38,9 +40,6 @@
 #define META(x)         ((x) | 0x80)
 #define ISMETA(x)       ((x) & 0x80)
 #define UNMETA(x)       ((x) & 0x7F)
-#ifndef HIST_SIZE       /* Default to one line history, i.e. disabled. */
-#define HIST_SIZE       1
-#endif
 #define SEPS "\"#$&'()*:;<=>?[\\]^`{|}~\n\t "
 
 /*
@@ -64,8 +63,13 @@ typedef struct {
 typedef struct {
     int         Size;
     int         Pos;
-    char       *Lines[HIST_SIZE];
+    char      **Lines;
 } el_hist_t;
+
+rl_getc_func_t *rl_getc_function = rl_getc;
+rl_hook_func_t *rl_event_hook;
+rl_vintfunc_t  *rl_prep_term_function   = rl_prep_terminal;
+rl_voidfunc_t  *rl_deprep_term_function = rl_deprep_terminal;
 
 /*
 **  Globals.
@@ -79,25 +83,34 @@ int               rl_quit;
 int               rl_susp;
 #endif
 
+int               el_hist_size = 15;
+static el_hist_t  H = {
+    .Size  = 0,
+    .Pos   = 0,
+    .Lines = NULL,
+};
+
 static char        NILSTR[] = "";
 static const char *el_input = NILSTR;
 static char       *Yanked;
 static char       *Screen;
 static char       NEWLINE[]= CRLF;
-static el_hist_t  H;
+static const char *el_term = "dumb";
 static int        Repeat;
 static int        old_point;
 static int        el_push_back;
 static int        el_pushed;
 static int        el_intr_pending;
+static int        el_infd  = EL_STDIN;
+static int        el_outfd = EL_STDOUT;
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
 static size_t     Length;
 static size_t     ScreenCount;
 static size_t     ScreenSize;
-static char       *backspace;
-static int        tty_cols;
-static int        tty_rows;
+static char       *backspace = "\b";
+static int        tty_cols = SCREEN_COLS;
+static int        tty_rows = SCREEN_ROWS;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
 int               rl_point;
@@ -106,7 +119,9 @@ int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 char             *rl_line_buffer;
 const char       *rl_prompt;
-const char       *rl_readline_name;/* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
+const char       *rl_readline_name;    /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
+FILE             *rl_instream = NULL;  /* The stdio stream from which input is read. Defaults to stdin if NULL */
+FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL */
 
 /* User definable callbacks. */
 char **(*rl_attempted_completion_function)(const char *token, int start, int end);
@@ -145,7 +160,7 @@ static void tty_flush(void)
 
     if (ScreenCount) {
 	if (!el_no_echo)
-	    res = write(1, Screen, ScreenCount);
+	    res = write(el_outfd, Screen, ScreenCount);
         ScreenCount = 0;
     }
 }
@@ -194,11 +209,20 @@ static void tty_push(int c)
     el_push_back = c;
 }
 
+int rl_getc(void)
+{
+    int r;
+    char c;
+
+    do {
+	r = read(el_infd, &c, 1);
+    } while (r == -1 && errno == EINTR);
+
+    return r == 1 ? c : EOF;
+}
+
 static int tty_get(void)
 {
-    char c;
-    int r;
-
     tty_flush();
     if (el_pushed) {
         el_pushed = 0;
@@ -206,15 +230,11 @@ static int tty_get(void)
     }
     if (*el_input)
         return *el_input++;
-    do
-    {
-        r = read(0, &c, 1);
-    } while (r == -1 && errno == EINTR);
 
-    return r == 1 ? c : EOF;
+    return rl_getc_function();
 }
 
-#define tty_back()       (backspace ? tty_puts(backspace) : tty_put('\b'))
+#define tty_back()  tty_puts(backspace)
 
 static void tty_backn(int n)
 {
@@ -224,21 +244,13 @@ static void tty_backn(int n)
 
 static void tty_info(void)
 {
-    static int          init;
-#ifdef CONFIG_USE_TERMCAP
-    char               *term;
-    char                buff[2048];
-    char               *bp;
-#endif
-#ifdef TIOCGWINSZ
-    struct winsize      W;
-#endif
+    static int init;
 
     if (init) {
 #ifdef TIOCGWINSZ
-        /* Perhaps we got resized. */
-        if (ioctl(0, TIOCGWINSZ, &W) >= 0
-         && W.ws_col > 0 && W.ws_row > 0) {
+	struct winsize W;
+
+        if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
             tty_cols = (int)W.ws_col;
             tty_rows = (int)W.ws_row;
         }
@@ -249,39 +261,28 @@ static void tty_info(void)
 
     /* Initialize to faulty values to trigger fallback if nothing else works. */
     tty_cols = tty_rows = -1;
-#ifdef CONFIG_USE_TERMCAP
-    bp = buff;
-    if ((term = getenv("TERM")) == NULL)
-        term = "dumb";
-    if (-1 != tgetent(buff, term)) {
-	if ((backspace = tgetstr("le", &bp)) != NULL)
-	    backspace = strdup(backspace);
-	else
-	    backspace = "\b";
-	tty_cols = tgetnum("co");
-	tty_rows = tgetnum("li");
-    }
-    /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
-#endif
-
-    if (tty_cols <= 0 || tty_rows <= 0) {
-#ifdef TIOCGWINSZ
-       if (-1 != ioctl(0, TIOCGWINSZ, &W)) {
-          tty_cols = (int)W.ws_col;
-          tty_rows = (int)W.ws_row;
-          return;
-       }
-#endif
-       tty_cols = SCREEN_COLS;
-       tty_rows = SCREEN_ROWS;
-    }
+    rl_reset_terminal(NULL);
 }
 
 
 /*
+**  Glue routines to rl_ttyset()
+*/
+void rl_prep_terminal(int meta_flag)
+{
+    rl_meta_chars = !meta_flag;
+    rl_ttyset(0);
+}
+
+void rl_deprep_terminal(void)
+{
+    rl_ttyset(1);
+}
+
+/*
 **  Print an array of words in columns.
 */
-static void columns(int ac, char **av)
+void el_print_columns(int ac, char **av)
 {
     char        *p;
     int         i;
@@ -346,7 +347,7 @@ static void right(el_status_t Change)
         rl_point++;
 }
 
-static el_status_t ring_bell(void)
+el_status_t el_ring_bell(void)
 {
     tty_put('\07');
     tty_flush();
@@ -364,7 +365,7 @@ static el_status_t do_macro(int c)
 
     if ((el_input = (char *)getenv((char *)name)) == NULL) {
         el_input = NILSTR;
-        return ring_bell();
+        return el_ring_bell();
     }
     return CSstay;
 }
@@ -535,7 +536,7 @@ static const char *prev_hist(void)
 static el_status_t do_insert_hist(const char *p)
 {
     if (p == NULL)
-        return ring_bell();
+        return el_ring_bell();
 
     rl_point = 0;
     reposition();
@@ -553,7 +554,7 @@ static el_status_t do_hist(const char *(*move)(void))
     i = 0;
     do {
         if ((p = move()) == NULL)
-            return ring_bell();
+            return el_ring_bell();
     } while (++i < Repeat);
     return do_insert_hist(p);
 }
@@ -640,7 +641,7 @@ static el_status_t h_search(void)
     const char *p;
 
     if (Searching)
-        return ring_bell();
+        return el_ring_bell();
     Searching = 1;
 
     clear_line();
@@ -660,7 +661,7 @@ static el_status_t h_search(void)
     p = search_hist(p, move);
     clear_line();
     if (p == NULL) {
-        ring_bell();
+        el_ring_bell();
         return redisplay();
     }
     return do_insert_hist(p);
@@ -702,7 +703,7 @@ static el_status_t delete_string(int count)
     char        *p;
 
     if (count <= 0 || rl_end == rl_point)
-        return ring_bell();
+        return el_ring_bell();
 
     if (count == 1 && rl_point == rl_end - 1) {
         /* Optimize common case of delete at end of line. */
@@ -866,7 +867,7 @@ static el_status_t meta(void)
 		break;
         }
 
-	return ring_bell();
+	return el_ring_bell();
     }
 #endif /* CONFIG_ANSI_ARROWS */
 
@@ -884,7 +885,7 @@ static el_status_t meta(void)
             return kp->Function();
     }
 
-    return ring_bell();
+    return el_ring_bell();
 }
 
 static el_status_t emacs(int c)
@@ -1000,19 +1001,33 @@ static char *editinput(void)
     return NULL;
 }
 
-static void hist_add(char *p)
+static void hist_alloc(void)
+{
+    if (!H.Lines)
+	H.Lines = calloc(el_hist_size, sizeof(char *));
+}
+
+static void hist_add(const char *p)
 {
     int i;
+    char *s;
 
-    if ((p = (char *)strdup((char *)p)) == NULL)
+#ifdef CONFIG_UNIQUE_HISTORY
+    if (H.Pos && strcmp(p, H.Lines[H.Pos - 1]) == 0)
         return;
-    if (H.Size < HIST_SIZE) {
-        H.Lines[H.Size++] = p;
+#endif
+    if (H.Size && strcmp(p, H.Lines[H.Size - 1]) == 0)
+        return;
+
+    if ((s = strdup(p)) == NULL)
+        return;
+    if (H.Size < el_hist_size) {
+        H.Lines[H.Size++] = s;
     } else {
         free(H.Lines[0]);
-        for (i = 0; i < HIST_SIZE - 1; i++)
+        for (i = 0; i < el_hist_size - 1; i++)
             H.Lines[i] = H.Lines[i + 1];
-        H.Lines[i] = p;
+        H.Lines[i] = s;
     }
     H.Pos = H.Size - 1;
 }
@@ -1041,7 +1056,7 @@ static char *read_redirected(void)
 
             p += oldpos;        /* Continue where we left off... */
         }
-        if (read(0, p, 1) <= 0) {
+        if (read(el_infd, p, 1) <= 0) {
             /* Ignore "incomplete" lines at EOF, just like we do for a tty. */
             free(line);
             return NULL;
@@ -1056,19 +1071,67 @@ static char *read_redirected(void)
 }
 
 /* For compatibility with FSF readline. */
-void rl_reset_terminal(char *p __attribute__((__unused__)))
+void rl_reset_terminal(const char *terminal_name)
 {
+#ifdef CONFIG_USE_TERMCAP
+    char                buff[2048];
+    char               *bp;
+#endif
+#ifdef TIOCGWINSZ
+    struct winsize      W;
+#endif
+
+    if (terminal_name) {
+        el_term = terminal_name;
+	return;
+    }
+
+    if ((el_term = getenv("TERM")) == NULL)
+        el_term = "dumb";
+
+#ifdef CONFIG_USE_TERMCAP
+    bp = buff;
+    if (-1 != tgetent(buff, el_term)) {
+	if ((backspace = tgetstr("le", &bp)) != NULL)
+	    backspace = strdup(backspace);
+	tty_cols = tgetnum("co");
+	tty_rows = tgetnum("li");
+    }
+    /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
+#endif
+
+    if (tty_cols <= 0 || tty_rows <= 0) {
+#ifdef TIOCGWINSZ
+       if (-1 != ioctl(el_outfd, TIOCGWINSZ, &W)) {
+          tty_cols = (int)W.ws_col;
+          tty_rows = (int)W.ws_row;
+          return;
+       }
+#endif
+       tty_cols = SCREEN_COLS;
+       tty_rows = SCREEN_ROWS;
+    }
 }
 
 void rl_initialize(void)
 {
     if (!rl_prompt)
 	rl_prompt = "? ";
+
+    hist_alloc();
+
+    /* Setup I/O descriptors */
+    if (!rl_instream)  el_infd  = EL_STDIN;
+    else               el_infd  = fileno(rl_instream);
+    if (el_infd < 0)   el_infd  = EL_STDIN;
+    if (!rl_outstream) el_outfd = EL_STDOUT;
+    else               el_outfd = fileno(rl_outstream);
+    if (el_outfd < 0)  el_outfd = EL_STDOUT;
 }
 
 char *readline(const char *prompt)
 {
-    char        *line;
+    char *line;
 
     /* Unless called by the user already. */
     rl_initialize();
@@ -1086,7 +1149,7 @@ char *readline(const char *prompt)
     }
 
     tty_info();
-    rl_ttyset(0);
+    rl_prep_term_function(!rl_meta_chars);
     hist_add(NILSTR);
     ScreenSize = SCREEN_INC;
     Screen = malloc(sizeof(char) * ScreenSize);
@@ -1111,18 +1174,13 @@ char *readline(const char *prompt)
         tty_flush();
     }
 
-    rl_ttyset(1);
+    rl_deprep_term_function();
     free(Screen);
     free(H.Lines[--H.Size]);
 
-    if (line != NULL && *line != '\0'
-#ifdef CONFIG_UNIQUE_HISTORY
-        && !(H.Pos && strcmp(line, H.Lines[H.Pos - 1]) == 0)
-#endif
-        && !(H.Size && strcmp(line, H.Lines[H.Size - 1]) == 0)
-    ) {
+    /* Always add history, if it's a sane line. */
+    if (line != NULL && *line != '\0')
         hist_add(line);
-    }
 
     if (el_intr_pending > 0) {
 	int s = el_intr_pending;
@@ -1133,20 +1191,58 @@ char *readline(const char *prompt)
     return line;
 }
 
-void add_history(char *p __attribute__ ((unused)))
+/* Even though readline() itself adds history automatically, the user can also add
+ * lines.  This is for compat with GNU Readline. */
+void add_history(const char *p)
 {
-#ifdef obsolete         /* Made part of readline(). -- kjb */
     if (p == NULL || *p == '\0')
         return;
 
-#ifdef CONFIG_UNIQUE_HISTORY
-    if (H.Pos && strcmp(p, (char *) H.Lines[H.Pos - 1]) == 0)
-        return;
-#endif
-    if (H.Size && strcmp(p, (char *) H.Lines[H.Size - 1]) == 0)
-        return;
-    hist_add((char *)p);
-#endif
+    hist_add(p);
+}
+
+
+int read_history(const char *filename)
+{
+    FILE *fp;
+    char buf[SCREEN_INC];
+
+    hist_alloc();
+    fp = fopen(filename, "r");
+    if (fp) {
+	H.Size = 0;
+	while (H.Size < el_hist_size) {
+	    if (!fgets(buf, SCREEN_INC, fp))
+		break;
+	    buf[strlen(buf) - 1] = 0; /* Remove '\n' */
+	    add_history(buf);
+	}
+	fclose(fp);
+
+	return 0;
+    }
+
+    return errno;
+}
+
+int write_history(const char *filename)
+{
+    FILE *fp;
+
+    hist_alloc();
+    fp = fopen(filename, "w");
+    if (fp) {
+	int i = 0;
+
+	while (i < H.Size) {
+	    fprintf(fp, "%s\n", H.Lines[i++]);
+	}
+	fclose(fp);
+
+	return 0;
+    }
+
+    return errno;
 }
 
 
@@ -1154,7 +1250,7 @@ void add_history(char *p __attribute__ ((unused)))
 **  Move back to the beginning of the current word and return an
 **  allocated copy of it.
 */
-static char *find_word(void)
+char *el_find_word(void)
 {
     char        *p, *q;
     char        *new;
@@ -1197,12 +1293,12 @@ static el_status_t c_possible(void)
     char        *word;
     int         ac;
 
-    word = find_word();
+    word = el_find_word();
     ac = rl_list_possib(word, &av);
     if (word)
         free(word);
     if (ac) {
-        columns(ac, av);
+        el_print_columns(ac, av);
         while (--ac >= 0)
             free(av[ac]);
         free(av);
@@ -1210,7 +1306,7 @@ static el_status_t c_possible(void)
         return CSmove;
     }
 
-    return ring_bell();
+    return el_ring_bell();
 }
 
 static el_status_t c_complete(void)
@@ -1221,7 +1317,7 @@ static el_status_t c_complete(void)
     int         unique;
     el_status_t s = 0;
 
-    word = find_word();
+    word = el_find_word();
     p = (char *)rl_complete((char *)word, &unique);
     if (word)
         free(word);
@@ -1244,7 +1340,7 @@ static el_status_t c_complete(void)
             s = insert_string(new);
 #ifdef CONFIG_ANNOYING_NOISE
             if (!unique)
-                ring_bell();
+                el_ring_bell();
 #endif
         }
         free(new);
@@ -1303,7 +1399,7 @@ static el_status_t exchange(void)
     int c;
 
     if ((c = tty_get()) != CTL('X'))
-        return c == EOF ? CSeof : ring_bell();
+        return c == EOF ? CSeof : el_ring_bell();
 
     if ((c = rl_mark) <= rl_end) {
         rl_mark = rl_point;
@@ -1323,7 +1419,7 @@ static el_status_t yank(void)
 static el_status_t copy_region(void)
 {
     if (rl_mark > rl_end)
-        return ring_bell();
+        return el_ring_bell();
 
     if (rl_point > rl_mark)
         save_yank(rl_mark, rl_point - rl_mark);
@@ -1449,14 +1545,14 @@ static el_status_t last_argument(void)
     int         ac;
 
     if (H.Size == 1 || (p = (char *)H.Lines[H.Size - 2]) == NULL)
-        return ring_bell();
+        return el_ring_bell();
 
     if ((p = strdup(p)) == NULL)
         return CSstay;
     ac = argify(p, &av);
 
     if (Repeat != NO_ARG)
-        s = Repeat < ac ? insert_string(av[Repeat]) : ring_bell();
+        s = Repeat < ac ? insert_string(av[Repeat]) : el_ring_bell();
     else
         s = ac ? insert_string(av[ac - 1]) : CSstay;
 
@@ -1467,14 +1563,14 @@ static el_status_t last_argument(void)
     return s;
 }
 
-static el_keymap_t Map[33] = {
+static el_keymap_t Map[64] = {
     {   CTL('@'),       mk_set          },
     {   CTL('A'),       beg_line        },
     {   CTL('B'),       bk_char         },
     {   CTL('D'),       del_char        },
     {   CTL('E'),       end_line        },
     {   CTL('F'),       fd_char         },
-    {   CTL('G'),       ring_bell       },
+    {   CTL('G'),       el_ring_bell    },
     {   CTL('H'),       bk_del_char     },
     {   CTL('I'),       c_complete      },
     {   CTL('J'),       accept_line     },
@@ -1482,13 +1578,13 @@ static el_keymap_t Map[33] = {
     {   CTL('L'),       redisplay       },
     {   CTL('M'),       accept_line     },
     {   CTL('N'),       h_next          },
-    {   CTL('O'),       ring_bell       },
+    {   CTL('O'),       el_ring_bell    },
     {   CTL('P'),       h_prev          },
-    {   CTL('Q'),       ring_bell       },
+    {   CTL('Q'),       el_ring_bell    },
     {   CTL('R'),       h_search        },
-    {   CTL('S'),       ring_bell       },
+    {   CTL('S'),       el_ring_bell    },
     {   CTL('T'),       transpose       },
-    {   CTL('U'),       ring_bell       },
+    {   CTL('U'),       el_ring_bell    },
     {   CTL('V'),       quote           },
     {   CTL('W'),       bk_kill_word    },
     {   CTL('X'),       exchange        },
@@ -1496,12 +1592,12 @@ static el_keymap_t Map[33] = {
 #ifdef SYSTEM_IS_WIN32
     {   CTL('Z'),       end_of_input    },
 #else
-    {   CTL('Z'),       ring_bell       },
+    {   CTL('Z'),       el_ring_bell    },
 #endif
     {   CTL('['),       meta            },
     {   CTL(']'),       move_to_char    },
-    {   CTL('^'),       ring_bell       },
-    {   CTL('_'),       ring_bell       },
+    {   CTL('^'),       el_ring_bell    },
+    {   CTL('_'),       el_ring_bell    },
     {   0,              NULL            }
 };
 
@@ -1525,31 +1621,40 @@ static el_keymap_t   MetaMap[64]= {
     {   0,              NULL            }
 };
 
-void el_bind_key_in_metamap(char c, el_keymap_func_t func)
+static void el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t map[], size_t mapsz)
 {
-    /* Add given function to key map for META keys */
-    int i;
+    size_t i;
 
-    for (i = 0; MetaMap[i].Key != 0; i++)
+    for (i = 0; Map[i].Function != NULL; i++)
     {
-	if (MetaMap[i].Key == c)
+	if (map[i].Key == key)
 	{
-	    MetaMap[i].Function = func;
+	    map[i].Function = function;
 	    return;
 	}
     }
 
     /* A new key so have to add it to end */
-    if (i == 63)
+    if (i == mapsz)
     {
-	fprintf(stderr,"editline: MetaMap table full, requires increase\n");
+	fprintf(stderr,"editline: failed binding key 0x%x, keymap full.\n", key);
 	return;
     }
 
-    MetaMap[i].Function = func;
-    MetaMap[i].Key = c;
-    MetaMap[i + 1].Function = 0;  /* Zero the last location */
-    MetaMap[i + 1].Key = 0;       /* Zero the last location */
+    map[i].Key = key;
+    map[i].Function = function;
+
+    map[i + 1].Function = NULL;	/* Terminate list */
+}
+
+void el_bind_key(int key, el_keymap_func_t function)
+{
+    el_bind_key_in_map(key, function, Map, ARRAY_ELEMENTS(Map));
+}
+
+void el_bind_key_in_metamap(int key, el_keymap_func_t function)
+{
+    el_bind_key_in_map(key, function, MetaMap, ARRAY_ELEMENTS(MetaMap));
 }
 
 /**

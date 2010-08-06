@@ -1,7 +1,8 @@
 TODO
 
 * Port "fileman" example from BSD libedit, http://www.thrysoee.dk/editline/
-* Add support for rl_bind_key(), currently one needs to "hack" the Map[]
+* Instead of supporting multiline input, try the Emacs approach, line scrolling.
+* Add support for rl_bind_key(), currently only en editline specific el_bind_key() exists.
 * Add support for inhibiting completion: rl_inhibit_completion
 * Make "char *rl_prompt" globally visible.
 * Add support for rl_set_prompt().

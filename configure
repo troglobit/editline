@@ -748,8 +748,6 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 TERMLIBS
 AM_CFLAGS
-CONFIG_DEFAULT_COMPLETE_FALSE
-CONFIG_DEFAULT_COMPLETE_TRUE
 LIBOBJS
 CPP
 OTOOL64
@@ -869,13 +867,12 @@ with_pic
 enable_fast_install
 with_gnu_ld
 enable_libtool_lock
+enable_unique_history
 enable_default_complete
 enable_arrow_keys
 enable_sigstop
 enable_terminal_bell
 enable_termcap
-enable_history
-enable_unique_history
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1514,13 +1511,15 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --enable-default-complete      Enable default completion handler.
-  --enable-arrow-keys            Enable ANSI arrow keys.
-  --enable-sigstop               Enable SIGSTOP key.
-  --enable-terminal-bell         Enable terminal bell on completion.
-  --enable-termcap               Use the termcap library for terminal size.
-  --enable-history=LINES         Enable scrollback history, default off.
-  --enable-unique-history        Uniqify scrollback history, i.e., don't save dupes.
+  --disable-unique-history
+                          Disable uniqify of scrollback. Default: duplicate
+                          entries are ignored. Use this to save dupes.
+  --disable-default-complete
+                          Disable default (filename) completion handler.
+  --disable-arrow-keys    Disable ANSI arrow keys.
+  --enable-sigstop        Enable SIGSTOP key.
+  --enable-terminal-bell  Enable terminal bell on completion.
+  --enable-termcap        Use termcap library to query terminal size.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -4562,13 +4561,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4565: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4564: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4568: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4567: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4571: output\"" >&5)
+  (eval echo "\"\$as_me:4570: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5774,7 +5773,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5777 "configure"' > conftest.$ac_ext
+  echo '#line 5776 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7304,11 +7303,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7307: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7306: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7311: \$? = $ac_status" >&5
+   echo "$as_me:7310: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7643,11 +7642,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7646: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7645: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7650: \$? = $ac_status" >&5
+   echo "$as_me:7649: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7748,11 +7747,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7751: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7750: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7755: \$? = $ac_status" >&5
+   echo "$as_me:7754: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7803,11 +7802,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7806: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7805: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7810: \$? = $ac_status" >&5
+   echo "$as_me:7809: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10187,7 +10186,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10190 "configure"
+#line 10189 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10283,7 +10282,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10286 "configure"
+#line 10285 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10908,9 +10907,6 @@ fi
 
 $as_echo "#define SYS_UNIX 1" >>confdefs.h
 
-
-$as_echo "#define HIDE 1" >>confdefs.h
-
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
 if test "x$ac_cv_type_size_t" = x""yes; then :
 
@@ -11130,26 +11126,32 @@ fi
 done
 
 
-# Check whether --enable-default-complete was given.
-if test "${enable_default_complete+set}" = set; then :
-  enableval=$enable_default_complete; complete=true;
-$as_echo "#define CONFIG_DEFAULT_COMPLETE /**/" >>confdefs.h
+# Check whether --enable-unique-history was given.
+if test "${enable_unique_history+set}" = set; then :
+  enableval=$enable_unique_history;
+else
+
+$as_echo "#define CONFIG_UNIQUE_HISTORY 1" >>confdefs.h
 
 fi
 
- if test x$complete = xtrue; then
-  CONFIG_DEFAULT_COMPLETE_TRUE=
-  CONFIG_DEFAULT_COMPLETE_FALSE='#'
+
+# Check whether --enable-default-complete was given.
+if test "${enable_default_complete+set}" = set; then :
+  enableval=$enable_default_complete;
 else
-  CONFIG_DEFAULT_COMPLETE_TRUE='#'
-  CONFIG_DEFAULT_COMPLETE_FALSE=
+
+$as_echo "#define CONFIG_DEFAULT_COMPLETE 1" >>confdefs.h
+
 fi
 
 
 # Check whether --enable-arrow-keys was given.
 if test "${enable_arrow_keys+set}" = set; then :
   enableval=$enable_arrow_keys;
-$as_echo "#define CONFIG_ANSI_ARROWS /**/" >>confdefs.h
+else
+
+$as_echo "#define CONFIG_ANSI_ARROWS 1" >>confdefs.h
 
 fi
 
@@ -11157,7 +11159,7 @@ fi
 # Check whether --enable-sigstop was given.
 if test "${enable_sigstop+set}" = set; then :
   enableval=$enable_sigstop;
-$as_echo "#define CONFIG_SIGSTOP /**/" >>confdefs.h
+$as_echo "#define CONFIG_SIGSTOP 1" >>confdefs.h
 
 fi
 
@@ -11165,7 +11167,7 @@ fi
 # Check whether --enable-terminal-bell was given.
 if test "${enable_terminal_bell+set}" = set; then :
   enableval=$enable_terminal_bell;
-$as_echo "#define CONFIG_ANNOYING_NOISE /**/" >>confdefs.h
+$as_echo "#define CONFIG_ANNOYING_NOISE 1" >>confdefs.h
 
 fi
 
@@ -11173,31 +11175,7 @@ fi
 # Check whether --enable-termcap was given.
 if test "${enable_termcap+set}" = set; then :
   enableval=$enable_termcap;
-$as_echo "#define CONFIG_USE_TERMCAP /**/" >>confdefs.h
-
-fi
-
-
-# Default history size 1, i.e. disabled.
-let HIST_SIZE=1
-# Check whether --enable-history was given.
-if test "${enable_history+set}" = set; then :
-  enableval=$enable_history; let HIST_SIZE=$enableval
-fi
-
-if test $HIST_SIZE -lt 1; then
-   let HIST_SIZE=1
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HIST_SIZE $HIST_SIZE
-_ACEOF
-
-
-# Check whether --enable-unique-history was given.
-if test "${enable_unique_history+set}" = set; then :
-  enableval=$enable_unique_history;
-$as_echo "#define CONFIG_UNIQUE_HISTORY /**/" >>confdefs.h
+$as_echo "#define CONFIG_USE_TERMCAP 1" >>confdefs.h
 
 fi
 
@@ -11532,10 +11510,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error "conditional \"am__fastdepCC\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${CONFIG_DEFAULT_COMPLETE_TRUE}" && test -z "${CONFIG_DEFAULT_COMPLETE_FALSE}"; then
-  as_fn_error "conditional \"CONFIG_DEFAULT_COMPLETE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

@@ -149,7 +149,8 @@ int main(void)
 	if (next)
 	    continue;
 
- 	printf("\t\t\t|%s|\n", line);
+	if (*line != '\0')
+	    printf("\t\t\t|%s|\n", line);
  	free(line);
     }
 

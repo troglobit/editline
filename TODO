@@ -1,5 +1,6 @@
 TODO
 
+* Verify for 1.14.0 that custom completion handlers still work, after reverting fix in 0.2.2.
 * Port "fileman" example from BSD libedit, http://www.thrysoee.dk/editline/
 * Instead of supporting multiline input, try the Emacs approach, line scrolling.
 * Add support for rl_bind_key(), currently only en editline specific el_bind_key() exists.

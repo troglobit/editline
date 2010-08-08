@@ -19,6 +19,14 @@ desirable at all, type:
 
     ./configure --disable-default-complete
 
+An even more common desire is to change the default install location.  By default all
+configure scripts setup /usr/local as the install "prefix", to change this type:
+
+    ./configure --prefix=/home/troglobit/tmp
+
+Advanced users are encouraged to read up on --libdir, --mandir, etc. in the GNU
+Configure and Build System.
+
 For more available options, type:
 
     ./configure --help
@@ -27,7 +35,7 @@ To build and install, simply type:
 
     make
 
-and
+followed by
 
     sudo make install
 

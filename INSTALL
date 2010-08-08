@@ -1,0 +1,36 @@
+HowTo Build Minix Editline
+==========================
+
+Minix editline makes use of GNU configure tools, which includes autoconf, automake
+and libtool. This enables high levels of portability and ease of use In most cases
+all you need to do is unpack the tarball, enter the directory and type:
+
+    ./configure
+
+There are are, however, more options available.  For instance, sometimes it is useful
+to build editline as a static library, type:
+
+    ./configure --disable-shared
+
+By default editline employs a default handler for the TAB key, pressing it once
+completes to the nearest matching filename in the current working directory, or it
+can display a listing of possible completions.  For some uses this default is not
+desirable at all, type:
+
+    ./configure --disable-default-complete
+
+For more available options, type:
+
+    ./configure --help
+
+To build and install, simply type:
+
+    make
+
+and
+
+    sudo make install
+
+Good Luck!
+     //Joachim
+

@@ -23,8 +23,6 @@ optional configure flags.
 
 * Add support for rl_bind_key(), currently only en editline specific el_bind_key() exists.
 
-* Add support for inhibiting completion: rl_inhibit_completion
-
 * Make "char *rl_prompt" globally visible.
 
 * Add support for rl_set_prompt().

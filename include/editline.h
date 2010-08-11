@@ -53,6 +53,7 @@ extern int         rl_list_possib(char *token, char ***av);
 extern int         rl_point;
 extern int         rl_mark;
 extern int         rl_end;
+extern int         rl_inhibit_complete;
 extern char       *rl_line_buffer;
 extern const char *rl_readline_name;
 extern FILE       *rl_instream;  /* The stdio stream from which input is read. Defaults to stdin if NULL - Not supported yet! */

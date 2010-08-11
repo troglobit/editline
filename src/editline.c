@@ -116,6 +116,7 @@ int               rl_point;
 int               rl_mark;
 int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
+int               rl_inhibit_complete = 0;
 char             *rl_line_buffer;
 const char       *rl_prompt;
 const char       *rl_readline_name;    /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
@@ -904,7 +905,15 @@ static el_status_t emacs(int c)
         if (kp->Key == c)
             break;
     }
-    s = kp->Function ? kp->Function() : insert_char(c);
+
+    if (kp->Function) {
+	s = kp->Function();
+	if (s == CSdispatch)	/* If Function is inhibited. */
+	    s = insert_char(c);
+    } else {
+	s = insert_char(c);
+    }
+
     if (!el_pushed) {
         /* No pushback means no repeat count; hacky, but true. */
         Repeat = NO_ARG;
@@ -1314,7 +1323,10 @@ static el_status_t c_complete(void)
     char        *word, *new;
     size_t      len;
     int         unique;
-    el_status_t s = 0;
+    el_status_t s = CSdone;
+
+    if (rl_inhibit_complete)
+	return CSdispatch;
 
     word = el_find_word();
     p = (char *)rl_complete((char *)word, &unique);

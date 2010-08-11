@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-# Sample debian/rules that uses debhelper.
+# debian/rules for libeditline
 # GNU copyright 1997 to 1999 by Joey Hess.
 
 # Uncomment this to turn on verbose mode.
@@ -12,14 +12,12 @@ major=0
 build: build-stamp
 build-stamp:
 	dh_testdir
-	$(MAKE)
-	touch build-stamp
+	dh_auto_configure
+	dh_auto_build
 
 clean:
 	dh_testdir
-	dh_testroot
-	rm -f build-stamp
-	[ ! -f Makefile ] || $(MAKE) clean
+	dh_auto_clean
 	dh_clean
 
 install: build
@@ -27,29 +25,18 @@ install: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-	$(MAKE) install DESTDIR=`pwd`/debian/libeditline-dev
-	cp include_editline.h \
-	   `pwd`/debian/libeditline-dev/usr/include/editline.h
+	dh_auto_install
 
-binary-indep: build install
+binary-indep: install
 
-binary-arch: build install
+# build libeditline${major} package by moving files from editline-dev
+binary-arch: install
 	dh_testdir
 	dh_testroot
-	# build libeditline${major} package by moving files from editline-dev
-	dh_movefiles --sourcedir=debian/libeditline-dev \
-	             -plibeditline$(major) \
-	             usr/lib/libeditline.so.$(major) \
-	             usr/lib/libeditline.so.$(version)
+	dh_auto_install
+	dh_install --sourcedir=debian/tmp
 	dh_installdocs
-	dh_installexamples
-	dh_installmenu
-	dh_installmanpages
-	rm -rf debian/libeditline0/usr/share/man/
-	dh_installcron
-	dh_installinfo
 	dh_installchangelogs 
-	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms

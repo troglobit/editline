@@ -1,0 +1,4 @@
+usr/include
+usr/lib/libeditline*.*a
+usr/lib/libeditline*.so
+usr/share/man/man3

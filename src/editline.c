@@ -1329,17 +1329,17 @@ static el_status_t c_complete(void)
 	return CSdispatch;
 
     word = el_find_word();
-    p = (char *)rl_complete((char *)word, &unique);
+    p = rl_complete(word, &unique);
     if (word)
         free(word);
     if (p) {
-        len = strlen((char *)p);
+        len = strlen(p);
         word = p;
         new = q = malloc(sizeof(char) * (2 * len + 1));
 	if (!new)
 	    return CSstay;
         while (*p) {
-            if ((*p < ' ' || strchr(SEPS, (char) *p) != NULL)
+            if ((*p < ' ' || strchr(SEPS, *p) != NULL)
                                 && (!unique || p[1] != 0)) {
                 *q++ = '\\';
             }

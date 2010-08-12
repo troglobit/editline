@@ -1065,7 +1065,7 @@ static char *read_redirected(void)
 void rl_reset_terminal(const char *terminal_name)
 {
 #ifdef CONFIG_USE_TERMCAP
-    char                buff[2048];
+    char                buf[1024];
     char               *bp;
 #endif
 #ifdef TIOCGWINSZ
@@ -1082,8 +1082,8 @@ void rl_reset_terminal(const char *terminal_name)
     tty_cols = tty_rows = -1;
 
 #ifdef CONFIG_USE_TERMCAP
-    bp = buff;
-    if (-1 != tgetent(buff, el_term)) {
+    bp = buf;
+    if (-1 != tgetent(buf, el_term)) {
 	if ((backspace = tgetstr("le", &bp)) != NULL)
 	    backspace = strdup(backspace);
 	tty_cols = tgetnum("co");

@@ -244,23 +244,6 @@ static void tty_backn(int n)
 
 static void tty_info(void)
 {
-    static int init;
-
-    if (init) {
-#ifdef TIOCGWINSZ
-	struct winsize W;
-
-        if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
-            tty_cols = (int)W.ws_col;
-            tty_rows = (int)W.ws_row;
-        }
-#endif
-        return;
-    }
-    init++;
-
-    /* Initialize to faulty values to trigger fallback if nothing else works. */
-    tty_cols = tty_rows = -1;
     rl_reset_terminal(NULL);
 }
 
@@ -1091,11 +1074,12 @@ void rl_reset_terminal(const char *terminal_name)
 
     if (terminal_name) {
         el_term = terminal_name;
-	return;
+    } else if ((el_term = getenv("TERM")) == NULL) {
+        el_term = "dumb";
     }
 
-    if ((el_term = getenv("TERM")) == NULL)
-        el_term = "dumb";
+    /* Initialize to faulty values to trigger fallback if nothing else works. */
+    tty_cols = tty_rows = -1;
 
 #ifdef CONFIG_USE_TERMCAP
     bp = buff;
@@ -1110,7 +1094,7 @@ void rl_reset_terminal(const char *terminal_name)
 
     if (tty_cols <= 0 || tty_rows <= 0) {
 #ifdef TIOCGWINSZ
-       if (-1 != ioctl(el_outfd, TIOCGWINSZ, &W)) {
+       if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
           tty_cols = (int)W.ws_col;
           tty_rows = (int)W.ws_row;
           return;

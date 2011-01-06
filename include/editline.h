@@ -21,6 +21,14 @@
 #ifndef __EDITLINE_H__
 #define __EDITLINE_H__
 
+/* Handy macros when binding keys. */
+#define CTL(x)          ((x) & 0x1F)
+#define ISCTL(x)        ((x) && (x) < ' ')
+#define UNCTL(x)        ((x) + 64)
+#define META(x)         ((x) | 0x80)
+#define ISMETA(x)       ((x) & 0x80)
+#define UNMETA(x)       ((x) & 0x7F)
+
 /* Command status codes. */
 typedef enum {
     CSdone, CSeof, CSmove, CSdispatch, CSstay, CSsignal

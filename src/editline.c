@@ -33,12 +33,6 @@
 #define EL_STDOUT       1
 #define NO_ARG          (-1)
 #define DEL             127
-#define CTL(x)          ((x) & 0x1F)
-#define ISCTL(x)        ((x) && (x) < ' ')
-#define UNCTL(x)        ((x) + 64)
-#define META(x)         ((x) | 0x80)
-#define ISMETA(x)       ((x) & 0x80)
-#define UNMETA(x)       ((x) & 0x7F)
 #define SEPS "\"#$&'()*:;<=>?[\\]^`{|}~\n\t "
 
 /*

@@ -9,16 +9,24 @@
 version=0.0.0
 major=0
 
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	dh_auto_configure
+	touch configure-stamp
+
 build: build-stamp
 build-stamp:
 	dh_testdir
 	dh_auto_configure
 	dh_auto_build
+	touch $@
 
 clean:
 	dh_testdir
 	dh_auto_clean
 	dh_clean
+	@rm -f build-stamp configure-stamp
 
 install: build
 	dh_testdir

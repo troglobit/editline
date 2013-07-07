@@ -818,6 +818,11 @@ static el_status_t del_char(void)
     return delete_string(Repeat == NO_ARG ? 1 : Repeat);
 }
 
+el_status_t el_del_char(void)
+{
+    return del_char();
+}
+
 static el_status_t meta(void)
 {
     int c;

@@ -901,21 +901,6 @@ static el_status_t emacs(int c)
 
 static el_status_t tty_special(int c)
 {
-   if (rl_meta_chars && ISMETA(c))
-        return CSdispatch;
-
-    if (c == rl_erase || c == DEL)
-        return bk_del_char();
-    if (c == rl_kill) {
-        if (rl_point != 0) {
-            rl_point = 0;
-            reposition();
-        }
-        Repeat = NO_ARG;
-        return kill_line();
-    }
-    if (c == rl_eof && rl_point == 0 && rl_end == 0)
-        return CSeof;
     if (c == rl_intr) {
         el_intr_pending = SIGINT;
         return CSsignal;
@@ -930,6 +915,23 @@ static el_status_t tty_special(int c)
         return CSsignal;
     }
 #endif
+
+   if (rl_meta_chars && ISMETA(c))
+        return CSdispatch;
+
+    if (c == rl_erase || c == DEL)
+        return bk_del_char();
+    if (c == rl_kill) {
+        if (rl_point != 0) {
+            rl_point = 0;
+            reposition();
+        }
+        Repeat = NO_ARG;
+        return kill_line();
+    }
+
+    if (c == rl_eof && rl_point == 0 && rl_end == 0)
+        return CSeof;
 
     return CSdispatch;
 }

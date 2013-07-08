@@ -1,6 +1,6 @@
 # Minix libeditline                                           -*- Autoconf -*-
 #
-# Copyright (c) 2008-2010  Joachim Nilsson <troglobit()vmlinux!org>
+# Copyright (c) 2008-2013  Joachim Nilsson <troglobit()gmail!com>
 #
 # Process this file with autoconf to produce a configure script.
 #
@@ -13,13 +13,13 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AC_PREREQ(2.61)
-AC_INIT(editline, 1.14.0, troglobit@vmlinux.org)
+AC_INIT(editline, 1.14.1, troglobit@gmail.com)
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Prepare automake
-AM_INIT_AUTOMAKE([dist-bzip2 dist-lzma])
+AM_INIT_AUTOMAKE([no-dist-gzip dist-xz])
 
 # Silent "kernel" style build from automake 1.11 and later.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])

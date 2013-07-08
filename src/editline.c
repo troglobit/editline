@@ -154,10 +154,14 @@ static void tty_flush(void)
 {
     ssize_t res;
 
-    if (ScreenCount) {
-	if (!el_no_echo)
-	    res = write(el_outfd, Screen, ScreenCount);
-        ScreenCount = 0;
+    if (!ScreenCount)
+	return;
+
+    if (!el_no_echo) {
+	res = write(el_outfd, Screen, ScreenCount);
+
+	if (res > 0)
+	    ScreenCount = 0;
     }
 }
 

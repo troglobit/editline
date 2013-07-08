@@ -19,10 +19,11 @@
  * 4. This notice may not be removed or altered.
  */
 
-#include "editline.h"
-#include <signal.h>
 #include <errno.h>
 #include <ctype.h>
+#include <signal.h>
+
+#include "editline.h"
 
 /*
 **  Manifest constants.
@@ -1643,13 +1644,13 @@ static int is_ctl_map_key(int key)
     return mapsz != find_key_in_map(key, Map, mapsz);
 }
 
-static void el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t map[], size_t mapsz)
+static el_status_t el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t map[], size_t mapsz)
 {
     size_t creat, pos = find_key_in_map(key, map, mapsz);
 
     if (pos == mapsz) {
-	fprintf(stderr,"editline: Failed binding key 0x%x, keymap full.\n", key);
-	return;
+	errno = ENOMEM;
+	return CSeof;
     }
 
     /* Add at end, create new? */
@@ -1664,16 +1665,18 @@ static void el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t m
 	map[pos + 1].Key      = 0;
 	map[pos + 1].Function = NULL;
     }
+
+    return CSdone;
 }
 
-void el_bind_key(int key, el_keymap_func_t function)
+el_status_t el_bind_key(int key, el_keymap_func_t function)
 {
-    el_bind_key_in_map(key, function, Map, ARRAY_ELEMENTS(Map));
+    return el_bind_key_in_map(key, function, Map, ARRAY_ELEMENTS(Map));
 }
 
-void el_bind_key_in_metamap(int key, el_keymap_func_t function)
+el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function)
 {
-    el_bind_key_in_map(key, function, MetaMap, ARRAY_ELEMENTS(MetaMap));
+    return el_bind_key_in_map(key, function, MetaMap, ARRAY_ELEMENTS(MetaMap));
 }
 
 /**

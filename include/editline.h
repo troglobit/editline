@@ -31,7 +31,12 @@
 
 /* Command status codes. */
 typedef enum {
-    CSdone, CSeof, CSmove, CSdispatch, CSstay, CSsignal
+    CSdone = 0,                 /* OK */
+    CSeof,                      /* Error, or EOF */
+    CSmove,
+    CSdispatch,
+    CSstay,
+    CSsignal
 } el_status_t;
 
 /* Editline specific types, despite rl_ prefix.  From Heimdal project. */
@@ -52,8 +57,8 @@ extern void        el_print_columns(int ac, char **av);
 extern el_status_t el_ring_bell(void);
 extern el_status_t el_del_char(void);
 
-extern void        el_bind_key(int key, el_keymap_func_t function);
-extern void        el_bind_key_in_metamap(int key, el_keymap_func_t function);
+extern el_status_t el_bind_key(int key, el_keymap_func_t function);
+extern el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function);
 
 extern char       *rl_complete(char *token, int *match);
 extern int         rl_list_possib(char *token, char ***av);

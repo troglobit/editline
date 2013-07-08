@@ -122,6 +122,7 @@ char **(*rl_attempted_completion_function)(const char *token, int start, int end
 
 /* Declarations. */
 static char     *editinput(void);
+static int       is_ctl_map_key(int key);
 #ifdef CONFIG_USE_TERMCAP
 extern char     *tgetstr(const char *, char **);
 extern int      tgetent(char *, const char *);
@@ -930,6 +931,9 @@ static el_status_t tty_special(int c)
         return kill_line();
     }
 
+    if (is_ctl_map_key(c))
+	return CSdispatch;
+
     if (c == rl_eof && rl_point == 0 && rl_end == 0)
         return CSeof;
 
@@ -1612,30 +1616,49 @@ static el_keymap_t   MetaMap[64]= {
     {   0,              NULL            }
 };
 
-static void el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t map[], size_t mapsz)
+static size_t find_key_in_map(int key, el_keymap_t map[], size_t mapsz)
 {
     size_t i;
 
-    for (i = 0; Map[i].Function != NULL; i++)
-    {
+    for (i = 0; map[i].Function != NULL; i++) {
 	if (map[i].Key == key)
-	{
-	    map[i].Function = function;
-	    return;
-	}
+	    return i;
     }
 
-    /* A new key so have to add it to end */
-    if (i == mapsz)
-    {
-	fprintf(stderr,"editline: failed binding key 0x%x, keymap full.\n", key);
+    if (i < mapsz)
+	return i;
+
+    return mapsz;
+}
+
+static int is_ctl_map_key(int key)
+{
+    size_t mapsz = ARRAY_ELEMENTS(Map);
+
+    return mapsz != find_key_in_map(key, Map, mapsz);
+}
+
+static void el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t map[], size_t mapsz)
+{
+    size_t creat, pos = find_key_in_map(key, map, mapsz);
+
+    if (pos == mapsz) {
+	fprintf(stderr,"editline: Failed binding key 0x%x, keymap full.\n", key);
 	return;
     }
 
-    map[i].Key = key;
-    map[i].Function = function;
+    /* Add at end, create new? */
+    creat = map[pos].Function == NULL;
 
-    map[i + 1].Function = NULL;	/* Terminate list */
+    /* A new key so have to add it to end */
+    map[pos].Key	  = key;
+    map[pos].Function	  = function;
+
+    /* Terminate list */
+    if (creat) {
+	map[pos + 1].Key      = 0;
+	map[pos + 1].Function = NULL;
+    }
 }
 
 void el_bind_key(int key, el_keymap_func_t function)

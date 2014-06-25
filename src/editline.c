@@ -167,6 +167,9 @@ static void tty_flush(void)
 
 static void tty_put(const char c)
 {
+    if (el_no_echo)
+	return;
+
     Screen[ScreenCount] = c;
     if (++ScreenCount >= ScreenSize - 1) {
         ScreenSize += SCREEN_INC;
@@ -1180,9 +1183,11 @@ char *readline(const char *prompt)
     free(Screen);
     free(H.Lines[--H.Size]);
 
-    /* Always add history, if it's a sane line. */
-    if (line != NULL && *line != '\0')
-        hist_add(line);
+    /* Add to history, unless no-echo mode ... */
+    if (!el_no_echo) {
+	if (line != NULL && *line != '\0')
+	    hist_add(line);
+    }
 
     if (el_intr_pending > 0) {
 	int s = el_intr_pending;

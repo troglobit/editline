@@ -1,14 +1,1 @@
-Notable Changes
-
-* v1.13.0 - Adaptations to Debian editline package
-** Major version number bump, adapt to Jum Studt's v1.12
-** Import debian/ directory and adapt it to configure et al.
-** Change library name to libeditline to distinguish it from BSD libedit.
-
-* v0.3.0
-** Support for ANSI arrow keys using --enable-arrow-keys
-
-* v0.2.x
-** Patches from Debian package merged.
-** Support for custom command completion.
-
+NEWS.md

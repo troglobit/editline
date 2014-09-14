@@ -1,0 +1,37 @@
+editline
+========
+
+This is a line editing library.  It can be linked into almost any program to
+provide command-line editing and history.  It is call-compatible with the FSF
+readline library, but is a fraction of the size (and offers fewer features).
+
+The editline library was created by Simmule Turner and Rich Salz back in 1992.
+At the time they chose to distribute the code under a "C News-like" copyright,
+see the file LICENSE for details.
+
+The small size (<30k), lack of dependencies (no ncurses needed!) and the free
+license should make this library interesting to many embedded developers.
+
+Configuration is made by supplying different options to the GNU configure
+script.  In the `examples/` directory you can find some small code snippets used
+for testing.
+
+This version of the editline library is a fork off the Minix3 sources. Other
+know versions, often based off of the original comp.sources.unix posting are:
+
+* Debian [libeditline](http://packages.qa.debian.org/e/editline.html)
+* [Heimdal](http://www.h5l.org)
+* [Festival speech-tools](http://festvox.org/festival/)
+* Steve Tell's [editline patches](http://www.cs.unc.edu/~tell/dist.html)
+
+The most intersting patches and bug fixes from each fork have been merged here.
+Outstanding issues are listed in the TODO file.
+
+An explanation of the version numbering may be in order.  I didn't know about
+the Debian version for quite some time, so I kept a different name for the
+package and a different versioning scheme.  In June 2009, I decided to line up
+alongside Debian, with the intent of merging the efforts.
+
+----
+Joachim Nilsson <[troglobit()gmail!com](mailto:troglobit@gmail!com)>
+

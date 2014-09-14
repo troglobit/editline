@@ -3,4 +3,20 @@ language: c
 compiler:
   - gcc
 
-script: ./configure && make
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: ""
+
+addons:
+  coverity_scan:
+    project:
+      name: "troglobit/editline"
+      description: "Minix editline"
+    notification_email: troglobit@gmail.com
+    build_command_prepend: "./configure --enable-sigstop --enable-terminal-bell"
+    build_command:   "make -j5"
+    branch_pattern: master
+
+script: ./configure --enable-sigstop --enable-terminal-bell && make -j5

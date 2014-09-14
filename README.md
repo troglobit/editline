@@ -1,5 +1,6 @@
 editline
 ========
+[![Build Status](https://travis-ci.org/troglobit/editline.png?branch=master)](https://travis-ci.org/troglobit/editline)[![Coverity Scan Status](https://scan.coverity.com/projects/2982/badge.svg)](https://scan.coverity.com/projects/2982)
 
 This is a line editing library.  It can be linked into almost any program to
 provide command-line editing and history.  It is call-compatible with the FSF

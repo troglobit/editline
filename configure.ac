@@ -13,7 +13,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AC_PREREQ(2.61)
-AC_INIT(editline, 1.14.1, troglobit@gmail.com)
+AC_INIT(editline, 1.14.2, troglobit@gmail.com)
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])

@@ -1,3 +1,11 @@
+editline (1.14.2-1) unstable; urgency=low
+
+  * Minor bugfix release:
+    + Fix `el_no_echo` bug causing secrets to leak when disabling no-echo
+    + Handle `EINTR` in syscalls better
+
+ -- Joachim Nilsson <troglobit@gmail.com>  Sun, 14 Sep 2014 04:27:25 +0200
+
 editline (1.14.1-1) unstable; urgency=low
 
   * New release.

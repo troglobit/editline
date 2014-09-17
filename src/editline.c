@@ -1134,6 +1134,33 @@ void rl_initialize(void)
     if (el_outfd < 0)  el_outfd = EL_STDOUT;
 }
 
+static const char *rl_saved_prompt = NULL;
+void rl_save_prompt(void)
+{
+    rl_saved_prompt = rl_prompt;
+}
+
+void rl_restore_prompt(void)
+{
+    if (rl_saved_prompt)
+	rl_prompt = rl_saved_prompt;
+}
+
+void rl_set_prompt(const char *prompt)
+{
+    rl_prompt = prompt;
+}
+
+void rl_clear_message(void)
+{
+    /* Nothing to do atm. */
+}
+
+void rl_forced_update_display()
+{
+    redisplay();
+}
+
 char *readline(const char *prompt)
 {
     char *line;

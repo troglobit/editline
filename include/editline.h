@@ -78,6 +78,13 @@ extern int         el_hist_size; /* size of history scrollback buffer, default: 
 extern void rl_initialize(void);
 extern void rl_reset_terminal(const char *terminal_name);
 
+void rl_save_prompt(void);
+void rl_restore_prompt(void);
+void rl_set_prompt(const char *prompt);
+
+void rl_clear_message(void);
+void rl_forced_update_display(void);
+
 extern char *readline(const char *prompt);
 extern void add_history(const char *line);
 

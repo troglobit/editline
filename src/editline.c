@@ -1576,7 +1576,7 @@ static int argify(char *line, char ***avp)
                         return ac;
                     }
 
-                    memcpy(arg, p, i * sizeof(char **));
+                    memcpy(arg, p, i * sizeof(char *));
                     i += MEM_INC;
                     free(p);
                     *avp = p = arg;

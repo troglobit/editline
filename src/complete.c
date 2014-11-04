@@ -75,7 +75,7 @@ static int FindMatches(char *dir, char *file, char ***avp)
                 break;
             }
             if (ac) {
-                memcpy(word, av, ac * sizeof(char **));
+                memcpy(word, av, ac * sizeof(char *));
                 free(av);
             }
             *avp = av = word;
@@ -105,7 +105,7 @@ static int FindMatches(char *dir, char *file, char ***avp)
         if ((p = strdup("choices")) != NULL) av[ac++] = p;
     } else {
         if (ac)
-            qsort(av, ac, sizeof (char **), compare);
+            qsort(av, ac, sizeof(char *), compare);
     }
 
     return ac;

@@ -1369,8 +1369,10 @@ static el_status_t c_complete(void)
         len = strlen(p);
         word = p;
         new = q = malloc(sizeof(char) * (2 * len + 1));
-	if (!new)
+	if (!new) {
+	    free(word);
 	    return CSstay;
+	}
         while (*p) {
             if ((*p < ' ' || strchr(SEPS, *p) != NULL)
                                 && (!unique || p[1] != 0)) {

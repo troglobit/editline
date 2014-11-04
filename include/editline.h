@@ -72,7 +72,8 @@ extern char       *rl_line_buffer;
 extern const char *rl_readline_name;
 extern FILE       *rl_instream;  /* The stdio stream from which input is read. Defaults to stdin if NULL - Not supported yet! */
 extern FILE       *rl_outstream; /* The stdio stream to which output is flushed. Defaults to stdout if NULL - Not supported yet! */
-extern int         el_no_echo;   /* e.g under emacs, don't echo except prompt */
+extern int         el_no_echo;   /* E.g under emacs, don't echo except prompt */
+extern int         el_no_hist;   /* Disable auto-save of and access to history -- e.g. for password prompts or wizards */
 extern int         el_hist_size; /* size of history scrollback buffer, default: 15 */
 
 extern void rl_initialize(void);

@@ -107,6 +107,7 @@ static int        tty_cols = SCREEN_COLS;
 static int        tty_rows = SCREEN_ROWS;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
+int               el_no_hist = 0;
 int               rl_point;
 int               rl_mark;
 int               rl_end;
@@ -547,11 +548,17 @@ static el_status_t do_hist(const char *(*move)(void))
 
 static el_status_t h_next(void)
 {
+    if (el_no_hist)
+	return CSstay;
+
     return do_hist(next_hist);
 }
 
 static el_status_t h_prev(void)
 {
+    if (el_no_hist)
+	return CSstay;
+
     return do_hist(prev_hist);
 }
 
@@ -1210,8 +1217,8 @@ char *readline(const char *prompt)
     free(Screen);
     free(H.Lines[--H.Size]);
 
-    /* Add to history, unless no-echo mode ... */
-    if (!el_no_echo) {
+    /* Add to history, unless no-echo or no-history mode ... */
+    if (!el_no_echo && !el_no_hist) {
 	if (line != NULL && *line != '\0')
 	    hist_add(line);
     }

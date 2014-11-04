@@ -467,24 +467,27 @@ static el_status_t insert_string(const char *p)
 {
     size_t      len;
     int         i;
-    char        *new;
+    char        *line;
     char        *q;
 
     len = strlen(p);
     if (rl_end + len >= Length) {
-	new = malloc(sizeof(char) * (Length + len + MEM_INC));
-        if (!new)
+	line = malloc(sizeof(char) * (Length + len + MEM_INC));
+        if (!line)
             return CSstay;
+
         if (Length) {
-            memcpy(new, rl_line_buffer, Length);
+            memcpy(line, rl_line_buffer, Length);
             free(rl_line_buffer);
         }
-        rl_line_buffer = new;
+
+        rl_line_buffer = line;
         Length += len + MEM_INC;
     }
 
     for (q = &rl_line_buffer[rl_point], i = rl_end - rl_point; --i >= 0; )
         q[len + i] = q[i];
+
     memcpy(&rl_line_buffer[rl_point], p, len);
     rl_end += len;
     rl_line_buffer[rl_end] = '\0';
@@ -1275,9 +1278,9 @@ int write_history(const char *filename)
     if (fp) {
 	int i = 0;
 
-	while (i < H.Size) {
+	while (i < H.Size)
 	    fprintf(fp, "%s\n", H.Lines[i++]);
-	}
+
 	fclose(fp);
 
 	return 0;
@@ -1294,7 +1297,7 @@ int write_history(const char *filename)
 char *el_find_word(void)
 {
     char        *p, *q;
-    char        *new;
+    char        *word;
     size_t      len;
 
     p = &rl_line_buffer[rl_point];
@@ -1311,11 +1314,11 @@ char *el_find_word(void)
     }
 
     len = rl_point - (p - rl_line_buffer) + 1;
-    new = malloc(sizeof(char) * len);
-    if (!new)
+    word = malloc(sizeof(char) * len);
+    if (!word)
         return NULL;
 
-    q = new;
+    q = word;
     while (p < &rl_line_buffer[rl_point]) {
         if (*p == '\\') {
             if (++p == &rl_line_buffer[rl_point])
@@ -1325,7 +1328,7 @@ char *el_find_word(void)
     }
     *q = '\0';
 
-    return new;
+    return word;
 }
 
 static el_status_t c_possible(void)
@@ -1353,7 +1356,7 @@ static el_status_t c_possible(void)
 static el_status_t c_complete(void)
 {
     char        *p, *q;
-    char        *word, *new;
+    char        *word, *string;
     size_t      len;
     int         unique;
     el_status_t s = CSdone;
@@ -1368,11 +1371,13 @@ static el_status_t c_complete(void)
     if (p) {
         len = strlen(p);
         word = p;
-        new = q = malloc(sizeof(char) * (2 * len + 1));
-	if (!new) {
+
+        string = q = malloc(sizeof(char) * (2 * len + 1));
+	if (!string) {
 	    free(word);
 	    return CSstay;
 	}
+
         while (*p) {
             if ((*p < ' ' || strchr(SEPS, *p) != NULL)
                                 && (!unique || p[1] != 0)) {
@@ -1382,17 +1387,20 @@ static el_status_t c_complete(void)
         }
         *q = '\0';
         free(word);
+
         if (len > 0) {
-            s = insert_string(new);
+            s = insert_string(string);
 #ifdef CONFIG_ANNOYING_NOISE
             if (!unique)
                 el_ring_bell();
 #endif
         }
-        free(new);
+        free(string);
+
         if (len > 0)
 	    return s;
     }
+
     return c_possible();
 }
 
@@ -1542,7 +1550,7 @@ static int argify(char *line, char ***avp)
 {
     char       *c;
     char      **p;
-    char      **new;
+    char      **arg;
     int         ac;
     int         i;
 
@@ -1559,17 +1567,19 @@ static int argify(char *line, char ***avp)
     for (ac = 0, p[ac++] = c; *c && *c != '\n'; ) {
         if (isspace(*c)) {
             *c++ = '\0';
+
             if (*c && *c != '\n') {
                 if (ac + 1 == i) {
-                    new = malloc(sizeof(char *) * (i + MEM_INC));
-                    if (!new) {
+                    arg = malloc(sizeof(char *) * (i + MEM_INC));
+                    if (!arg) {
                         p[ac] = NULL;
                         return ac;
                     }
-                    memcpy(new, p, i * sizeof(char **));
+
+                    memcpy(arg, p, i * sizeof(char **));
                     i += MEM_INC;
                     free(p);
-                    *avp = p = new;
+                    *avp = p = arg;
                 }
                 p[ac++] = c;
             }
@@ -1577,6 +1587,7 @@ static int argify(char *line, char ***avp)
             c++;
 	}
     }
+
     *c = '\0';
     p[ac] = NULL;
 
@@ -1593,10 +1604,11 @@ static el_status_t last_argument(void)
     if (H.Size == 1 || (p = (char *)H.Lines[H.Size - 2]) == NULL)
         return el_ring_bell();
 
-    if ((p = strdup(p)) == NULL)
+    p = strdup(p);
+    if (!p)
         return CSstay;
-    ac = argify(p, &av);
 
+    ac = argify(p, &av);
     if (Repeat != NO_ARG)
         s = Repeat < ac ? insert_string(av[Repeat]) : el_ring_bell();
     else

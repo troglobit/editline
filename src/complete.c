@@ -37,7 +37,7 @@ static int compare(const void *p1, const void *p2)
 static int FindMatches(char *dir, char *file, char ***avp)
 {
     char        **av;
-    char        **new;
+    char        **word;
     char        *p;
     DIR         *dp;
     DIRENTRY    *ep;
@@ -69,16 +69,16 @@ static int FindMatches(char *dir, char *file, char ***avp)
         }
 
         if ((ac % MEM_INC) == 0) {
-	    new = malloc(sizeof(char *) * (ac + MEM_INC));
-            if (!new) {
+	    word = malloc(sizeof(char *) * (ac + MEM_INC));
+            if (!word) {
                 total = 0;
                 break;
             }
             if (ac) {
-                memcpy(new, av, ac * sizeof(char **));
+                memcpy(word, av, ac * sizeof(char **));
                 free(av);
             }
-            *avp = av = new;
+            *avp = av = word;
         }
 
         if ((av[ac] = strdup(p)) == NULL) {
@@ -157,7 +157,7 @@ char *el_filename_complete(char *pathname, int *match)
     char        **av;
     char        *dir;
     char        *file;
-    char        *new;
+    char        *path;
     char        *p;
     size_t      ac;
     size_t      end;
@@ -185,11 +185,11 @@ char *el_filename_complete(char *pathname, int *match)
         if (p) {
             memcpy(p, av[0] + len, j);
 	    len = strlen(dir) + strlen(av[0]) + 2;
-	    new = malloc(sizeof(char) * len);
-            if (new) {
-		snprintf(new, len, "%s/%s", dir, av[0]);
-                rl_add_slash(new, p);
-                free(new);
+	    path = malloc(sizeof(char) * len);
+            if (path) {
+		snprintf(path, len, "%s/%s", dir, av[0]);
+                rl_add_slash(path, p);
+                free(path);
             }
         }
     } else {

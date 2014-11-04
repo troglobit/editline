@@ -1683,7 +1683,7 @@ static size_t find_key_in_map(int key, el_keymap_t map[], size_t mapsz)
 {
     size_t i;
 
-    for (i = 0; map[i].Function != NULL; i++) {
+    for (i = 0; map[i].Function; i++) {
 	if (map[i].Key == key)
 	    return i;
     }
@@ -1705,7 +1705,9 @@ static el_status_t el_bind_key_in_map(int key, el_keymap_func_t function, el_key
 {
     size_t creat, pos = find_key_in_map(key, map, mapsz);
 
-    if (pos == mapsz) {
+    /* Must check that pos is not the next to last array position,
+     * otherwise we will write out-of-bounds to terminate the list. */
+    if (pos >= mapsz - 1) {
 	errno = ENOMEM;
 	return CSeof;
     }

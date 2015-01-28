@@ -1,4 +1,5 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS  = -I m4
-EXTRA_DIST       = LICENSE
+doc_DATA         = README LICENSE CHANGELOG
+EXTRA_DIST       = LICENSE CHANGELOG
 SUBDIRS          = src include man examples

@@ -1,16 +1,15 @@
-Minix Editline
-==============
-[![Build Status](https://travis-ci.org/troglobit/editline.png?branch=master)](https://travis-ci.org/troglobit/editline)
-[![Coverity Scan Status](https://scan.coverity.com/projects/2982/badge.svg)](https://scan.coverity.com/projects/2982)
-
+Editline
+========
+[![Travis Status]][Travis] [![Coverity Status]][Coverity Scan]
 
 Introduction
 ------------
 
 This is a small line editing library.  It can be linked into almost any
 program to provide command line editing and history functions.  It is
-call compatible with the FSF readline library, but at a fraction of the
-size, and as a result fewer features.
+call compatible with the [FSF readline] library, but at a fraction of
+the size, and as a result fewer features.  It is also distributed under
+a much more liberal [LICENSE].
 
 The small size (<30k), lack of dependencies (no ncurses needed!), and
 the free license should make this library interesting to many embedded
@@ -25,45 +24,122 @@ directory you can find some small code snippets used for testing.
 API
 ---
 
-*TODO*
+Here is the interface to editline.  It has a small compatibility layer
+to [FSF readline], which may not be entirely up-to-date.
+
+```C
+    /* Editline specific global variables. */
+    int         el_no_echo;   /* E.g under emacs, don't echo except prompt */
+    int         el_no_hist;   /* Disable auto-save of and access to history,
+                               * e.g. for password prompts or wizards */
+    int         el_hist_size; /* size of history scrollback buffer, default: 15 */
+    
+    /* Editline specific functions. */
+    char *      el_find_word(void);
+    void        el_print_columns(int ac, char **av);
+    el_status_t el_ring_bell(void);
+    el_status_t el_del_char(void);
+    
+    el_status_t el_bind_key(int key, el_keymap_func_t function);
+    el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function);
+    
+    char       *rl_complete(char *token, int *match);
+    int         rl_list_possib(char *token, char ***av);
+    
+    /* For compatibility with FSF readline. */
+    int         rl_point;
+    int         rl_mark;
+    int         rl_end;
+    int         rl_inhibit_complete;
+    char       *rl_line_buffer;
+    const char *rl_readline_name;
+    
+    void rl_initialize(void);
+    void rl_reset_terminal(const char *terminal_name);
+
+    void rl_save_prompt(void);
+    void rl_restore_prompt(void);
+    void rl_set_prompt(const char *prompt);
+    
+    void rl_clear_message(void);
+    void rl_forced_update_display(void);
+
+    /* Main function to use, saves history by default */
+    char *readline(const char *prompt);
+
+    /* Use to save a read line to history, when el_no_hist is set */
+    void add_history(const char *line);
+    
+    /* Load and save editline history from/to a file. */
+    int read_history(const char *filename);
+    int write_history(const char *filename);
+    
+    /* Magic completion API, see examples/cli.c for more info */
+    rl_complete_func_t    *rl_set_complete_func(rl_complete_func_t *func);
+    rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func);
+```
 
 
 Example
 -------
 
-*TODO*
+Here is a very brief example to illustrate how one can use Editline to
+create a simple CLI.
+
+```C
+    #include <stdlib.h>
+
+    extern char *readline(char *prompt);
+
+    int main (void)
+    {
+        char *p;
+
+        while ((p = readline("CLI> ")) != NULL) {
+            puts(p);
+            free(p);
+        }
+
+        return 0;
+    }
+```
 
 
 Origin & References
 --------------------
 
-The editline library was created by Simmule Turner and Rich Salz back in
+The [editline library] was created by Simmule Turner and Rich Salz in
 in 1992.  It is distributed under a "C News-like" license, similar to
-the [BSD License].  For details, see the file LICENSE.
+the [BSD license].  For details, see the file [LICENSE].
 
-This version of the editline library is forked from the [Minix 3] tree.
-Other known versions, often based off of the original comp.sources.unix
-posting, are:
+This version of the editline library is forked from the [Minix 3] source
+tree.  Patches and bug fixes from the following forks, all based on the
+original comp.sources.unix posting, have been merged:
 
 * Debian [libeditline]
 * [Heimdal]
 * [Festival] speech-tools
 * [Steve Tell]'s editline patches
 
-The most intersting patches and bug fixes from each fork have been
-merged here.  Outstanding issues are listed in the TODO file.
+The version numbering scheme today follows that of the Debian version,
+which can be seen in the [CHANGELOG.md].  The Debian version was unknown
+to the current [maintainer] for quite some time, so a different name and
+different versioning scheme was used.  In June 2009 this was changed to
+line up alongside Debian, the intent is to eventually merge the efforts.
 
-An explanation of the version numbering may be in order.  I didn't know
-about the Debian version for quite some time, so I kept a different name
-for the package and a different versioning scheme.  In June 2009, I
-decided to line up alongside Debian, with the intent of eventually
-merging the efforts.  However, despite several attempts, the Debian
-maintainer has not responded to my emails.
+Outstanding issues are listed in the [TODO.md] file.
 
 
-[Minix 3]:     http://www.minix3.org/
-[BSD License]: http://en.wikipedia.org/wiki/BSD_licenses
-[libeditline]: http://packages.qa.debian.org/e/editline.html
-[Heimdal]:     http://www.h5l.org
-[Festival]:    http://festvox.org/festival/
-[Steve Tell]:  http://www.cs.unc.edu/~tell/dist.html
+[maintainer]:      http://troglobit.com
+[LICENSE]:         https://github.com/troglobit/editline/blob/master/LICENSE
+[FSF readline]:    http://www.gnu.org/software/readline/
+[Minix 3]:         http://www.minix3.org/
+[BSD license]:     http://en.wikipedia.org/wiki/BSD_licenses
+[libeditline]:     http://packages.qa.debian.org/e/editline.html
+[Heimdal]:         http://www.h5l.org
+[Festival]:        http://festvox.org/festival/
+[Steve Tell]:      http://www.cs.unc.edu/~tell/dist.html
+[Travis]:          https://travis-ci.org/troglobit/editline
+[Travis Status]:   https://travis-ci.org/troglobit/editline.png?branch=master
+[Coverity Scan]:   https://scan.coverity.com/projects/2982
+[Coverity Status]: https://scan.coverity.com/projects/2982/badge.svg

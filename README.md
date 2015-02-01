@@ -2,12 +2,23 @@ Editline
 ========
 [![Travis Status]][Travis] [![Coverity Status]][Coverity Scan]
 
+
+Table of Contents
+-----------------
+
+* [Introduction](#introduction)
+* [API](#api)
+* [Example](#example)
+* [Build & Install](#build--install)
+* [Origin & References](#origin--references)
+
+
 Introduction
 ------------
 
-This is a small line editing library.  It can be linked into almost any
-program to provide command line editing and history functions.  It is
-call compatible with the [FSF readline] library, but at a fraction of
+This is a small [line editing] library.  It can be linked into almost
+any program to provide command line editing and history functions.  It
+is call compatible with the [FSF readline] library, but at a fraction of
 the size, and as a result fewer features.  It is also distributed under
 a much more liberal [LICENSE].
 
@@ -19,6 +30,8 @@ Editline has several optional build-time features that can be enabled by
 by supplying different options to the GNU configure script.  See the
 output from <kbd>configure --help</kbd> for details.  In the `examples/`
 directory you can find some small code snippets used for testing.
+
+Editline is maintained collaboratively at [GitHub].
 
 
 API
@@ -105,11 +118,25 @@ create a simple CLI.
 ```
 
 
+Build & Install
+---------------
+
+Editline was originally designed for older UNIX systems and Plan 9.  The
+current maintainer works exclusively on GNU/Linux systems, so it may use
+GCC and GNU Make specific extensions here and there.  This is not on
+purpose and patches/pull-requests to correct this are most welcome.
+
+* <kbd>./configure</kbd>: Configure editline with default features
+* <kbd>make all</kbd>: Build the library and examples
+* <kbd>make install</kbd>: Honors `$prefix` and `$DESTDIR` environment
+  variables, but see also <kbd>./configure --help</kbd>
+
+
 Origin & References
 --------------------
 
-The [editline library] was created by Simmule Turner and Rich Salz in
-in 1992.  It is distributed under a "C News-like" license, similar to
+This [line editing] library was created by Simmule Turner and Rich Salz
+in in 1992.  It is distributed under a “C News-like” license, similar to
 the [BSD license].  For details, see the file [LICENSE].
 
 This version of the editline library is forked from the [Minix 3] source
@@ -129,9 +156,12 @@ line up alongside Debian, the intent is to eventually merge the efforts.
 
 Outstanding issues are listed in the [TODO.md] file.
 
-
+[GitHub]:          https://github.com/troglobit/editline
+[line editing]:    https://github.com/troglobit/editline/blob/master/doc/README
 [maintainer]:      http://troglobit.com
 [LICENSE]:         https://github.com/troglobit/editline/blob/master/LICENSE
+[TODO.md]:         https://github.com/troglobit/editline/blob/master/TODO.md
+[CHANGELOG.md]:    https://github.com/troglobit/editline/blob/master/CHANGELOG.md
 [FSF readline]:    http://www.gnu.org/software/readline/
 [Minix 3]:         http://www.minix3.org/
 [BSD license]:     http://en.wikipedia.org/wiki/BSD_licenses

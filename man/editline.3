@@ -28,7 +28,7 @@ when the calling program is done with it.
 Each line returned is copied to the internal history list, unless it happens
 to be equal to the previous line.  This is configurable if you are building editline
 from source.
-.SS "User Interface"
+.SS User Interface
 A program that uses this library provides a simple emacs-like editing interface to
 its users.  A line may be edited before it is sent to the calling program by typing
 either control characters or escape sequences.  A control character, shown as a caret
@@ -121,9 +121,11 @@ are read in as if you had typed them at the keyboard.
 For example, if the variable
 .I _L_
 contains the following:
+.PP
 .RS
 ^A^Kecho '^V^[[H^V^[[2J'^M
 .RE
+.PP
 Then typing ``ESC L'' will move to the beginning of the line, kill the
 entire line, enter the echo command needed to clear the terminal (if your
 terminal is like a VT-100), and send the line back to the shell.
@@ -132,6 +134,7 @@ The
 .I editline
 library also does filename completion.
 Suppose the root directory has the following files in it:
+.PP
 .RS
 .nf
 .ta \w'core   'u
@@ -139,6 +142,7 @@ bin	vmunix
 core	vmunix.old
 .fi
 .RE
+.PP
 If you type ``rm\ /v'' and then the tab key.
 .I Editline
 will then finish off as much of the name as possible by adding ``munix''.
@@ -147,48 +151,50 @@ If you type the escape key and a question mark, it will display the
 two choices.
 If you then type a period and a tab, the library will finish off the filename
 for you:
+.PP
 .RS
 .nf
 .RI "rm /v[TAB]" munix ".[TAB]" old
 .fi
 .RE
+.PP
 The tab key is shown by ``[TAB]'' and the automatically-entered text
 is shown in italics.
-
-.SH "USAGE"
+.SH USAGE
 To include
 .I readline()
 in your program, simply call it as you do any other function. Just make sure to link
 your program with libeditline.
-
-.SS "Example"
+.SS Example
 The following brief example lets you enter a line and edit it, then displays it.
-
 .nf
-.B "#include <stdlib.h>"
 .B ""
-.B "extern char *readline(char *prompt);"
+.B #include <stdlib.h>
 .B ""
-.B "int main (void)"
-.B "{"
-.B "    char *p;"
+.B extern char *readline(char *prompt);
 .B ""
-.B "    while ((p = readline(``CLI> '')) != NULL) {"
-.B "        printf(\"%s\n\", p);"
-.B "        free(p);"
-.B "    }"
+.B int main (void)
+.B {
+.RS
+.B     char *p;
 .B ""
-.B "    return 0;"
-.B "}"
+.B     while ((p = readline("CLI>"))) {
+.RS
+.B         puts(p);
+.B         free(p);
+.RE
+.B     }
+.B ""
+.B     return 0;
+.RE
+.B }
 .fi
-
-.SH "BUGS AND LIMITATIONS"
-Doesn't know how to handle multiple lines or unicode characters well.  See the TODO
+.SH BUGS AND LIMITATIONS
+Does not handle multiple lines or unicode characters well.  See the TODO
 file in the distribution if you want to help out.
-
 .SH AUTHORS
-The original editline library was created by Simmule R. Turner and Rich $alz.  It is
-now maintained in several forks: Heimdal, Festival speech tools, Mozilla, Google
-Gadgets for Linux, and many other places.  The original manual page was made by DaviD
-W. Sanderson.  This version was made by Joachim Nilsson <troglobit@gmail.com>.
-
+The original editline library was created by Simmule R. Turner and Rich
+$alz.  It now exists in several forks: Heimdal, Festival speech tools,
+Mozilla, Google Gadgets for Linux, and many other places.  The original
+manual page was made by David W. Sanderson.  Currently maintained by
+Joachim Nilsson at http://github.com/troglobit/editline

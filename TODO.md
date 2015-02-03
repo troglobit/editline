@@ -11,10 +11,10 @@ no external dependencies, except a C library.
 Verify custom completion handlers
 ---------------------------------
 
-Verify for 1.14.0 that custom completion handlers still work After
-reverting "fix" in 0.2.2 that made rl_complete() a function pointer we
-need to make sure the same functionality is still available with the new
-infrastructure.  (Which is more inspired by BSD libedit and GNU
+Verify for v1.14.0 that custom completion handlers still work After
+reverting a "fix" in v0.2.2 that made `rl_complete()` a function pointer
+we need to make sure the same functionality is still available with the
+new infrastructure.  Which is more inspired by BSD libedit and GNU
 readline.
 
 

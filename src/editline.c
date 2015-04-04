@@ -124,7 +124,6 @@ char **(*rl_attempted_completion_function)(const char *token, int start, int end
 
 /* Declarations. */
 static char     *editinput(void);
-static int       is_ctl_map_key(int key);
 #ifdef CONFIG_USE_TERMCAP
 extern char     *tgetstr(const char *, char **);
 extern int      tgetent(char *, const char *);
@@ -954,9 +953,6 @@ static el_status_t tty_special(int c)
         return kill_line();
     }
 
-    if (is_ctl_map_key(c))
-	return CSdispatch;
-
     if (c == rl_eof && rl_point == 0 && rl_end == 0)
         return CSeof;
 
@@ -1692,13 +1688,6 @@ static size_t find_key_in_map(int key, el_keymap_t map[], size_t mapsz)
 	return i;
 
     return mapsz;
-}
-
-static int is_ctl_map_key(int key)
-{
-    size_t mapsz = ARRAY_ELEMENTS(Map);
-
-    return mapsz != find_key_in_map(key, Map, mapsz);
 }
 
 static el_status_t el_bind_key_in_map(int key, el_keymap_func_t function, el_keymap_t map[], size_t mapsz)

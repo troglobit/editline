@@ -3,9 +3,6 @@
 /* Define to 1 if the `closedir' function returns void instead of `int'. */
 #undef CLOSEDIR_VOID
 
-/* Define to enable terminal bell on completion. */
-#undef CONFIG_ANNOYING_NOISE
-
 /* Define to include ANSI arrow keys support. */
 #undef CONFIG_ANSI_ARROWS
 
@@ -20,6 +17,9 @@
 
 /* Define to enable SIGSTOP (Ctrl-Z) key. */
 #undef CONFIG_SIGSTOP
+
+/* Define to enable terminal bell on completion. */
+#undef CONFIG_TERMINAL_BELL
 
 /* Define to skip duplicate lines in the scrollback history. */
 #undef CONFIG_UNIQUE_HISTORY

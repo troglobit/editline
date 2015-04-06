@@ -1390,7 +1390,7 @@ static el_status_t c_complete(void)
 
         if (len > 0) {
             s = insert_string(string);
-#ifdef CONFIG_ANNOYING_NOISE
+#ifdef CONFIG_TERMINAL_BELL
             if (!unique)
                 el_ring_bell();
 #endif

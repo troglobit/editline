@@ -78,7 +78,7 @@ AC_ARG_ENABLE(sigstop,
 
 AC_ARG_ENABLE(terminal-bell,
    [AS_HELP_STRING([--enable-terminal-bell], [Enable terminal bell on completion.])],
-   AC_DEFINE([CONFIG_ANNOYING_NOISE], 1, [Define to enable terminal bell on completion.]))
+   AC_DEFINE([CONFIG_TERMINAL_BELL], 1, [Define to enable terminal bell on completion.]))
 
 AC_ARG_ENABLE(termcap,
    [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],

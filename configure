@@ -12078,7 +12078,7 @@ fi
 # Check whether --enable-terminal-bell was given.
 if test "${enable_terminal_bell+set}" = set; then :
   enableval=$enable_terminal_bell;
-$as_echo "#define CONFIG_ANNOYING_NOISE 1" >>confdefs.h
+$as_echo "#define CONFIG_TERMINAL_BELL 1" >>confdefs.h
 
 fi
 

@@ -12,6 +12,12 @@
 /* Define to enable the default completion handler. */
 #undef CONFIG_DEFAULT_COMPLETE
 
+/* Define to enable EOF (Ctrl-C) key. */
+#undef CONFIG_EOF
+
+/* Define to enable SIGINT (Ctrl-C) key. */
+#undef CONFIG_SIGINT
+
 /* Define to enable SIGSTOP (Ctrl-Z) key. */
 #undef CONFIG_SIGSTOP
 

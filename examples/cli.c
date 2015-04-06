@@ -102,6 +102,24 @@ el_status_t list_possible(void)
     return el_ring_bell();
 }
 
+el_status_t do_break(void)
+{
+        puts("Breakout!");
+        return CSeof;
+}
+
+el_status_t do_exit(void)
+{
+        puts("Bye bye!");
+        return CSeof;
+}
+
+el_status_t do_suspend(void)
+{
+        puts("Abort!");
+        return CSstay;
+}
+
 int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
 {
    char *line;
@@ -111,6 +129,9 @@ int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
    rl_set_complete_func(&my_rl_complete);
    rl_set_list_possib_func(&my_rl_list_possib);
    el_bind_key('?', list_possible);
+   el_bind_key(CTL('C'), do_break);
+   el_bind_key(CTL('D'), do_exit);
+   el_bind_key(CTL('Z'), do_suspend);
    read_history(HISTORY);
 
    while ((line = readline(prompt)) != NULL) {

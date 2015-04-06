@@ -764,6 +764,8 @@ enable_libtool_lock
 enable_unique_history
 enable_default_complete
 enable_arrow_keys
+enable_eof
+enable_sigint
 enable_sigstop
 enable_terminal_bell
 enable_termcap
@@ -1410,7 +1412,9 @@ Optional Features:
   --disable-default-complete
                           Disable default (filename) completion handler.
   --disable-arrow-keys    Disable ANSI arrow keys.
-  --enable-sigstop        Enable SIGSTOP key.
+  --disable-eof           Disable default EOF (Ctrl-D) behavior.
+  --disable-sigint        Disable default SIGINT (Ctrl-C) behavior.
+  --enable-sigstop        Enable SIGSTOP (Ctrl-Z) behavior.
   --enable-terminal-bell  Enable terminal bell on completion.
   --enable-termcap        Use termcap library to query terminal size.
 
@@ -12039,6 +12043,26 @@ if test "${enable_arrow_keys+set}" = set; then :
 else
 
 $as_echo "#define CONFIG_ANSI_ARROWS 1" >>confdefs.h
+
+fi
+
+
+# Check whether --enable-eof was given.
+if test "${enable_eof+set}" = set; then :
+  enableval=$enable_eof;
+else
+
+$as_echo "#define CONFIG_EOF 1" >>confdefs.h
+
+fi
+
+
+# Check whether --enable-sigint was given.
+if test "${enable_sigint+set}" = set; then :
+  enableval=$enable_sigint;
+else
+
+$as_echo "#define CONFIG_SIGINT 1" >>confdefs.h
 
 fi
 

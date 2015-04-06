@@ -64,8 +64,16 @@ AC_ARG_ENABLE(arrow-keys,
    [AS_HELP_STRING([--disable-arrow-keys], [Disable ANSI arrow keys.])],
    , AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))
 
+AC_ARG_ENABLE(eof,
+   [AS_HELP_STRING([--disable-eof], [Disable default EOF (Ctrl-D) behavior.])],
+   , AC_DEFINE([CONFIG_EOF], 1, [Define to enable EOF (Ctrl-C) key.]))
+
+AC_ARG_ENABLE(sigint,
+   [AS_HELP_STRING([--disable-sigint], [Disable default SIGINT (Ctrl-C) behavior.])],
+   , AC_DEFINE([CONFIG_SIGINT], 1, [Define to enable SIGINT (Ctrl-C) key.]))
+
 AC_ARG_ENABLE(sigstop,
-   [AS_HELP_STRING([--enable-sigstop], [Enable SIGSTOP key.])],
+   [AS_HELP_STRING([--enable-sigstop], [Enable SIGSTOP (Ctrl-Z) behavior.])],
    AC_DEFINE([CONFIG_SIGSTOP], 1, [Define to enable SIGSTOP (Ctrl-Z) key.]))
 
 AC_ARG_ENABLE(terminal-bell,

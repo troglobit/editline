@@ -924,10 +924,12 @@ static el_status_t emacs(int c)
 
 static el_status_t tty_special(int c)
 {
+#ifdef CONFIG_SIGINT
     if (c == rl_intr) {
         el_intr_pending = SIGINT;
         return CSsignal;
     }
+#endif
     if (c == rl_quit) {
         el_intr_pending = SIGQUIT;
         return CSeof;
@@ -953,8 +955,10 @@ static el_status_t tty_special(int c)
         return kill_line();
     }
 
+#ifdef CONFIG_EOF
     if (c == rl_eof && rl_point == 0 && rl_end == 0)
         return CSeof;
+#endif
 
     return CSdispatch;
 }

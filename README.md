@@ -42,10 +42,10 @@ to [FSF readline], which may not be entirely up-to-date.
 
 ```C
     /* Editline specific global variables. */
-    int         el_no_echo;   /* E.g under emacs, don't echo except prompt */
+    int         el_no_echo;   /* Do not echo input characters */
     int         el_no_hist;   /* Disable auto-save of and access to history,
                                * e.g. for password prompts or wizards */
-    int         el_hist_size; /* size of history scrollback buffer, default: 15 */
+    int         el_hist_size; /* Size of history scrollback buffer, default: 15 */
     
     /* Editline specific functions. */
     char *      el_find_word(void);
@@ -53,11 +53,12 @@ to [FSF readline], which may not be entirely up-to-date.
     el_status_t el_ring_bell(void);
     el_status_t el_del_char(void);
     
+    /* Callback function for key binding */
+    typedef el_status_t el_keymap_func_t(void);
+    
+    /* Bind key to a callback, use CTL('f') to change Ctrl-F, for example */
     el_status_t el_bind_key(int key, el_keymap_func_t function);
     el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function);
-    
-    char       *rl_complete(char *token, int *match);
-    int         rl_list_possib(char *token, char ***av);
     
     /* For compatibility with FSF readline. */
     int         rl_point;
@@ -97,7 +98,7 @@ Example
 -------
 
 Here is a very brief example to illustrate how one can use Editline to
-create a simple CLI.
+create a simple CLI.  More examples are availble in the source tree.
 
 ```C
     #include <stdlib.h>
@@ -173,3 +174,9 @@ Outstanding issues are listed in the [TODO.md] file.
 [Travis Status]:   https://travis-ci.org/troglobit/editline.png?branch=master
 [Coverity Scan]:   https://scan.coverity.com/projects/2982
 [Coverity Status]: https://scan.coverity.com/projects/2982/badge.svg
+
+<!--
+  -- Local Variables:
+  -- mode: markdown
+  -- End:
+  -->

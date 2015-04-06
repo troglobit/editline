@@ -7,6 +7,8 @@ All notable changes to the project are documented in this file.
 ------------
 
 ### Changes
+- Add support for `--disable-eof` and `--disable-sigint` to disable
+  default Ctrl-D and Ctrl-C behavior.
 - Add support for `el_no_hist` to disable access to and auto-save of history.
 - GNU readline compat functions for prompt handling and redisplay.
 - Refactor: replace variables named 'new' with non-reserved word.
@@ -15,10 +17,12 @@ All notable changes to the project are documented in this file.
   integrated with [Travis-CI] -- scan runs for each push to master
 - Rename NEWS.md --> CHANGELOG.md, with symlinks for `make install`
 - Attempt to align with http://keepachangelog.com/ for this file.
-- Cleanup and improve Markdown syntax in [README.md], inspired by libuEv.
+- Cleanup and improve Markdown syntax in [README.md], inspired by [libuEv].
 - Add API and example to [README.md]
 
 ### Fixes
+- Fix issue #2, regression in Ctrl-D (EOF) behavior. Regression
+  introduced in [1.14.1].  Fixed by @TobyGoodwin
 - Fix memory leak in completion handler.  Found by [Coverity Scan].
 - Fix suspicious use of `sizeof(char **)`, same as `sizeof(char *)` but
   non-portable.  Found by [Coverity Scan].
@@ -124,6 +128,13 @@ Adaptations to Debian editline package.
 [0.3.0]:         https://github.com/troglobit/finit/compare/0.2.3...0.3.0
 [0.2.3]:         https://github.com/troglobit/finit/compare/0.1.0...0.2.3
 [0.1.0]:         https://github.com/troglobit/finit/compare/0.0.0...0.1.0
+[libuEv]:        http://github.com/troglobit/libuev
 [Travis-CI]:     https://travis-ci.org/troglobit/uftpd
 [Coverity Scan]: https://scan.coverity.com/projects/2947
 [README.md]:     https://github.com/troglobit/editline/blob/master/README.md
+
+<!--
+  -- Local Variables:
+  -- mode: markdown
+  -- End:
+  -->

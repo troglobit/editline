@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <signal.h>
+#include <sys/ioctl.h>
 
 #include "editline.h"
 

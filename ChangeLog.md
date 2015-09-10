@@ -3,8 +3,8 @@ Change Log
 
 All notable changes to the project are documented in this file.
 
-[1.15.0][] - Not yet released
------------------------------
+[1.15.0][] - 2015-09-10
+-----------------------
 
 ### Changes
 - Add support for `--disable-eof` and `--disable-sigint` to disable

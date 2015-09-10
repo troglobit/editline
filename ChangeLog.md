@@ -3,36 +3,39 @@ Change Log
 
 All notable changes to the project are documented in this file.
 
-[UNRELEASED]
-------------
+[1.15.0][] - Not yet released
+-----------------------------
 
 ### Changes
 - Add support for `--disable-eof` and `--disable-sigint` to disable
-  default Ctrl-D and Ctrl-C behavior.
-- Add support for `el_no_hist` to disable access to and auto-save of history.
-- GNU readline compat functions for prompt handling and redisplay.
-- Refactor: replace variables named 'new' with non-reserved word.
-- Add support for [Travis-CI], continuous integration with GitHub
-- Add support for [Coverity Scan], the best static code analyzer,
-  integrated with [Travis-CI] -- scan runs for each push to master
-- Rename NEWS.md --> CHANGELOG.md, with symlinks for `make install`
-- Attempt to align with http://keepachangelog.com/ for this file.
-- Cleanup and improve Markdown syntax in [README.md], inspired by [libuEv].
-- Add API and example to [README.md]
+  default Ctrl-D and Ctrl-C behavior
+- Add support for `el_no_hist` to disable access to and auto-save of history
+- GNU readline compat functions for prompt handling and redisplay
+- Refactor: replace variables named 'new' with non-reserved word
+- Add support for [Travis-CI][], continuous integration with GitHub
+- Add support for [Coverity Scan][], the best static code analyzer,
+  integrated with [Travis-CI][] -- scan runs for each push to master
+- Rename NEWS.md --> ChangeLog.md, with symlinks for <kbd>make install</kbd>
+- Attempt to align with http://keepachangelog.com/ for this file
+- Cleanup and improve Markdown syntax in [README.md][]
+- Add API and example to [README.md][], inspired by [libuEv][]
+- Removed generated files from version control.  Use `./autogen.sh`
+  to generate the `configure` script when working from GIT.  This
+  does not affect distributed tarballs
 
 ### Fixes
-- Fix issue #2, regression in Ctrl-D (EOF) behavior. Regression
-  introduced in [1.14.1].  Fixed by @TobyGoodwin
-- Fix memory leak in completion handler.  Found by [Coverity Scan].
+- Fix issue #2, regression in Ctrl-D (EOF) behavior.  Regression
+  introduced in [1.14.1][].  Fixed by @TobyGoodwin
+- Fix memory leak in completion handler.  Found by [Coverity Scan][].
 - Fix suspicious use of `sizeof(char **)`, same as `sizeof(char *)` but
-  non-portable.  Found by [Coverity Scan].
-- Fix out-of-bounds access in user key binding routines.
-  Found by [Coverity Scan].
-- Fix invisible example code in man page.
+  non-portable.  Found by [Coverity Scan][]
+- Fix out-of-bounds access in user key binding routines
+  Found by [Coverity Scan][].
+- Fix invisible example code in man page
 
 
-[1.14.2] - 2014-09-14
----------------------
+[1.14.2][] - 2014-09-14
+-----------------------
 
 Bug fixes only.
 
@@ -41,8 +44,8 @@ Bug fixes only.
   - Handle `EINTR` in syscalls better
 
 
-[1.14.1] - 2014-09-14
----------------------
+[1.14.1][] - 2014-09-14
+-----------------------
 
 Minor fixes and additions.
 
@@ -56,8 +59,8 @@ Minor fixes and additions.
 - Bug fixes ...
 
 
-[1.14.0] - 2010-08-10
----------------------
+[1.14.0][] - 2010-08-10
+-----------------------
 
 Major cleanups and further merges with Debian editline package.
 
@@ -70,7 +73,7 @@ Major cleanups and further merges with Debian editline package.
 - Configure option for using termcap to read/control terminal size
 - Rename Signal to `el_intr_pending`, from Festival speech-tools
 - Merge support for capitalizing words (`M-c`) from Festival
-  speech-tools by Alan W Black <awb()cstr!ed!ac!uk>
+  speech-tools by Alan W Black <mailto:awb()cstr!ed!ac!uk>
 - Fallback backspace handling, in case `tgetstr("le")` fails
 
 ### Fixes
@@ -87,8 +90,8 @@ Major cleanups and further merges with Debian editline package.
   Steve Tell from way back in 1997 and 1998
 
 
-[1.13.0] - 2010-03-09
----------------------
+[1.13.0][] - 2010-03-09
+-----------------------
 
 Adaptations to Debian editline package.
 
@@ -98,29 +101,30 @@ Adaptations to Debian editline package.
 - Change library name to libeditline to distinguish it from BSD libedit
 
 
-[0.3.0] - 2009-02-08
---------------------
+[0.3.0][] - 2009-02-08
+----------------------
 
 ### Changes
 - Support for ANSI arrow keys using <kbd>configure --enable-arrow-keys</kbd>
 
 
-[0.2.3] - 2008-12-02
---------------------
+[0.2.3][] - 2008-12-02
+----------------------
 
 ### Changes
 - Patches from Debian package merged
 - Support for custom command completion
 
 
-[0.1.0] - 2008-06-07
---------------------
+[0.1.0][] - 2008-06-07
+----------------------
 
 ### Changes
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.14.2...HEAD
+[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.15.0...HEAD
+[1.15.0]:        https://github.com/troglobit/finit/compare/1.14.2...1.15.0
 [1.14.2]:        https://github.com/troglobit/finit/compare/1.14.1...1.14.2
 [1.14.1]:        https://github.com/troglobit/finit/compare/1.14.0...1.14.1
 [1.14.0]:        https://github.com/troglobit/finit/compare/1.13.0...1.14.0

@@ -1,7 +1,9 @@
 # Travis CI integration
+# Defaults to GNU GCC and autotools: ./configure && make && make test
 language: c
-compiler:
-  - gcc
+
+# We don't need to install packages, use dockerized build, quicker
+sudo: false
 
 env:
   global:
@@ -15,8 +17,13 @@ addons:
       name: "troglobit/editline"
       description: "Minix editline"
     notification_email: troglobit@gmail.com
-    build_command_prepend: "./configure --enable-sigstop --enable-terminal-bell"
+    build_command_prepend: "./autogen.sh && ./configure --enable-sigstop --enable-terminal-bell"
     build_command:   "make -j5"
     branch_pattern: master
 
-script: ./configure --enable-sigstop --enable-terminal-bell && make -j5
+# We don't store generated files (configure and Makefile) in GIT,
+# so we must customize the default build script to run ./autogen.sh
+script:
+  - ./autogen.sh
+  - ./configure --enable-sigstop --enable-terminal-bell 
+  - make -j5

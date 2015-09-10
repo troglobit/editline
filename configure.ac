@@ -14,18 +14,17 @@
 
 AC_PREREQ(2.61)
 AC_INIT(editline, 1.15.0-rc1, https://github.com/troglobit/editline/issues)
+AM_INIT_AUTOMAKE([no-dist-gzip dist-xz])
+AM_SILENT_RULES([yes])
+
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
-AC_CONFIG_MACRO_DIR([m4])
-
-# Prepare automake
-AM_INIT_AUTOMAKE([no-dist-gzip dist-xz])
-
-# Silent "kernel" style build from automake 1.11 and later.
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile man/Makefile examples/Makefile])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_INSTALL
 
 # Checks for libraries.
 LT_INIT
@@ -87,5 +86,4 @@ AC_ARG_ENABLE(termcap,
 AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow -Wcast-qual"
 AC_SUBST(AM_CFLAGS)
 
-AC_OUTPUT(Makefile src/Makefile include/Makefile man/Makefile examples/Makefile)
-
+AC_OUTPUT

@@ -16,11 +16,11 @@ Table of Contents
 Introduction
 ------------
 
-This is a small [line editing] library.  It can be linked into almost
+This is a small [line editing][] library.  It can be linked into almost
 any program to provide command line editing and history functions.  It
-is call compatible with the [FSF readline] library, but at a fraction of
-the size, and as a result fewer features.  It is also distributed under
-a much more liberal [LICENSE].
+is call compatible with the [FSF readline][] library, but at a fraction
+of the size, and as a result fewer features.  It is also distributed
+under a much more liberal [LICENSE][].
 
 The small size (<30k), lack of dependencies (no ncurses needed!), and
 the free license should make this library interesting to many embedded
@@ -31,14 +31,14 @@ by supplying different options to the GNU configure script.  See the
 output from <kbd>configure --help</kbd> for details.  In the `examples/`
 directory you can find some small code snippets used for testing.
 
-Editline is maintained collaboratively at [GitHub].
+Editline is maintained collaboratively at [GitHub][].
 
 
 API
 ---
 
 Here is the interface to editline.  It has a small compatibility layer
-to [FSF readline], which may not be entirely up-to-date.
+to [FSF readline][], which may not be entirely up-to-date.
 
 ```C
     /* Editline specific global variables. */
@@ -125,37 +125,39 @@ Build & Install
 Editline was originally designed for older UNIX systems and Plan 9.  The
 current maintainer works exclusively on GNU/Linux systems, so it may use
 GCC and GNU Make specific extensions here and there.  This is not on
-purpose and patches/pull-requests to correct this are most welcome.
+purpose and patches or pull requests to correct this are most welcome!
 
-* <kbd>./configure</kbd>: Configure editline with default features
-* <kbd>make all</kbd>: Build the library and examples
-* <kbd>make install</kbd>: Honors `$prefix` and `$DESTDIR` environment
-  variables, but see also <kbd>./configure --help</kbd>
+1. Configure editline with default features: <kbd>./configure</kbd>
+2. Build the library and examples: <kbd>make all</kbd>
+3. Install using <kbd>make install</kbd>
 
+The `$DESTDIR` environment variable is honored at install.  See
+<kbd>./configure --help</kbd> for more options.
 
 Origin & References
 --------------------
 
-This [line editing] library was created by Simmule Turner and Rich Salz
+This [line editing][] library was created by Simmule Turner and Rich Salz
 in in 1992.  It is distributed under a “C News-like” license, similar to
-the [BSD license].  For details, see the file [LICENSE].
+the [BSD license][].  For details, see the file [LICENSE][].
 
-This version of the editline library is forked from the [Minix 3] source
+This version of the editline library is forked from the [Minix 3][] source
 tree.  Patches and bug fixes from the following forks, all based on the
 original comp.sources.unix posting, have been merged:
 
-* Debian [libeditline]
-* [Heimdal]
-* [Festival] speech-tools
-* [Steve Tell]'s editline patches
+* Debian [libeditline][]
+* [Heimdal][]
+* [Festival][] speech-tools
+* [Steve Tell][]'s editline patches
 
 The version numbering scheme today follows that of the Debian version,
-which can be seen in the [CHANGELOG.md].  The Debian version was unknown
-to the current [maintainer] for quite some time, so a different name and
-different versioning scheme was used.  In June 2009 this was changed to
-line up alongside Debian, the intent is to eventually merge the efforts.
+which can be seen in the [CHANGELOG.md][].  The Debian version was
+unknown to the current [maintainer][] for quite some time, so a
+different name and different versioning scheme was used.  In June 2009
+this was changed to line up alongside Debian, the intent is to
+eventually merge the efforts.
 
-Outstanding issues are listed in the [TODO.md] file.
+Outstanding issues are listed in the [TODO.md][] file.
 
 [GitHub]:          https://github.com/troglobit/editline
 [line editing]:    https://github.com/troglobit/editline/blob/master/doc/README

@@ -151,10 +151,10 @@ original comp.sources.unix posting, have been merged:
 * [Steve Tell][]'s editline patches
 
 The version numbering scheme today follows that of the Debian version,
-which can be seen in the [CHANGELOG.md][].  The Debian version was
+which can be seen in the [ChangeLog.md][].  The Debian version was
 unknown to the current [maintainer][] for quite some time, so a
 different name and different versioning scheme was used.  In June 2009
-this was changed to line up alongside Debian, the intent is to
+this was changed to line up alongside Debian, with the intent is to
 eventually merge the efforts.
 
 Outstanding issues are listed in the [TODO.md][] file.
@@ -164,7 +164,7 @@ Outstanding issues are listed in the [TODO.md][] file.
 [maintainer]:      http://troglobit.com
 [LICENSE]:         https://github.com/troglobit/editline/blob/master/LICENSE
 [TODO.md]:         https://github.com/troglobit/editline/blob/master/TODO.md
-[CHANGELOG.md]:    https://github.com/troglobit/editline/blob/master/CHANGELOG.md
+[ChangeLog.md]:    https://github.com/troglobit/editline/blob/master/ChangeLog.md
 [FSF readline]:    http://www.gnu.org/software/readline/
 [Minix 3]:         http://www.minix3.org/
 [BSD license]:     http://en.wikipedia.org/wiki/BSD_licenses

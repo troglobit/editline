@@ -14,7 +14,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT(editline, 1.15.0, https://github.com/troglobit/editline/issues)
-AM_INIT_AUTOMAKE([no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
 
 AC_CONFIG_MACRO_DIR([m4])

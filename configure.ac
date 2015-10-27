@@ -83,6 +83,7 @@ AC_ARG_ENABLE(termcap,
    [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],
    AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.]))
 
+AM_CONDITIONAL([USE_LIBTERMCAP], [test "$enable_termcap" != no])
 AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow -Wcast-qual"
 AC_SUBST(AM_CFLAGS)
 

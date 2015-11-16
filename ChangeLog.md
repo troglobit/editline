@@ -137,7 +137,7 @@ Adaptations to Debian editline package.
 
 
 [UNRELEASED]:    https://github.com/troglobit/finit/compare/1.15.0...HEAD
-[1.15.0]:        https://github.com/troglobit/finit/compare/1.15.0...1.15.1
+[1.15.1]:        https://github.com/troglobit/finit/compare/1.15.0...1.15.1
 [1.15.0]:        https://github.com/troglobit/finit/compare/1.14.2...1.15.0
 [1.14.2]:        https://github.com/troglobit/finit/compare/1.14.1...1.14.2
 [1.14.1]:        https://github.com/troglobit/finit/compare/1.14.0...1.14.1

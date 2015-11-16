@@ -11,7 +11,7 @@ Bug fixes only.
 ### Changes
 - Update README with origin of this version of editline
 
-##¤ Fixes
+### Fixes
 - Fix build system, don't force automake v1.11, require at least v1.11
 - Fix build problem with examples using `--enable-termcap`
 

@@ -13,7 +13,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AC_PREREQ(2.61)
-AC_INIT(editline, 1.15.0, https://github.com/troglobit/editline/issues)
+AC_INIT(editline, 1.15.1, https://github.com/troglobit/editline/issues)
 AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
 

@@ -5,6 +5,11 @@ language: c
 # We don't need to install packages, use dockerized build, quicker
 sudo: false
 
+# Test build with both GCC and Clang (LLVM)
+compiler:
+  - gcc
+  - clang
+
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
@@ -19,7 +24,7 @@ addons:
     notification_email: troglobit@gmail.com
     build_command_prepend: "./autogen.sh && ./configure --enable-sigstop --enable-terminal-bell"
     build_command:   "make -j5"
-    branch_pattern: master
+    branch_pattern: dev
 
 # We don't store generated files (configure and Makefile) in GIT,
 # so we must customize the default build script to run ./autogen.sh

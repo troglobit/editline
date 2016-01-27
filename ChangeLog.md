@@ -3,6 +3,15 @@ Change Log
 
 All notable changes to the project are documented in this file.
 
+
+[UNRELEASED][]
+--------------
+
+### Changes
+- Prevent mangling of symbols when linking with C++.  Patch courtesy of
+  Jakub Pawlowski
+
+
 [1.15.1][] - 2015-11-16
 -----------------------
 
@@ -136,7 +145,8 @@ Adaptations to Debian editline package.
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.15.0...HEAD
+[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.15.1...HEAD
+[1.15.2]:        https://github.com/troglobit/finit/compare/1.15.1...1.15.2
 [1.15.1]:        https://github.com/troglobit/finit/compare/1.15.0...1.15.1
 [1.15.0]:        https://github.com/troglobit/finit/compare/1.14.2...1.15.0
 [1.14.2]:        https://github.com/troglobit/finit/compare/1.14.1...1.14.2

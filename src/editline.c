@@ -1170,6 +1170,7 @@ void rl_clear_message(void)
 void rl_forced_update_display()
 {
     redisplay();
+    tty_flush();
 }
 
 char *readline(const char *prompt)

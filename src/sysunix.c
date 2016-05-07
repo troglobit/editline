@@ -232,7 +232,6 @@ void rl_add_slash(char *path, char *p)
 
 /**
  * Local Variables:
- *  version-control: t
  *  indent-tabs-mode: t
  *  c-file-style: "ellemtel"
  *  c-basic-offset: 4

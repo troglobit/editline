@@ -147,8 +147,8 @@ This version of the editline library was forked from the [Minix 3][]
 source tree and is *not* related to the similarily named NetBSD version
 that [Jess Thrysøe][jess] disitributes to the world outside BSD.  The
 libraries have much in common, but the latter is heavily refactored and
-also relies on ncurses, whereas this library only uses termios from the
-standard C library.
+also relies on libtermcap (usually supplied by ncurses), whereas this
+library only uses termios from the standard C library.
 
 Patches and bug fixes from the following forks, all based on the
 original comp.sources.unix posting, have been merged:

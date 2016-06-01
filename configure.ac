@@ -83,8 +83,17 @@ AC_ARG_ENABLE(termcap,
    [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],
    AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.]))
 
-AM_CONDITIONAL([USE_LIBTERMCAP], [test "$enable_termcap" != no])
 AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow -Wcast-qual"
 AC_SUBST(AM_CFLAGS)
+# Check for a termcap compatible library if enabled
+AS_IF([test "$enable_termcap" != no],
+	AC_CHECK_LIB(termcap, tgetent, , [
+		AC_CHECK_LIB(tinfo, tgetent, , [
+			AC_CHECK_LIB(curses, tgetent, , [
+				AC_CHECK_LIB(ncurses, tgetent, , [
+					AC_MSG_ERROR([Cannot find a termcap capable library, try installing Ncurses.])])
+			])
+		])
+	]))
 
 AC_OUTPUT

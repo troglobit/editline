@@ -1,4 +1,3 @@
-AUTOMAKE_OPTIONS = foreign
-doc_DATA         = README LICENSE CHANGELOG
-EXTRA_DIST       = LICENSE CHANGELOG INSTALL
-SUBDIRS          = src include man examples
+doc_DATA    = README LICENSE CHANGELOG
+EXTRA_DIST  = LICENSE CHANGELOG INSTALL
+SUBDIRS     = src include man examples

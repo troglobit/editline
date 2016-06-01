@@ -1,20 +1,5 @@
-# Minix libeditline                                           -*- Autoconf -*-
-#
-# Copyright (c) 2008-2013  Joachim Nilsson <troglobit()gmail!com>
-#
-# Process this file with autoconf to produce a configure script.
-#
-# This file is free software; as a special exception the author gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-AC_PREREQ(2.61)
 AC_INIT(editline, 1.15.2-beta1, https://github.com/troglobit/editline/issues)
-AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -83,8 +68,6 @@ AC_ARG_ENABLE(termcap,
    [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],
    AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.]))
 
-AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow -Wcast-qual"
-AC_SUBST(AM_CFLAGS)
 # Check for a termcap compatible library if enabled
 AS_IF([test "$enable_termcap" != no],
 	AC_CHECK_LIB(termcap, tgetent, , [

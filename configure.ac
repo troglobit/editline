@@ -1,11 +1,11 @@
-AC_INIT(editline, 1.15.2-beta1, https://github.com/troglobit/editline/issues)
+AC_INIT(editline, 1.15.2, https://github.com/troglobit/editline/issues)
 AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADER([config.h])
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile man/Makefile examples/Makefile])
+AC_CONFIG_FILES([Makefile libeditline.pc src/Makefile include/Makefile man/Makefile examples/Makefile])
 
 # Checks for programs.
 AC_PROG_CC

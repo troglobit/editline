@@ -4,12 +4,21 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
-[UNRELEASED][]
---------------
+[1.15.2][] - 2016-06-06
+-----------------------
+
+Bug fixes and minor feature creep in `pkg-config` support.
 
 ### Changes
 - Prevent mangling of symbols when linking with C++.  Patch courtesy of
   Jakub Pawlowski
+- Add `libeditline.pc` for `pkg-config`
+
+### Fixes
+- Do not assume a termcap library exists, check for `tgetent()` in
+  curses, ncurses, tinfo and termcap libraries
+- Call `tty_flush()` when user calls `rl_forced_update_display()`
+  to prevent screen becoming garbled.  Patch by Jakub Pawlowski
 
 
 [1.15.1][] - 2015-11-16

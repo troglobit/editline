@@ -2,6 +2,7 @@
 */.libs/
 *.lo
 *.o
+*.pc
 .deps
 Makefile
 Makefile.in

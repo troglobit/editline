@@ -70,11 +70,13 @@ AC_ARG_ENABLE(termcap,
 # Check for a termcap compatible library if enabled
 AS_IF([test "x$enable_termcap" = "xyes"],
    AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.])
-   AC_CHECK_LIB(termcap, tgetent, , [
-      AC_CHECK_LIB(tinfo, tgetent, , [
-         AC_CHECK_LIB(curses, tgetent, , [
-            AC_CHECK_LIB(ncurses, tgetent, , [
-               AC_MSG_ERROR([Cannot find a termcap capable library, try installing Ncurses.])])
+   AC_CHECK_LIB(terminfo, tgetent, , [
+      AC_CHECK_LIB(termcap, tgetent, , [
+         AC_CHECK_LIB(tinfo, tgetent, , [
+            AC_CHECK_LIB(curses, tgetent, , [
+               AC_CHECK_LIB(ncurses, tgetent, , [
+                  AC_MSG_ERROR([Cannot find a termcap capable library, try installing Ncurses.])])
+               ])
             ])
          ])
       ]))

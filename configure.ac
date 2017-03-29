@@ -35,41 +35,61 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_STAT
 AC_CHECK_FUNCS([strchr strdup strrchr tcgetattr perror])
 
+#
+# Available features
+#
 AC_ARG_ENABLE(unique-history,
    [AS_HELP_STRING([--disable-unique-history],
-                   [Disable uniqify of scrollback. Default: duplicate entries are ignored. Use this to save dupes.])],
-   , AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.]))
+                   [Disable uniqify of scrollback. Default: duplicate entries are ignored. Use this to save dupes.])])
 
 AC_ARG_ENABLE(default-complete,
-   [AS_HELP_STRING([--disable-default-complete], [Disable default (filename) completion handler.])],
-   , AC_DEFINE(CONFIG_DEFAULT_COMPLETE, 1, [Define to enable the default completion handler.]))
+   [AS_HELP_STRING([--disable-default-complete], [Disable default (filename) completion handler.])])
 
 AC_ARG_ENABLE(arrow-keys,
-   [AS_HELP_STRING([--disable-arrow-keys], [Disable ANSI arrow keys.])],
-   , AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))
+   [AS_HELP_STRING([--disable-arrow-keys], [Disable ANSI arrow keys.])])
 
 AC_ARG_ENABLE(eof,
-   [AS_HELP_STRING([--disable-eof], [Disable default EOF (Ctrl-D) behavior.])],
-   , AC_DEFINE([CONFIG_EOF], 1, [Define to enable EOF (Ctrl-C) key.]))
+   [AS_HELP_STRING([--disable-eof], [Disable default EOF (Ctrl-D) behavior.])])
 
 AC_ARG_ENABLE(sigint,
-   [AS_HELP_STRING([--disable-sigint], [Disable default SIGINT (Ctrl-C) behavior.])],
-   , AC_DEFINE([CONFIG_SIGINT], 1, [Define to enable SIGINT (Ctrl-C) key.]))
+   [AS_HELP_STRING([--disable-sigint], [Disable default SIGINT (Ctrl-C) behavior.])])
 
 AC_ARG_ENABLE(sigstop,
-   [AS_HELP_STRING([--enable-sigstop], [Enable SIGSTOP (Ctrl-Z) behavior.])],
-   AC_DEFINE([CONFIG_SIGSTOP], 1, [Define to enable SIGSTOP (Ctrl-Z) key.]))
+   [AS_HELP_STRING([--enable-sigstop], [Enable SIGSTOP (Ctrl-Z) behavior.])])
 
 AC_ARG_ENABLE(terminal-bell,
-   [AS_HELP_STRING([--enable-terminal-bell], [Enable terminal bell on completion.])],
-   AC_DEFINE([CONFIG_TERMINAL_BELL], 1, [Define to enable terminal bell on completion.]))
+   [AS_HELP_STRING([--enable-terminal-bell], [Enable terminal bell on completion.])])
 
 AC_ARG_ENABLE(termcap,
    AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.]))
 
+#
+# Check what features have been enabled
+#
+AS_IF([test "x$enable_unique_history" != "xno"],
+   AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.]))
+
+AS_IF([test "x$enable_default_complete" != "xno"],
+   AC_DEFINE(CONFIG_DEFAULT_COMPLETE, 1, [Define to enable the default completion handler.]))
+
+AS_IF([test "x$enable_terminal_bell" != "xno"],
+   AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))
+
+AS_IF([test "x$enable_terminal_bell" != "xno"],
+   AC_DEFINE(CONFIG_EOF, 1, [Define to enable EOF (Ctrl-C) key.]))
+
+AS_IF([test "x$enable_sigint" != "xno"],
+   AC_DEFINE(CONFIG_SIGINT, 1, [Define to enable SIGINT (Ctrl-C) key.]))
+
+AS_IF([test "x$enable_sigstop" = "xyes"],
+   AC_DEFINE(CONFIG_SIGSTOP, 1, [Define to enable SIGSTOP (Ctrl-Z) key.]))
+
+AS_IF([test "x$enable_terminal_bell" = "xyes"],
+   AC_DEFINE(CONFIG_TERMINAL_BELL, 1, [Define to enable terminal bell on completion.]))
+
 # Check for a termcap compatible library if enabled
 AS_IF([test "x$enable_termcap" = "xyes"],
-   AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.])
+   AC_DEFINE(CONFIG_USE_TERMCAP, 1, [Define to use the termcap library for terminal size.])
    AC_CHECK_LIB(terminfo, tgetent, , [
       AC_CHECK_LIB(termcap, tgetent, , [
          AC_CHECK_LIB(tinfo, tgetent, , [

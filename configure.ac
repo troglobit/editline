@@ -65,18 +65,19 @@ AC_ARG_ENABLE(terminal-bell,
    AC_DEFINE([CONFIG_TERMINAL_BELL], 1, [Define to enable terminal bell on completion.]))
 
 AC_ARG_ENABLE(termcap,
-   [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],
-   AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.]))
+   AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.]))
 
 # Check for a termcap compatible library if enabled
-AS_IF([test "$enable_termcap" != no],
-	AC_CHECK_LIB(termcap, tgetent, , [
-		AC_CHECK_LIB(tinfo, tgetent, , [
-			AC_CHECK_LIB(curses, tgetent, , [
-				AC_CHECK_LIB(ncurses, tgetent, , [
-					AC_MSG_ERROR([Cannot find a termcap capable library, try installing Ncurses.])])
-			])
-		])
-	]))
+AS_IF([test "x$enable_termcap" = "xyes"],
+   AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.])
+   AC_CHECK_LIB(termcap, tgetent, , [
+      AC_CHECK_LIB(tinfo, tgetent, , [
+         AC_CHECK_LIB(curses, tgetent, , [
+            AC_CHECK_LIB(ncurses, tgetent, , [
+               AC_MSG_ERROR([Cannot find a termcap capable library, try installing Ncurses.])])
+            ])
+         ])
+      ]))
 
+# Generate all files
 AC_OUTPUT

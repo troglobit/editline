@@ -1,1 +1,1 @@
-usr/lib/libeditline*.so.*
+usr/lib/*/libeditline*.so*

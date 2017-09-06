@@ -16,7 +16,7 @@ Bug fix release.
 - Fix #7: `--enable-termcap` configure option does not work, wrongly
   enables termcap by default.
   
-  Also, check for termino as well, when `--enable-termcap` is selected.
+  Also, check for terminfo as well, when `--enable-termcap` is selected.
 
 
 [1.15.2][] - 2016-06-06

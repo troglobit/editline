@@ -1,3 +1,9 @@
+editline (1.15.3-1) unstable; urgency=medium
+
+  * New upstream bug fix release, v1.15.3
+
+ -- Joachim Nilsson <troglobit@gmail.com>  Thu, 07 Sep 2017 01:24:19 +0200
+
 editline (1.15.2-1) unstable; urgency=medium
 
   * New upstream bug fix release, v1.15.2

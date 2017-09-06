@@ -4,6 +4,21 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[1.15.3][] - 2017-09-07
+-----------------------
+
+Bug fix release.
+
+### Changes
+- Refactor all enable/disable configure options, same problem as in #7
+
+### Fixes
+- Fix #7: `--enable-termcap` configure option does not work, wrongly
+  enables termcap by default.
+  
+  Also, check for termino as well, when `--enable-termcap` is selected.
+
+
 [1.15.2][] - 2016-06-06
 -----------------------
 

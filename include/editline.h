@@ -1,5 +1,4 @@
-/* Minix editline
- *
+/*
  * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz
  * All rights reserved.
  *

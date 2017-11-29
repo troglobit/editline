@@ -87,6 +87,7 @@ void rl_ttyset(int Reset)
     if (!Reset) {
         if (-1 == getattr(0, &old))
 	    perror("Failed tcgetattr()");
+
         rl_erase = old.c_cc[VERASE];
         rl_kill = old.c_cc[VKILL];
         rl_eof = old.c_cc[VEOF];
@@ -124,6 +125,7 @@ void rl_ttyset(int Reset)
     if (!Reset) {
 	if (-1 == ioctl_wrap(0, TCGETA, &old))
 	    perror("Failed ioctl(TCGETA)");
+
         rl_erase = old.c_cc[VERASE];
         rl_kill = old.c_cc[VKILL];
         rl_eof = old.c_cc[VEOF];
@@ -167,19 +169,22 @@ void rl_ttyset(int Reset)
     if (!Reset) {
         if (-1 == ioctl_wrap(0, TIOCGETP, &old_sgttyb))
 	    perror("Failed TIOCGETP");
+
         rl_erase = old_sgttyb.sg_erase;
         rl_kill = old_sgttyb.sg_kill;
 
         if (-1 == ioctl_wrap(0, TIOCGETC, &old_tchars))
 	    perror("Failed TIOCGETC");
-        rl_eof = old_tchars.t_eofc;
+
+	rl_eof = old_tchars.t_eofc;
         rl_intr = old_tchars.t_intrc;
         rl_quit = old_tchars.t_quitc;
 
 #ifdef CONFIG_SIGSTOP
         if (-1 == ioctl_wrap(0, TIOCGLTC, &old_ltchars))
 	    perror("Failed TIOCGLTC");
-        rl_susp = old_ltchars.t_suspc;
+
+	rl_susp = old_ltchars.t_suspc;
 #endif
 
         new_sgttyb = old_sgttyb;
@@ -189,9 +194,11 @@ void rl_ttyset(int Reset)
 	    new_sgttyb.sg_flags &= ~PASS8;
 	else
 	    new_sgttyb.sg_flags |= PASS8;
-        if (-1 == ioctl_wrap(0, TIOCSETP, &new_sgttyb))
+
+	if (-1 == ioctl_wrap(0, TIOCSETP, &new_sgttyb))
 	    perror("Failed TIOCSETP");
-        new_tchars = old_tchars;
+
+	new_tchars = old_tchars;
         new_tchars.t_intrc = -1;
         new_tchars.t_quitc = -1;
         if (-1 == ioctl_wrap(0, TIOCSETC, &new_tchars))
@@ -199,7 +206,8 @@ void rl_ttyset(int Reset)
     } else {
         if (-1 == ioctl_wrap(0, TIOCSETP, &old_sgttyb))
 	    perror("Failed TIOCSETP");
-        if (-1 == ioctl_wrap(0, TIOCSETC, &old_tchars))
+
+	if (-1 == ioctl_wrap(0, TIOCSETC, &old_tchars))
 	    perror("Failed TIOCSETC");
     }
 }
@@ -232,8 +240,7 @@ void rl_add_slash(char *path, char *p)
 
 /**
  * Local Variables:
- *  indent-tabs-mode: t
- *  c-file-style: "ellemtel"
+ *  c-file-style: "k&r"
  *  c-basic-offset: 4
  * End:
  */

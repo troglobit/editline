@@ -25,59 +25,55 @@
 #define HISTORY "/tmp/.cli-history"
 
 static char *list[] = {
-   "foo ", "bar ", "bsd ", "cli ", "ls ", "cd ", "malloc ", "tee ", NULL
+    "foo ", "bar ", "bsd ", "cli ", "ls ", "cd ", "malloc ", "tee ", NULL
 };
 
 /* Attempt to complete the pathname, returning an allocated copy.
  * Fill in *unique if we completed it, or set it to 0 if ambiguous. */
 static char *my_rl_complete(char *token, int *match)
 {
-   int i;
-   int index = -1;
-   int matchlen = 0;
-   int count = 0;
+    int i;
+    int index = -1;
+    int matchlen = 0;
+    int count = 0;
 
-   for (i = 0; list[i]; i++)
-   {
-      int partlen = strlen (token); /* Part of token */
+    for (i = 0; list[i]; i++) {
+	int partlen = strlen (token); /* Part of token */
 
-      if (!strncmp (list[i], token, partlen))
-      {
-         index = i;
-         matchlen = partlen;
-         count ++;
-      }
-   }
+	if (!strncmp (list[i], token, partlen)) {
+	    index = i;
+	    matchlen = partlen;
+	    count ++;
+	}
+    }
 
-   if (count == 1)
-   {
-      *match = 1;
-      return strdup (list[index] + matchlen);
-   }
+    if (count == 1) {
+	*match = 1;
+	return strdup (list[index] + matchlen);
+    }
 
-   return NULL;
+    return NULL;
 }
 
 /* Return all possible completions. */
 static int my_rl_list_possib(char *token, char ***av)
 {
-   int i, num, total = 0;
-   char **copy;
+    int i, num, total = 0;
+    char **copy;
    
-   for (num = 0; list[num]; num++)
-      ;
-   copy = (char **) malloc (num * sizeof(char *));
-   for (i = 0; i < num; i++)
-   {
-      if (!strncmp (list[i], token, strlen (token)))
-      {
-         copy[total] = strdup (list[i]);
-         total ++;
-      }
-   }
-   *av = copy;
+    for (num = 0; list[num]; num++)
+	;
 
-   return total;
+    copy = (char **) malloc (num * sizeof(char *));
+    for (i = 0; i < num; i++) {
+	if (!strncmp (list[i], token, strlen (token))) {
+	    copy[total] = strdup (list[i]);
+	    total ++;
+	}
+    }
+    *av = copy;
+
+    return total;
 }
 
 el_status_t list_possible(void)
@@ -104,42 +100,49 @@ el_status_t list_possible(void)
 
 el_status_t do_break(void)
 {
-        puts("Breakout!");
-        return CSeof;
+    puts("Breakout!");
+    return CSeof;
 }
 
 el_status_t do_exit(void)
 {
-        puts("Bye bye!");
-        return CSeof;
+    puts("Bye bye!");
+    return CSeof;
 }
 
 el_status_t do_suspend(void)
 {
-        puts("Abort!");
-        return CSstay;
+    puts("Abort!");
+    return CSstay;
 }
 
-int main(int ac __attribute__ ((unused)), char *av[] __attribute__ ((unused)))
+int main(void)
 {
-   char *line;
-   char	*prompt = "cli> ";
+    char *line;
+    char	*prompt = "cli> ";
 
-   /* Setup callbacks */
-   rl_set_complete_func(&my_rl_complete);
-   rl_set_list_possib_func(&my_rl_list_possib);
-   el_bind_key('?', list_possible);
-   el_bind_key(CTL('C'), do_break);
-   el_bind_key(CTL('D'), do_exit);
-   el_bind_key(CTL('Z'), do_suspend);
-   read_history(HISTORY);
+    /* Setup callbacks */
+    rl_set_complete_func(&my_rl_complete);
+    rl_set_list_possib_func(&my_rl_list_possib);
+    el_bind_key('?', list_possible);
+    el_bind_key(CTL('C'), do_break);
+    el_bind_key(CTL('D'), do_exit);
+    el_bind_key(CTL('Z'), do_suspend);
+    read_history(HISTORY);
 
-   while ((line = readline(prompt)) != NULL) {
-      printf("\t\t\t|%s|\n", line);
-      free(line);
-   }
+    while ((line = readline(prompt)) != NULL) {
+	printf("\t\t\t|%s|\n", line);
+	free(line);
+    }
 
-   write_history(HISTORY);
+    write_history(HISTORY);
 
-   return 0;
+    return 0;
 }
+
+/**
+ * Local Variables:
+ *  c-file-style: "k&r"
+ *  c-basic-offset: 4
+ * End:
+ */

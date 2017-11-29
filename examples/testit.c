@@ -73,9 +73,7 @@ int main(int argc, char *argv[] __attribute__ ((unused)))
 
 /**
  * Local Variables:
- *  version-control: t
- *  indent-tabs-mode: t
- *  c-file-style: "ellemtel"
+ *  c-file-style: "k&r"
  *  c-basic-offset: 4
  * End:
  */

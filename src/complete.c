@@ -74,6 +74,7 @@ static int FindMatches(char *dir, char *file, char ***avp)
                 total = 0;
                 break;
             }
+
             if (ac) {
                 memcpy(word, av, ac * sizeof(char *));
                 free(av);
@@ -94,15 +95,22 @@ static int FindMatches(char *dir, char *file, char ***avp)
     closedir(dp);
     if (total > MAX_TOTAL_MATCHES) {
         char many[sizeof(total) * 3];
+
         p = many + sizeof(many);
         *--p = '\0';
         while (choices > 0) {
-           *--p = '0' + choices % 10;
-           choices /= 10;
+	    *--p = '0' + choices % 10;
+	    choices /= 10;
         }
-        while (p > many + sizeof(many) - 8) *--p = ' ';
-        if ((p = strdup(p)) != NULL) av[ac++] = p;
-        if ((p = strdup("choices")) != NULL) av[ac++] = p;
+
+	while (p > many + sizeof(many) - 8)
+	    *--p = ' ';
+
+        if ((p = strdup(p)) != NULL)
+	    av[ac++] = p;
+
+        if ((p = strdup("choices")) != NULL)
+	    av[ac++] = p;
     } else {
         if (ac)
             qsort(av, ac, sizeof(char *), compare);
@@ -121,6 +129,7 @@ static int SplitPath(char *path, char **dirpart, char **filepart)
     if ((fpart = strrchr(path, '/')) == NULL) {
         if ((dpart = strdup(DOT)) == NULL)
             return -1;
+
         if ((fpart = strdup(path)) == NULL) {
             free(dpart);
             return -1;
@@ -128,6 +137,7 @@ static int SplitPath(char *path, char **dirpart, char **filepart)
     } else {
         if ((dpart = strdup(path)) == NULL)
             return -1;
+
         dpart[fpart - path + 1] = '\0';
         if ((fpart = strdup(fpart + 1)) == NULL) {
             free(dpart);
@@ -147,6 +157,7 @@ rl_complete_func_t *rl_set_complete_func(rl_complete_func_t *func)
 {
     rl_complete_func_t *old = el_complete_func;
     el_complete_func = func;
+
     return old;
 }
 
@@ -196,11 +207,13 @@ char *el_filename_complete(char *pathname, int *match)
         *match = 0;
         if (len) {
             /* Find largest matching substring. */
-            for (i = len, end = strlen(av[0]); i < end; i++)
-                for (j = 1; j < ac; j++)
+            for (i = len, end = strlen(av[0]); i < end; i++) {
+                for (j = 1; j < ac; j++) {
                     if (av[0][i] != av[j][i])
                         goto breakout;
-  breakout:
+		}
+	    }
+	breakout:
             if (i > len) {
                 j = i - len + 1;
 		p = malloc(sizeof(char) * j);
@@ -277,8 +290,7 @@ int rl_list_possib(char *token, char ***av)
 
 /**
  * Local Variables:
- *  indent-tabs-mode: t
- *  c-file-style: "ellemtel"
+ *  c-file-style: "k&r"
  *  c-basic-offset: 4
  * End:
  */

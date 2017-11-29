@@ -161,7 +161,6 @@ static void tty_flush(void)
 
     if (!el_no_echo) {
 	res = write(el_outfd, Screen, ScreenCount);
-
 	if (res > 0)
 	    ScreenCount = 0;
     }
@@ -229,10 +228,12 @@ int rl_getc(void)
 static int tty_get(void)
 {
     tty_flush();
+
     if (el_pushed) {
         el_pushed = 0;
         return el_push_back;
     }
+
     if (*el_input)
         return *el_input++;
 
@@ -282,9 +283,10 @@ void el_print_columns(int ac, char **av)
     int         cols;
 
     /* Find longest name, determine column count from that. */
-    for (longest = 0, i = 0; i < ac; i++)
+    for (longest = 0, i = 0; i < ac; i++) {
         if ((j = strlen((char *)av[i])) > longest)
             longest = j;
+    }
     cols = tty_cols / (longest + 3);
 
     tty_puts(NEWLINE);
@@ -292,10 +294,13 @@ void el_print_columns(int ac, char **av)
         for (j = i; j < ac; j += skip) {
             for (p = av[j], len = strlen((char *)p), k = len; --k >= 0; p++)
                 tty_put(*p);
-            if (j + skip < ac)
+
+            if (j + skip < ac) {
                 while (++len < longest + 3)
                     tty_put(' ');
+	    }
         }
+
         tty_puts(NEWLINE);
     }
 }
@@ -323,6 +328,7 @@ static void left(el_status_t Change)
             tty_back();
         }
     }
+
     if (Change == CSmove)
         rl_point--;
 }
@@ -339,6 +345,7 @@ el_status_t el_ring_bell(void)
 {
     tty_put('\07');
     tty_flush();
+
     return CSstay;
 }
 
@@ -355,6 +362,7 @@ static el_status_t do_macro(int c)
         el_input = NILSTR;
         return el_ring_bell();
     }
+
     return CSstay;
 }
 
@@ -369,14 +377,16 @@ static el_status_t do_forward(el_status_t move)
         p = &rl_line_buffer[rl_point];
 
 	/* Skip to end of word, if inside a word. */
-        for (; rl_point < rl_end && is_alpha_num(p[0]); rl_point++, p++)
+        for (; rl_point < rl_end && is_alpha_num(p[0]); rl_point++, p++) {
             if (move == CSmove)
                 right(CSstay);
+	}
 
 	/* Skip to next word, or skip leading white space if outside a word. */
-        for ( ; rl_point < rl_end && (p[0] == ' ' || !is_alpha_num(p[0])); rl_point++, p++)
+        for ( ; rl_point < rl_end && (p[0] == ' ' || !is_alpha_num(p[0])); rl_point++, p++) {
             if (move == CSmove)
                 right(CSstay);
+	}
 
         if (rl_point == rl_end)
             break;
@@ -506,7 +516,8 @@ static el_status_t insert_string(const char *p)
 
 static el_status_t redisplay(void)
 {
-    tty_puts(NEWLINE); /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
+    /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
+    tty_puts(NEWLINE);
     tty_puts(rl_prompt);
     tty_string(rl_line_buffer);
 
@@ -550,13 +561,13 @@ static el_status_t do_insert_hist(const char *p)
 static el_status_t do_hist(const char *(*move)(void))
 {
     const char *p;
-    int i;
+    int i = 0;
 
-    i = 0;
     do {
         if ((p = move()) == NULL)
             return el_ring_bell();
     } while (++i < Repeat);
+
     return do_insert_hist(p);
 }
 
@@ -595,9 +606,12 @@ static int substrcmp(const char *text, const char *pat, size_t len)
 
     if ((c = *pat) == '\0')
         return *text == '\0';
-    for ( ; *text; text++)
+
+    for ( ; *text; text++) {
         if (*text == c && strncmp(text, pat, len) == 0)
             return 0;
+    }
+
     return 1;
 }
 
@@ -680,9 +694,8 @@ static el_status_t h_search(void)
 
 static el_status_t fd_char(void)
 {
-    int         i;
+    int i = 0;
 
-    i = 0;
     do {
         if (rl_point >= rl_end)
             break;
@@ -710,8 +723,8 @@ static void save_yank(int begin, int i)
 
 static el_status_t delete_string(int count)
 {
-    int         i;
-    char        *p;
+    int i;
+    char *p;
 
     if (count <= 0 || rl_end == rl_point)
         return el_ring_bell();
@@ -734,6 +747,7 @@ static el_status_t delete_string(int count)
         *p = '\0';
         return CSmove;
     }
+
     if (rl_point + count > rl_end && (count = rl_end - rl_point) <= 0)
         return CSstay;
 
@@ -745,14 +759,14 @@ static el_status_t delete_string(int count)
     ceol();
     rl_end -= count;
     tty_string(&rl_line_buffer[rl_point]);
+
     return CSmove;
 }
 
 static el_status_t bk_char(void)
 {
-    int         i;
+    int i = 0;
 
-    i = 0;
     do {
         if (rl_point == 0)
             break;
@@ -764,9 +778,8 @@ static el_status_t bk_char(void)
 
 static el_status_t bk_del_char(void)
 {
-    int         i;
+    int i = 0;
 
-    i = 0;
     do {
         if (rl_point == 0)
             break;
@@ -778,7 +791,7 @@ static el_status_t bk_del_char(void)
 
 static el_status_t kill_line(void)
 {
-    int         i;
+    int i;
 
     if (Repeat != NO_ARG) {
         if (Repeat < rl_point) {
@@ -790,6 +803,7 @@ static el_status_t kill_line(void)
             right(CSmove);
             delete_string(Repeat - rl_point - 1);
         }
+
         return CSmove;
     }
 
@@ -797,6 +811,7 @@ static el_status_t kill_line(void)
     rl_line_buffer[rl_point] = '\0';
     ceol();
     rl_end = rl_point;
+
     return CSstay;
 }
 
@@ -811,6 +826,7 @@ static el_status_t insert_char(int c)
     if (Repeat == NO_ARG || Repeat < 2) {
         buff[0] = c;
         buff[1] = '\0';
+
         return insert_string(buff);
     }
 
@@ -834,6 +850,7 @@ static el_status_t beg_line(void)
         rl_point = 0;
         return CSmove;
     }
+
     return CSstay;
 }
 
@@ -843,6 +860,7 @@ static el_status_t end_line(void)
         rl_point = rl_end;
         return CSmove;
     }
+
     return CSstay;
 }
 
@@ -859,7 +877,7 @@ el_status_t el_del_char(void)
 static el_status_t meta(void)
 {
     int c;
-    el_keymap_t              *kp;
+    el_keymap_t *kp;
 
     if ((c = tty_get()) == EOF)
         return CSeof;
@@ -868,19 +886,19 @@ static el_status_t meta(void)
     /* Also include VT-100 arrows. */
     if (c == '[' || c == 'O') {
         switch (tty_get()) {
-	    case EOF:  return CSeof;
-	    case '2':  tty_get(); return CSstay;     /* Insert */
-	    case '3':  tty_get(); return del_char(); /* Delete */
-	    case '5':  tty_get(); return CSstay;     /* PgUp */
-	    case '6':  tty_get(); return CSstay;     /* PgDn */
-	    case 'A':  return h_prev();              /* Up */
-	    case 'B':  return h_next();              /* Down */
-	    case 'C':  return fd_char();             /* Left */
-	    case 'D':  return bk_char();             /* Right */
-	    case 'F':  return end_line();            /* End */
-	    case 'H':  return beg_line();            /* Home */
-	    default:                                 /* Fall through */
-		break;
+	case EOF:  return CSeof;
+	case '2':  tty_get(); return CSstay;     /* Insert */
+	case '3':  tty_get(); return del_char(); /* Delete */
+	case '5':  tty_get(); return CSstay;     /* PgUp */
+	case '6':  tty_get(); return CSstay;     /* PgDn */
+	case 'A':  return h_prev();              /* Up */
+	case 'B':  return h_next();              /* Down */
+	case 'C':  return fd_char();             /* Left */
+	case 'D':  return bk_char();             /* Right */
+	case 'F':  return end_line();            /* End */
+	case 'H':  return beg_line();            /* Home */
+	default:                                 /* Fall through */
+	    break;
         }
 
 	return el_ring_bell();
@@ -891,11 +909,13 @@ static el_status_t meta(void)
         for (Repeat = c - '0'; (c = tty_get()) != EOF && isdigit(c); )
             Repeat = Repeat * 10 + c - '0';
 	tty_push(c);
+
         return CSstay;
     }
 
     if (isupper(c))
         return do_macro(c);
+
     for (kp = MetaMap; kp->Function; kp++) {
         if (kp->Key == c)
             return kp->Function();
@@ -957,18 +977,20 @@ static el_status_t tty_special(int c)
     }
 #endif
 
-   if (rl_meta_chars && ISMETA(c))
+    if (rl_meta_chars && ISMETA(c))
         return CSdispatch;
 
     if (c == rl_erase || c == DEL)
         return bk_del_char();
+
     if (c == rl_kill) {
         if (rl_point != 0) {
             rl_point = 0;
             reposition();
         }
         Repeat = NO_ARG;
-        return kill_line();
+
+	return kill_line();
     }
 
 #ifdef CONFIG_EOF
@@ -990,6 +1012,21 @@ static char *editinput(void)
     el_intr_pending = -1;
     while ((c = tty_get()) != EOF) {
         switch (tty_special(c)) {
+	case CSdone:
+	    return rl_line_buffer;
+
+	case CSeof:
+	    return NULL;
+
+	case CSsignal:
+	    return (char *)"";
+
+	case CSmove:
+	    reposition();
+	    break;
+
+	case CSdispatch:
+	    switch (emacs(c)) {
 	    case CSdone:
 		return rl_line_buffer;
 
@@ -1004,28 +1041,13 @@ static char *editinput(void)
 		break;
 
 	    case CSdispatch:
-		switch (emacs(c)) {
-		    case CSdone:
-			return rl_line_buffer;
-
-		    case CSeof:
-			return NULL;
-
-		    case CSsignal:
-			return (char *)"";
-
-		    case CSmove:
-			reposition();
-			break;
-
-		    case CSdispatch:
-		    case CSstay:
-			break;
-		}
-		break;
-
 	    case CSstay:
 		break;
+	    }
+	    break;
+
+	case CSstay:
+	    break;
         }
     }
 
@@ -1086,12 +1108,14 @@ static char *read_redirected(void)
 
             p += oldpos;        /* Continue where we left off... */
         }
+
         if (read(el_infd, p, 1) <= 0) {
             /* Ignore "incomplete" lines at EOF, just like we do for a tty. */
             free(line);
             return NULL;
         }
-        if (*p == '\n')
+
+	if (*p == '\n')
             break;
         p++;
     }
@@ -1133,14 +1157,14 @@ void rl_reset_terminal(const char *terminal_name)
 
     if (tty_cols <= 0 || tty_rows <= 0) {
 #ifdef TIOCGWINSZ
-       if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
-          tty_cols = (int)W.ws_col;
-          tty_rows = (int)W.ws_row;
-          return;
-       }
+	if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
+	    tty_cols = (int)W.ws_col;
+	    tty_rows = (int)W.ws_row;
+	    return;
+	}
 #endif
-       tty_cols = SCREEN_COLS;
-       tty_rows = SCREEN_ROWS;
+	tty_cols = SCREEN_COLS;
+	tty_rows = SCREEN_ROWS;
     }
 }
 
@@ -1225,6 +1249,7 @@ char *readline(const char *prompt)
 
     if (!isatty(0)) {
         tty_flush();
+
         return read_redirected();
     }
 
@@ -1246,6 +1271,7 @@ char *readline(const char *prompt)
     rl_prompt = prompt ? prompt : NILSTR;
     if (el_no_echo) {
 	int old = el_no_echo;
+
 	el_no_echo = 0;
 	tty_puts(rl_prompt);
 	tty_flush();
@@ -1273,9 +1299,10 @@ char *readline(const char *prompt)
     }
 
     if (el_intr_pending > 0) {
-	int s = el_intr_pending;
-        el_intr_pending = 0;
-        kill(getpid(), s);
+	int signo = el_intr_pending;
+
+	el_intr_pending = 0;
+        kill(getpid(), signo);
     }
 
     return line;
@@ -1306,6 +1333,7 @@ int read_history(const char *filename)
 	while (H.Size < el_hist_size) {
 	    if (!fgets(buf, SCREEN_INC, fp))
 		break;
+
 	    buf[strlen(buf) - 1] = 0; /* Remove '\n' */
 	    add_history(buf);
 	}
@@ -1428,7 +1456,7 @@ static el_status_t c_complete(void)
 
         while (*p) {
             if ((*p < ' ' || strchr(SEPS, *p) != NULL)
-                                && (!unique || p[1] != 0)) {
+		&& (!unique || p[1] != 0)) {
                 *q++ = '\\';
             }
             *q++ = *p++;
@@ -1480,6 +1508,7 @@ static el_status_t transpose(void)
         rl_line_buffer[rl_point++] = c;
         tty_show(c);
     }
+
     return CSstay;
 }
 
@@ -1508,6 +1537,7 @@ static el_status_t exchange(void)
         rl_point = c;
         return CSmove;
     }
+
     return CSstay;
 }
 
@@ -1515,6 +1545,7 @@ static el_status_t yank(void)
 {
     if (Yanked && *Yanked)
         return insert_string(Yanked);
+
     return CSstay;
 }
 
@@ -1533,17 +1564,19 @@ static el_status_t copy_region(void)
 
 static el_status_t move_to_char(void)
 {
-    int c;
-    int                 i;
-    char                *p;
+    int i, c;
+    char *p;
 
     if ((c = tty_get()) == EOF)
         return CSeof;
-    for (i = rl_point + 1, p = &rl_line_buffer[i]; i < rl_end; i++, p++)
+
+    for (i = rl_point + 1, p = &rl_line_buffer[i]; i < rl_end; i++, p++) {
         if (*p == c) {
             rl_point = i;
             return CSmove;
         }
+    }
+
     return CSstay;
 }
 
@@ -1554,7 +1587,7 @@ static el_status_t fd_word(void)
 
 static el_status_t fd_kill_word(void)
 {
-    int         i;
+    int i;
 
     do_forward(CSstay);
     if (old_point != rl_point) {
@@ -1562,6 +1595,7 @@ static el_status_t fd_kill_word(void)
         rl_point = old_point;
         return delete_string(i);
     }
+
     return CSstay;
 }
 
@@ -1605,34 +1639,35 @@ static int argify(char *line, char ***avp)
     i = MEM_INC;
     *avp = p = malloc(sizeof(char *) * i);
     if (!p)
-         return 0;
+	return 0;
 
     for (c = line; isspace(*c); c++)
         continue;
+
     if (*c == '\n' || *c == '\0')
         return 0;
 
     for (ac = 0, p[ac++] = c; *c && *c != '\n'; ) {
-        if (isspace(*c)) {
-            *c++ = '\0';
+        if (!isspace(*c)) {
+	    c++;
+	    continue;
+	}
 
-            if (*c && *c != '\n') {
-                if (ac + 1 == i) {
-                    arg = malloc(sizeof(char *) * (i + MEM_INC));
-                    if (!arg) {
-                        p[ac] = NULL;
-                        return ac;
-                    }
-
-                    memcpy(arg, p, i * sizeof(char *));
-                    i += MEM_INC;
-                    free(p);
-                    *avp = p = arg;
-                }
-                p[ac++] = c;
-            }
-        } else {
-            c++;
+	*c++ = '\0';
+	if (*c && *c != '\n') {
+	    if (ac + 1 == i) {
+		arg = malloc(sizeof(char *) * (i + MEM_INC));
+		if (!arg) {
+		    p[ac] = NULL;
+		    return ac;
+		}
+		
+		memcpy(arg, p, i * sizeof(char *));
+		i += MEM_INC;
+		free(p);
+		*avp = p = arg;
+	    }
+	    p[ac++] = c;
 	}
     }
 
@@ -1781,8 +1816,7 @@ el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function)
 
 /**
  * Local Variables:
- *  indent-tabs-mode: t
- *  c-file-style: "ellemtel"
+ *  c-file-style: "k&r"
  *  c-basic-offset: 4
  * End:
  */

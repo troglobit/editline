@@ -57,8 +57,7 @@ void rl_add_slash(char *path, char *p)
 
 /**
  * Local Variables:
- *  indent-tabs-mode: t
- *  c-file-style: "ellemtel"
+ *  c-file-style: "k&r"
  *  c-basic-offset: 4
  * End:
  */

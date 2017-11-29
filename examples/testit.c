@@ -45,6 +45,8 @@ int main(int argc, char *argv[] __attribute__ ((unused)))
     int doit;
     char *prompt, *p;
 
+    read_history(".testit_history");
+
     doit = argc == 1;
     if ((prompt = getenv("TESTPROMPT")) == NULL)
 	prompt = "testit>  ";
@@ -62,6 +64,9 @@ int main(int argc, char *argv[] __attribute__ ((unused)))
 	add_history(p);
 	free(p);
     }
+
+    write_history(".testit_history");
+    rl_uninitialize();
 
     return 0;
 }

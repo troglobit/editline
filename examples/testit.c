@@ -49,7 +49,7 @@ int main(int argc, char *argv[] __attribute__ ((unused)))
 
     doit = argc == 1;
     if ((prompt = getenv("TESTPROMPT")) == NULL)
-	prompt = "testit>  ";
+	prompt = "testit> ";
 
     while ((p = readline(prompt)) != NULL) {
 	printf("\t\t\t|%s|\n", p);

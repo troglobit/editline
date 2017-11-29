@@ -654,22 +654,27 @@ static el_status_t h_search(void)
     old_prompt = rl_prompt;
     rl_prompt = "Search: ";
     tty_puts(rl_prompt);
+
     move = Repeat == NO_ARG ? prev_hist : next_hist;
     p = editinput();
+
     rl_prompt = old_prompt;
     Searching = 0;
     tty_puts(rl_prompt);
+
     if (p == NULL && el_intr_pending > 0) {
         el_intr_pending = 0;
         clear_line();
         return redisplay();
     }
+
     p = search_hist(p, move);
     clear_line();
     if (p == NULL) {
         el_ring_bell();
         return redisplay();
     }
+
     return do_insert_hist(p);
 }
 
@@ -1023,6 +1028,7 @@ static char *editinput(void)
 		break;
         }
     }
+
     return NULL;
 }
 
@@ -1046,6 +1052,7 @@ static void hist_add(const char *p)
 
     if ((s = strdup(p)) == NULL)
         return;
+
     if (H.Size < el_hist_size) {
         H.Lines[H.Size++] = s;
     } else {
@@ -1272,8 +1279,10 @@ char *readline(const char *prompt)
     return line;
 }
 
-/* Even though readline() itself adds history automatically, the user can also add
- * lines.  This is for compat with GNU Readline. */
+/*
+ * Even though readline() itself adds history automatically, the user
+ * can also add lines.  This is for compatibility with GNU Readline.
+ */
 void add_history(const char *p)
 {
     if (p == NULL || *p == '\0')

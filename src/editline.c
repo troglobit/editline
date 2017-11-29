@@ -104,6 +104,7 @@ static size_t     Length = 0;
 static size_t     ScreenCount;
 static size_t     ScreenSize;
 static char       *backspace = "\b";
+static char       *old_search = NULL;
 static int        tty_cols = SCREEN_COLS;
 static int        tty_rows = SCREEN_ROWS;
 
@@ -602,7 +603,6 @@ static int substrcmp(const char *text, const char *pat, size_t len)
 
 static const char *search_hist(const char *search, const char *(*move)(void))
 {
-    static char *old_search;
     int         len;
     int         pos;
     int         (*match)(const char *s1, const char *s2, size_t n);
@@ -1176,6 +1176,10 @@ void rl_uninitialize(void)
     }
     H.Size = 0;
     H.Pos = 0;
+
+    if (old_search)
+	free(old_search);
+    old_search = NULL;
 
     /* Uninitialize the line buffer */
     if (rl_line_buffer)

@@ -1047,8 +1047,6 @@ static void hist_add(const char *p)
     if (H.Pos && strcmp(p, H.Lines[H.Pos - 1]) == 0)
         return;
 #endif
-    if (H.Size && strcmp(p, H.Lines[H.Size - 1]) == 0)
-        return;
 
     if ((s = strdup(p)) == NULL)
         return;

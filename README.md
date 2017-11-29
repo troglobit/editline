@@ -69,6 +69,7 @@ to [FSF readline][], which may not be entirely up-to-date.
     const char *rl_readline_name;
     
     void rl_initialize(void);
+    void rl_uninitialize(void);
     void rl_reset_terminal(const char *terminal_name);
 
     void rl_save_prompt(void);

@@ -18,8 +18,8 @@
  *    ever read sources, credits must appear in the documentation.
  * 4. This notice may not be removed or altered.
  */
-#ifndef __EDITLINE_H__
-#define __EDITLINE_H__
+#ifndef EDITLINE_H_
+#define EDITLINE_H_
 
 /* Handy macros when binding keys. */
 #define CTL(x)          ((x) & 0x1F)
@@ -109,4 +109,4 @@ int rl_getc(void);
 }
 #endif
 
-#endif  /* __EDITLINE_H__ */
+#endif  /* EDITLINE_H_ */

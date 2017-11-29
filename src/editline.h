@@ -19,8 +19,8 @@
  * 4. This notice may not be removed or altered.
  */
 
-#ifndef __PRIVATE_EDITLINE_H__
-#define __PRIVATE_EDITLINE_H__
+#ifndef EDITLINE_PRIVATE_H_
+#define EDITLINE_PRIVATE_H_
 
 #include <config.h>
 #include <stdio.h>
@@ -95,4 +95,4 @@ extern char	*strdup(const char *s);
 #endif
 
 #include "../include/editline.h"
-#endif  /* __PRIVATE_EDITLINE_H__ */
+#endif  /* EDITLINE_PRIVATE_H_ */

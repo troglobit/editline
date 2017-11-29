@@ -19,8 +19,8 @@
  * 4. This notice may not be removed or altered.
  */
 
-#ifndef __EDITLINE_UNIX_H__
-#define __EDITLINE_UNIX_H__
+#ifndef EDITLINE_UNIX_H_
+#define EDITLINE_UNIX_H_
 
 #define CRLF		"\r\n"
 #define FORWARD		STATIC
@@ -32,4 +32,4 @@
 #include <dirent.h>
 typedef struct dirent	DIRENTRY;
 
-#endif  /* __EDITLINE_UNIX_H__ */
+#endif /* EDITLINE_UNIX_H_ */

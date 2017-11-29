@@ -100,7 +100,7 @@ static int        el_infd  = EL_STDIN;
 static int        el_outfd = EL_STDOUT;
 static el_keymap_t Map[];
 static el_keymap_t MetaMap[];
-static size_t     Length;
+static size_t     Length = 0;
 static size_t     ScreenCount;
 static size_t     ScreenSize;
 static char       *backspace = "\b";
@@ -114,9 +114,9 @@ int               rl_mark;
 int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 int               rl_inhibit_complete = 0;
-char             *rl_line_buffer;
-const char       *rl_prompt;
-const char       *rl_readline_name;    /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
+char             *rl_line_buffer = NULL;
+const char       *rl_prompt = NULL;
+const char       *rl_readline_name = NULL; /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 FILE             *rl_instream = NULL;  /* The stdio stream from which input is read. Defaults to stdin if NULL */
 FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL */
 
@@ -1221,6 +1221,7 @@ char *readline(const char *prompt)
     rl_deprep_term_function();
     free(Screen);
     free(H.Lines[--H.Size]);
+    H.Lines[H.Size] = NULL;
 
     /* Add to history, unless no-echo or no-history mode ... */
     if (!el_no_echo && !el_no_hist) {

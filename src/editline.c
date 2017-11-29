@@ -1145,6 +1145,30 @@ void rl_initialize(void)
     if (el_outfd < 0)  el_outfd = EL_STDOUT;
 }
 
+void rl_uninitialize(void)
+{
+    int i;
+
+    /* Uninitialize the history */
+    if (H.Lines) {
+	for (i = 0; i < el_hist_size; i++) {
+	    if (H.Lines[i])
+		free(H.Lines[i]);
+	    H.Lines[i] = 0;
+	}
+	free(H.Lines);
+	H.Lines = 0;
+    }
+    H.Size = 0;
+    H.Pos = 0;
+
+    /* Uninitialize the line buffer */
+    if (rl_line_buffer)
+	free(rl_line_buffer);
+    rl_line_buffer = NULL;
+    Length = 0;
+}
+
 static const char *rl_saved_prompt = NULL;
 void rl_save_prompt(void)
 {

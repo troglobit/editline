@@ -1,6 +1,7 @@
 /* Minix editline
  *
- * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz. All rights reserved.
+ * Copyright (c) 1992, 1993  Simmule Turner and Rich Salz
+ * All rights reserved.
  *
  * This software is not subject to any license of the American Telephone
  * and Telegraph Company or of the Regents of the University of California.

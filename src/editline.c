@@ -1070,7 +1070,8 @@ static void hist_add(const char *p)
         return;
 #endif
 
-    if ((s = strdup(p)) == NULL)
+    s = strdup(p);
+    if (s == NULL)
         return;
 
     if (H.Size < el_hist_size) {
@@ -1337,9 +1338,8 @@ int read_history(const char *filename)
 	    buf[strlen(buf) - 1] = 0; /* Remove '\n' */
 	    add_history(buf);
 	}
-	fclose(fp);
 
-	return 0;
+	return fclose(fp);
     }
 
     return errno;
@@ -1357,9 +1357,7 @@ int write_history(const char *filename)
 	while (i < H.Size)
 	    fprintf(fp, "%s\n", H.Lines[i++]);
 
-	fclose(fp);
-
-	return 0;
+	return fclose(fp);
     }
 
     return errno;

@@ -431,11 +431,17 @@ static el_status_t case_cap_word(void)
 
 static void ceol(void)
 {
-    int         extras;
+    int         extras = 0;
     int         i;
     char        *p;
 
-    for (extras = 0, i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
+    while (rl_point < 0) {
+        tty_put(' ');
+	rl_point++;
+	extras++;
+    }
+
+    for (i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
         tty_put(' ');
         if (ISMETA(*p)) {
 	    if (rl_meta_chars) {
@@ -443,7 +449,7 @@ static void ceol(void)
 		tty_put(' ');
 		extras += 2;
 	    }
-	} if (ISCTL(*p)) {
+	} else if (ISCTL(*p)) {
             tty_put(' ');
             extras++;
         }
@@ -525,15 +531,19 @@ static const char *prev_hist(void)
 
 static el_status_t do_insert_hist(const char *p)
 {
+    el_status_t ret;
+
     if (p == NULL)
         return el_ring_bell();
 
     rl_point = 0;
     reposition();
-    ceol();
     rl_end = 0;
 
-    return insert_string(p);
+    ret = insert_string(p);
+    ceol();
+
+    return ret;
 }
 
 static el_status_t do_hist(const char *(*move)(void))

@@ -68,9 +68,12 @@ to [FSF readline][], which may not be entirely up-to-date.
     char       *rl_line_buffer;
     const char *rl_readline_name;
     
-    void rl_initialize(void);
-    void rl_uninitialize(void);
+    void (*rl_deprep_term_function)(void);
+    void rl_deprep_terminal(void);
     void rl_reset_terminal(const char *terminal_name);
+
+    void rl_initialize(void);
+    void rl_uninitialize(void);                          /* Free all internal memory */
 
     void rl_save_prompt(void);
     void rl_restore_prompt(void);

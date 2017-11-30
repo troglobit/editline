@@ -61,10 +61,13 @@ typedef struct {
     char      **Lines;
 } el_hist_t;
 
+/* User definable callbacks. */
 rl_getc_func_t *rl_getc_function = rl_getc;
 rl_hook_func_t *rl_event_hook;
 rl_vintfunc_t  *rl_prep_term_function   = rl_prep_terminal;
 rl_voidfunc_t  *rl_deprep_term_function = rl_deprep_terminal;
+
+char **(*rl_attempted_completion_function)(const char *token, int start, int end);
 
 /*
 **  Globals.
@@ -120,9 +123,6 @@ const char       *rl_prompt = NULL;
 const char       *rl_readline_name = NULL; /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 FILE             *rl_instream = NULL;  /* The stdio stream from which input is read. Defaults to stdin if NULL */
 FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL */
-
-/* User definable callbacks. */
-char **(*rl_attempted_completion_function)(const char *token, int start, int end);
 
 /* Declarations. */
 static char     *editinput(void);

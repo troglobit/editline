@@ -80,30 +80,30 @@ extern int         el_no_echo;   /* E.g under emacs, don't echo except prompt */
 extern int         el_no_hist;   /* Disable auto-save of and access to history -- e.g. for password prompts or wizards */
 extern int         el_hist_size; /* size of history scrollback buffer, default: 15 */
 
-extern void rl_initialize(void);
-extern void rl_reset_terminal(const char *terminal_name);
-extern void rl_uninitialize(void);
+extern void  rl_initialize      (void);
+extern void  rl_reset_terminal  (const char *terminal_name);
+extern void  rl_uninitialize    (void);
 
-void rl_save_prompt(void);
-void rl_restore_prompt(void);
-void rl_set_prompt(const char *prompt);
+extern void  rl_save_prompt     (void);
+extern void  rl_restore_prompt  (void);
+extern void  rl_set_prompt      (const char *prompt);
 
-void rl_clear_message(void);
-void rl_forced_update_display(void);
+extern void  rl_clear_message   (void);
+extern void  rl_forced_update_display(void);
 
-extern char *readline(const char *prompt);
-extern void add_history(const char *line);
+extern void  rl_prep_terminal   (int meta_flag);
+extern void  rl_deprep_terminal (void);
 
-extern int read_history(const char *filename);
-extern int write_history(const char *filename);
+extern int   rl_getc(void);
 
-rl_complete_func_t    *rl_set_complete_func(rl_complete_func_t *func);
-rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func);
+extern char *readline           (const char *prompt);
 
-void rl_prep_terminal(int meta_flag);
-void rl_deprep_terminal(void);
+extern void  add_history        (const char *line);
+extern int   read_history       (const char *filename);
+extern int   write_history      (const char *filename);
 
-int rl_getc(void);
+extern rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
+extern rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);
 
 #ifdef __cplusplus
 }

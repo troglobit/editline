@@ -20,7 +20,7 @@ AC_HEADER_STAT
 AC_HEADER_STDC
 # Check for malloc.h instead of AC_FUNC_MALLOC/REALLOC AIX and others
 # mess up the traditional malloc check.
-AC_CHECK_HEADERS([malloc.h signal.h stdlib.h string.h termcap.h termio.h termios.h sgtty.h])
+AC_CHECK_HEADERS([malloc.h signal.h stdlib.h string.h termcap.h termio.h termios.h sgtty.h unistd.h])
 
 # In termios.h or in sys/ioctl.g?
 AC_HEADER_TIOCGWINSZ

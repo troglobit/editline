@@ -96,6 +96,7 @@ extern void  rl_deprep_terminal (void);
 
 extern int   rl_getc(void);
 extern int   rl_insert_text     (const char *text);
+extern int   rl_refresh_line    (int ignore1, int ignore2);
 
 extern char *readline           (const char *prompt);
 

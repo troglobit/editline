@@ -534,6 +534,12 @@ static el_status_t redisplay(void)
     return CSmove;
 }
 
+int rl_refresh_line(int ignore1 __attribute__((unused)), int ignore2 __attribute__((unused)))
+{
+    redisplay();
+    return 0;
+}
+
 static el_status_t toggle_meta_mode(void)
 {
     rl_meta_chars = ! rl_meta_chars;

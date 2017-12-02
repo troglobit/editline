@@ -95,6 +95,7 @@ extern void  rl_prep_terminal   (int meta_flag);
 extern void  rl_deprep_terminal (void);
 
 extern int   rl_getc(void);
+extern int   rl_insert_text     (const char *text);
 
 extern char *readline           (const char *prompt);
 

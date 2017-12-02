@@ -514,6 +514,16 @@ static el_status_t insert_string(const char *p)
     return rl_point == rl_end ? CSstay : CSmove;
 }
 
+int rl_insert_text(const char *text)
+{
+    int mark = rl_point;
+
+    insert_string(text);
+    ceol();
+
+    return rl_point - mark;
+}
+
 static el_status_t redisplay(void)
 {
     /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */

@@ -50,8 +50,8 @@ Jeff
 
 #include <termios.h>	/* xxx - should make this more general */
 
-#ifdef READLINE_LIBRARY
-#  include "readline.h"
+#ifdef EDITLINE_LIBRARY
+#  include "editline.h"
 #else
 #  include <readline/readline.h>
 #endif

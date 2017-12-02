@@ -40,6 +40,10 @@ Jeff
 #include <stdio.h>
 #include <sys/types.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -114,7 +118,7 @@ main()
         exit(1);
     }
 
-    rl_add_defun("change-prompt", change_prompt, CTRL('t'));
+//    rl_add_defun("change-prompt", change_prompt, CTRL('t'));
     rl_callback_handler_install(get_prompt(), process_line);
 
     while(1) {
@@ -136,7 +140,7 @@ void
 process_line(char *line)
 {
   if( line == NULL ) {
-    fprintf(stderr, "\n", line);
+    fprintf(stderr, "\n");
 
     /* reset the old terminal setting before exiting */
     term.c_lflag     = old_lflag;

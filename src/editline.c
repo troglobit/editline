@@ -110,6 +110,10 @@ static char       *backspace = "\b";
 static char       *old_search = NULL;
 static int        tty_cols = SCREEN_COLS;
 static int        tty_rows = SCREEN_ROWS;
+static int        Searching = 0;
+static const char *(*search_move)(void);
+static const char *old_prompt = NULL;
+static rl_vcpfunc_t *line_handler = NULL;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
 int               el_no_hist = 0;
@@ -125,7 +129,7 @@ FILE             *rl_instream = NULL;  /* The stdio stream from which input is r
 FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL */
 
 /* Declarations. */
-static char     *editinput(void);
+static char     *editinput(int complete);
 #ifdef CONFIG_USE_TERMCAP
 extern char     *tgetstr(const char *, char **);
 extern int      tgetent(char *, const char *);
@@ -559,19 +563,16 @@ static const char *prev_hist(void)
 
 static el_status_t do_insert_hist(const char *p)
 {
-    el_status_t ret;
-
     if (p == NULL)
         return el_ring_bell();
+
+    clear_line();
 
     rl_point = 0;
     reposition();
     rl_end = 0;
 
-    ret = insert_string(p);
-    ceol();
-
-    return ret;
+    return insert_string(p);
 }
 
 static el_status_t do_hist(const char *(*move)(void))
@@ -669,13 +670,28 @@ static const char *search_hist(const char *search, const char *(*move)(void))
     return NULL;
 }
 
+static el_status_t h_search_end(const char *p)
+{
+    rl_prompt = old_prompt;
+    Searching = 0;
+
+    if (p == NULL && el_intr_pending > 0) {
+        el_intr_pending = 0;
+        clear_line();
+        return redisplay();
+    }
+
+    p = search_hist(p, search_move);
+    if (p == NULL) {
+        el_ring_bell();
+        return redisplay();
+    }
+
+    return do_insert_hist(p);
+}
+
 static el_status_t h_search(void)
 {
-    static int Searching;
-    const char *old_prompt;
-    const char *(*move)(void);
-    const char *p;
-
     if (Searching)
         return el_ring_bell();
     Searching = 1;
@@ -685,27 +701,13 @@ static el_status_t h_search(void)
     rl_prompt = "Search: ";
     tty_puts(rl_prompt);
 
-    move = Repeat == NO_ARG ? prev_hist : next_hist;
-    p = editinput();
-
-    rl_prompt = old_prompt;
-    Searching = 0;
-    tty_puts(rl_prompt);
-
-    if (p == NULL && el_intr_pending > 0) {
-        el_intr_pending = 0;
-        clear_line();
-        return redisplay();
+    search_move = Repeat == NO_ARG ? prev_hist : next_hist;
+    if (line_handler) {
+	editinput(0);
+	return CSstay;
     }
 
-    p = search_hist(p, move);
-    clear_line();
-    if (p == NULL) {
-        el_ring_bell();
-        return redisplay();
-    }
-
-    return do_insert_hist(p);
+    return h_search_end(editinput(1));
 }
 
 static el_status_t fd_char(void)
@@ -1017,16 +1019,15 @@ static el_status_t tty_special(int c)
     return CSdispatch;
 }
 
-static char *editinput(void)
+static char *editinput(int complete)
 {
     int c;
 
-    Repeat = NO_ARG;
-    old_point = rl_point = rl_mark = rl_end = 0;
-    rl_line_buffer[0] = '\0';
+    do {
+	c = tty_get();
+	if (c == EOF)
+	    break;
 
-    el_intr_pending = -1;
-    while ((c = tty_get()) != EOF) {
         switch (tty_special(c)) {
 	case CSdone:
 	    return rl_line_buffer;
@@ -1065,7 +1066,7 @@ static char *editinput(void)
 	case CSstay:
 	    break;
         }
-    }
+    } while (complete);
 
     return NULL;
 }
@@ -1257,18 +1258,9 @@ void rl_forced_update_display()
     tty_flush();
 }
 
-char *readline(const char *prompt)
+static int el_prep(const char *prompt)
 {
-    char *line;
-
-    /* Unless called by the user already. */
     rl_initialize();
-
-    if (!isatty(0)) {
-        tty_flush();
-
-        return read_redirected();
-    }
 
     if (!rl_line_buffer) {
         Length = MEM_INC;
@@ -1297,7 +1289,16 @@ char *readline(const char *prompt)
 	tty_puts(rl_prompt);
     }
 
-    line = editinput();
+    Repeat = NO_ARG;
+    old_point = rl_point = rl_mark = rl_end = 0;
+    rl_line_buffer[0] = '\0';
+    el_intr_pending = -1;
+
+    return 0;
+}
+
+static char *el_deprep(char *line)
+{
     if (line) {
         line = strdup(line);
         tty_puts(NEWLINE);
@@ -1305,7 +1306,11 @@ char *readline(const char *prompt)
     }
 
     rl_deprep_term_function();
-    free(Screen);
+    if (Screen) {
+	free(Screen);
+	Screen = NULL;
+    }
+
     free(H.Lines[--H.Size]);
     H.Lines[H.Size] = NULL;
 
@@ -1323,6 +1328,96 @@ char *readline(const char *prompt)
     }
 
     return line;
+}
+
+void rl_callback_handler_install(const char *prompt, rl_vcpfunc_t *lhandler)
+{
+    if (!lhandler)
+	return;
+    line_handler = lhandler;
+
+    /*
+     * Any error from el_prep() is handled by the lhandler callbck as
+     * soon as the user calls rl_callback_read_char().
+     */
+    el_prep(prompt);
+    tty_flush();
+}
+
+/*
+ * Reads one character at a time, when a complete line has been received
+ * the lhandler from rl_callback_handler_install() is called with the
+ * line as argument.
+ *
+ * If the callback returns the terminal is prepped for reading a new
+ * line.
+ *
+ * If any error occurs, either in the _install() phase, or while reading
+ * one character, this function restores the terminal and calls lhandler
+ * with a NULL argument.
+ */
+void rl_callback_read_char(void)
+{
+    char *line;
+
+    if (!line_handler) {
+	errno = EINVAL;
+	return;
+    }
+
+    /*
+     * Check if rl_callback_handler_install() failed
+     * This is the only point where we can tell user
+     */
+    if (!Screen || !rl_line_buffer) {
+	errno = ENOMEM;
+	line_handler(el_deprep(NULL));
+	return;
+    }
+
+    line = editinput(0);
+    if (line) {
+	char *l;
+
+	if (Searching) {
+	    h_search_end(line);
+	    tty_flush();
+	    return;
+	}
+
+	l = el_deprep(line);
+	line_handler(l);
+
+	if (el_prep(rl_prompt))
+	    line_handler(NULL);
+    }
+    tty_flush();
+}
+
+void rl_callback_handler_remove(void)
+{
+    if (!line_handler)
+	return;
+
+    el_deprep(NULL);
+    line_handler = NULL;
+}
+
+char *readline(const char *prompt)
+{
+    /* Unless called by the user already. */
+    rl_initialize();
+
+    if (!isatty(el_infd)) {
+        tty_flush();
+
+        return read_redirected();
+    }
+
+    if (el_prep(prompt))
+	return NULL;
+
+    return el_deprep(editinput(1));
 }
 
 /*

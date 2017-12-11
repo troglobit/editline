@@ -51,6 +51,7 @@ typedef int  rl_hook_func_t(void);
 typedef int  rl_getc_func_t(void);
 typedef void rl_voidfunc_t(void);
 typedef void rl_vintfunc_t(int);
+typedef void rl_vcpfunc_t(char *);
 
 /* Display 8-bit chars "as-is" or as `M-x'? Toggle with M-m. (Default:0 - "as-is") */
 extern int rl_meta_chars;
@@ -106,6 +107,11 @@ extern int   write_history      (const char *filename);
 
 extern rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
 extern rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);
+
+/* Alternate interface to plain readline(), for event loops */
+extern void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhandler);
+extern void rl_callback_read_char       (void);
+extern void rl_callback_handler_remove  (void);
 
 #ifdef __cplusplus
 }

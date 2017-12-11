@@ -61,7 +61,6 @@ int main(int argc, char *argv[] __attribute__ ((unused)))
 		perror(p);
 	    }
 	}
-	add_history(p);
 	free(p);
     }
 

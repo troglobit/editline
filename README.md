@@ -95,6 +95,11 @@ to [FSF readline][], which may not be entirely up-to-date.
     /* Magic completion API, see examples/cli.c for more info */
     rl_complete_func_t    *rl_set_complete_func(rl_complete_func_t *func);
     rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func);
+    
+    /* Alternate interface to plain readline(), for event loops */
+    void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhandler);
+    void rl_callback_read_char       (void);
+    void rl_callback_handler_remove  (void);
 ```
 
 

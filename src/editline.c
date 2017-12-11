@@ -172,7 +172,7 @@ static void tty_put(const char c)
 	return;
 
     Screen[ScreenCount] = c;
-    if (++ScreenCount >= ScreenSize - 1) {
+    if (++ScreenCount > ScreenSize) {
         ScreenSize += SCREEN_INC;
         Screen = realloc(Screen, sizeof(char) * ScreenSize);
     }

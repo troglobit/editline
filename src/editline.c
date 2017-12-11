@@ -1210,10 +1210,10 @@ void rl_uninitialize(void)
 	for (i = 0; i < el_hist_size; i++) {
 	    if (H.Lines[i])
 		free(H.Lines[i]);
-	    H.Lines[i] = 0;
+	    H.Lines[i] = NULL;
 	}
 	free(H.Lines);
-	H.Lines = 0;
+	H.Lines = NULL;
     }
     H.Size = 0;
     H.Pos = 0;
@@ -1274,7 +1274,7 @@ char *readline(const char *prompt)
         Length = MEM_INC;
 	rl_line_buffer = malloc(sizeof(char) * Length);
         if (!rl_line_buffer)
-            return NULL;
+	    return -1;
     }
 
     tty_info();
@@ -1283,7 +1283,7 @@ char *readline(const char *prompt)
     ScreenSize = SCREEN_INC;
     Screen = malloc(sizeof(char) * ScreenSize);
     if (!Screen)
-	return NULL;
+	return -1;
 
     rl_prompt = prompt ? prompt : NILSTR;
     if (el_no_echo) {

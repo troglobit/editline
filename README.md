@@ -70,38 +70,50 @@ availble in the source tree.
     }
 ```
 
-3. Compile the example, either by hard-coding the paths to the include
-   file and the library:
+3. Compile the example:
 
         cd ~/src/
         make LDLIBS=-leditline example
 
-In this example I use `make` and rely on its implicit (built-in) rules
-to handle all the magic with `gcc`, but you may want to create your own
-Makefile for the project.  In particular if you don't change the default
-prefix (above), because then you need to specify the search path for the
-include file(s) and the library manually.  A simple `~/src/Makefile`:
+Here I use `make` and rely on its implicit (built-in) rules to handle
+all the compiler magic, but you may want to create your own Makefile for
+the project.  In particular if you don't change the default prefix
+(above), because then you need to specify the search path for the
+include file(s) and the library manually.
+
+A simple `~/src/Makefile` could look like this:
 
     CFLAGS    = -I/usr/local/include
     LDFLAGS   = -L/usr/local/lib
     LDLIBS    = -leditline
+    EXEC      = example
+    OBJS      = example.o
     
-    all: example
+    all: $(EXEC)
+    
+    $(EXEC): $(OBJS)
+    
+    clean:
+            $(RM) $(OBJS) $(EXEC)
+    
+    distclean: clean
+            $(RM) *.o *~ *.bak
 
 Then simply type `make` from your `~/src/` directory.  You can also use
-`pkg-config` for your `~/src/Makefile`:
+`pkg-config` for your `~/src/Makefile`, replace the following lines:
 
     CFLAGS    = $(shell pkg-config --cflags libeditline)
     LDFLAGS   = $(shell pkg-config --libs-only-L libeditline)
     LDLIBS    = $(shell pkg-config --libs-only-l libeditline)
     
-    all: example
+Then simply type <kbd>make</kbd>, like above.
 
-Then simply type <kbd>make</kbd>, like above.  However, in most `.rpm`
-based distributions `pkg-config` doesn't search in `/usr/local` anymore,
-so you need to call make like this:
+However, most `.rpm` based distributions `pkg-config` doesn't search in
+`/usr/local` anymore, so you need to call make like this:
 
     PKG_CONFIG_LIBDIR=/usr/local/lib/pkgconfig make
+
+Debian/Ubuntu based systems do not have this problem.
 
 
 API

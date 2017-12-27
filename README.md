@@ -55,7 +55,7 @@ availble in the source tree.
 
 ```C
     #include <stdlib.h>
-	#include <editline.h>
+    #include <editline.h>
 
     int main (void)
     {

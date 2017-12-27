@@ -18,7 +18,7 @@ Introduction
 
 This is a small [line editing][]  library.  It can be linked into almost
 any program to  provide command line editing and  history functions.  It
-is call compatible with the [FSF  readline][] library, but at a fraction
+is call compatible with the [FSF readline][] library, but at a fraction
 of the  size, and as  a result fewer  features.  It is  also distributed
 under a much more liberal [LICENSE][].
 
@@ -37,7 +37,7 @@ Editline is maintained collaboratively at [GitHub][].
 API
 ---
 
-Here is the interface to editline.  It has a small compatibility layer
+Here is the libeditline interfaces.  It has a small compatibility layer
 to [FSF readline][], which may not be entirely up-to-date.
 
 ```C

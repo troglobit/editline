@@ -34,6 +34,76 @@ to use the library is available in the `examples/` directory.
 Editline is maintained collaboratively at [GitHub][].
 
 
+Example
+-------
+
+Here is a very brief example to illustrate how one can use Editline to
+create a simple CLI, use Ctrl-D to exit the program.  More examples are
+availble in the source tree.
+
+1. Build and install the library, preferably using a [release tarball][]
+   The configure script defaults to a `/usr/local` prefix.
+
+        tar xf editline-1.15.3.tar.xz
+        cd editline-1.15.3/
+        ./configure --prefix=/usr
+        make all
+        sudo make install
+
+2. Place the below source code in a separate project directory,
+   e.g. `~/src/example.c`
+
+```C
+    #include <stdlib.h>
+	#include <editline.h>
+
+    int main (void)
+    {
+        char *p;
+
+        while ((p = readline("CLI> ")) != NULL) {
+            puts(p);
+            free(p);
+        }
+
+        return 0;
+    }
+```
+
+3. Compile the example, either by hard-coding the paths to the include
+   file and the library:
+
+        cd ~/src/
+        make LDLIBS=-leditline example
+
+In this example I use `make` and rely on its implicit (built-in) rules
+to handle all the magic with `gcc`, but you may want to create your own
+Makefile for the project.  In particular if you don't change the default
+prefix (above), because then you need to specify the search path for the
+include file(s) and the library manually.  A simple `~/src/Makefile`:
+
+    CFLAGS    = -I/usr/local/include
+    LDFLAGS   = -L/usr/local/lib
+    LDLIBS    = -leditline
+    
+    all: example
+
+Then simply type `make` from your `~/src/` directory.  You can also use
+`pkg-config` for your `~/src/Makefile`:
+
+    CFLAGS    = $(shell pkg-config --cflags libeditline)
+    LDFLAGS   = $(shell pkg-config --libs-only-L libeditline)
+    LDLIBS    = $(shell pkg-config --libs-only-l libeditline)
+    
+    all: example
+
+Then simply type <kbd>make</kbd>, like above.  However, in most `.rpm`
+based distributions `pkg-config` doesn't search in `/usr/local` anymore,
+so you need to call make like this:
+
+    PKG_CONFIG_LIBDIR=/usr/local/lib/pkgconfig make
+
+
 API
 ---
 
@@ -103,31 +173,6 @@ to [FSF readline][], which may not be entirely up-to-date.
 ```
 
 
-Example
--------
-
-Here is a very brief example to illustrate how one can use Editline to
-create a simple CLI.  More examples are availble in the source tree.
-
-```C
-    #include <stdlib.h>
-
-    extern char *readline(char *prompt);
-
-    int main (void)
-    {
-        char *p;
-
-        while ((p = readline("CLI> ")) != NULL) {
-            puts(p);
-            free(p);
-        }
-
-        return 0;
-    }
-```
-
-
 Build & Install
 ---------------
 
@@ -142,6 +187,17 @@ purpose and patches or pull requests to correct this are most welcome!
 
 The `$DESTDIR` environment variable is honored at install.  For more
 options, see <kbd>./configure --help</kbd>
+
+Remember to run `ldconfig` after install to update the linker cache.  If
+you've installed to a non-standard location (`--prefix`) you may also
+have to update your `/etc/ld.so.conf`, or use `pkg-confg` to build your
+application (above).
+
+**NOTE:** RedHat/Fedora/CentOS and other `.rpm`-based distributions do
+  not consider `/usr/local` as standard path anymore.  So make sure to
+  `./configure --prefix=/usr`, otherwise the build system use the GNU
+  default, which is `/usr/local`.  The Debian based distributions, like
+  Ubuntu, do not have this problem.
 
 
 Origin & References
@@ -179,6 +235,7 @@ Outstanding issues are listed in the [TODO.md][] file.
 
 [GitHub]:          https://github.com/troglobit/editline
 [line editing]:    https://github.com/troglobit/editline/blob/master/doc/README
+[release tarball]: https://github.com/troglobit/editline/releases
 [maintainer]:      http://troglobit.com
 [LICENSE]:         https://github.com/troglobit/editline/blob/master/LICENSE
 [TODO.md]:         https://github.com/troglobit/editline/blob/master/TODO.md

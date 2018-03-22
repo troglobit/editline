@@ -57,7 +57,7 @@ availble in the source tree.
     #include <stdlib.h>
     #include <editline.h>
 
-    int main (void)
+    int main(void)
     {
         char *p;
 
@@ -130,17 +130,17 @@ to [FSF readline][], which may not be entirely up-to-date.
     int         el_hist_size; /* Size of history scrollback buffer, default: 15 */
     
     /* Editline specific functions. */
-    char *      el_find_word(void);
-    void        el_print_columns(int ac, char **av);
-    el_status_t el_ring_bell(void);
-    el_status_t el_del_char(void);
+    char *      el_find_word     (void);
+    void        el_print_columns (int ac, char **av);
+    el_status_t el_ring_bell     (void);
+    el_status_t el_del_char      (void);
     
     /* Callback function for key binding */
     typedef el_status_t el_keymap_func_t(void);
     
     /* Bind key to a callback, use CTL('f') to change Ctrl-F, for example */
-    el_status_t el_bind_key(int key, el_keymap_func_t function);
-    el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function);
+    el_status_t el_bind_key            (int key, el_keymap_func_t function);
+    el_status_t el_bind_key_in_metamap (int key, el_keymap_func_t function);
     
     /* For compatibility with FSF readline. */
     int         rl_point;
@@ -151,32 +151,32 @@ to [FSF readline][], which may not be entirely up-to-date.
     const char *rl_readline_name;
     
     void (*rl_deprep_term_function)(void);
-    void rl_deprep_terminal(void);
-    void rl_reset_terminal(const char *terminal_name);
+    void rl_deprep_terminal (void);
+    void rl_reset_terminal  (const char *terminal_name);
 
-    void rl_initialize(void);
-    void rl_uninitialize(void);                          /* Free all internal memory */
+    void rl_initialize   (void);
+    void rl_uninitialize (void);                         /* Free all internal memory */
 
-    void rl_save_prompt(void);
-    void rl_restore_prompt(void);
-    void rl_set_prompt(const char *prompt);
+    void rl_save_prompt    (void);
+    void rl_restore_prompt (void);
+    void rl_set_prompt     (const char *prompt);
     
-    void rl_clear_message(void);
-    void rl_forced_update_display(void);
+    void rl_clear_message         (void);
+    void rl_forced_update_display (void);
 
     /* Main function to use, saves history by default */
-    char *readline(const char *prompt);
+    char *readline    (const char *prompt);
 
     /* Use to save a read line to history, when el_no_hist is set */
-    void add_history(const char *line);
+    void add_history  (const char *line);
     
     /* Load and save editline history from/to a file. */
-    int read_history(const char *filename);
-    int write_history(const char *filename);
+    int read_history  (const char *filename);
+    int write_history (const char *filename);
     
     /* Magic completion API, see examples/cli.c for more info */
-    rl_complete_func_t    *rl_set_complete_func(rl_complete_func_t *func);
-    rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func);
+    rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
+    rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);
     
     /* Alternate interface to plain readline(), for event loops */
     void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhandler);

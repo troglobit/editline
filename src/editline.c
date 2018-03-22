@@ -892,6 +892,31 @@ el_status_t el_del_char(void)
     return del_char();
 }
 
+static el_status_t fd_word(void)
+{
+    return do_forward(CSmove);
+}
+
+static el_status_t bk_word(void)
+{
+    int         i;
+    char        *p;
+
+    i = 0;
+    do {
+        for (p = &rl_line_buffer[rl_point]; p > rl_line_buffer && !is_alpha_num(p[-1]); p--)
+            left(CSmove);
+
+        for (; p > rl_line_buffer && !isblank(p[-1]) && is_alpha_num(p[-1]); p--)
+            left(CSmove);
+
+        if (rl_point == 0)
+            break;
+    } while (++i < Repeat);
+
+    return CSstay;
+}
+
 static el_status_t meta(void)
 {
     int c;
@@ -905,6 +930,20 @@ static el_status_t meta(void)
     if (c == '[' || c == 'O') {
         switch (tty_get()) {
 	case EOF:  return CSeof;
+	case '1':
+	{
+	    char seq[4] = { 0 };
+
+	    for (c = 0; c < 3; c++)
+		seq[c] = tty_get();
+
+	    if (!strncmp(seq, ";5C", 3))
+		return fd_word(); /* Ctrl+Right */
+	    if (!strncmp(seq, ";5D", 3))
+		return bk_word(); /* Ctrl+Left */
+
+	    break;
+	}
 	case '2':  tty_get(); return CSstay;     /* Insert */
 	case '3':  tty_get(); return del_char(); /* Delete */
 	case '5':  tty_get(); return CSstay;     /* PgUp */
@@ -1689,11 +1728,6 @@ static el_status_t move_to_char(void)
     return CSstay;
 }
 
-static el_status_t fd_word(void)
-{
-    return do_forward(CSmove);
-}
-
 static el_status_t fd_kill_word(void)
 {
     int i;
@@ -1704,26 +1738,6 @@ static el_status_t fd_kill_word(void)
         rl_point = old_point;
         return delete_string(i);
     }
-
-    return CSstay;
-}
-
-static el_status_t bk_word(void)
-{
-    int         i;
-    char        *p;
-
-    i = 0;
-    do {
-        for (p = &rl_line_buffer[rl_point]; p > rl_line_buffer && !is_alpha_num(p[-1]); p--)
-            left(CSmove);
-
-        for (; p > rl_line_buffer && !isblank(p[-1]) && is_alpha_num(p[-1]); p--)
-            left(CSmove);
-
-        if (rl_point == 0)
-            break;
-    } while (++i < Repeat);
 
     return CSstay;
 }

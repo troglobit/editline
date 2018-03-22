@@ -1,6 +1,6 @@
 Editline
 ========
-[![Travis Status]][Travis] [![Coverity Status]][Coverity Scan]
+[![License Badge][]][License] [![Travis Status]][Travis] [![Coverity Status]][Coverity Scan]
 
 
 Table of Contents
@@ -20,7 +20,7 @@ This is a small [line editing][]  library.  It can be linked into almost
 any program to  provide command line editing and  history functions.  It
 is call compatible with the [FSF readline][] library, but at a fraction
 of the  size, and as  a result fewer  features.  It is  also distributed
-under a much more liberal [LICENSE][].
+under a much more liberal [License][].
 
 The small size  (<30k), lack of dependencies (ncurses  not needed!), and
 the free license  should make this library interesting  to many embedded
@@ -57,7 +57,7 @@ availble in the source tree.
     #include <stdlib.h>
     #include <editline.h>
 
-    int main (void)
+    int main(void)
     {
         char *p;
 
@@ -130,17 +130,17 @@ to [FSF readline][], which may not be entirely up-to-date.
     int         el_hist_size; /* Size of history scrollback buffer, default: 15 */
     
     /* Editline specific functions. */
-    char *      el_find_word(void);
-    void        el_print_columns(int ac, char **av);
-    el_status_t el_ring_bell(void);
-    el_status_t el_del_char(void);
+    char *      el_find_word     (void);
+    void        el_print_columns (int ac, char **av);
+    el_status_t el_ring_bell     (void);
+    el_status_t el_del_char      (void);
     
     /* Callback function for key binding */
     typedef el_status_t el_keymap_func_t(void);
     
     /* Bind key to a callback, use CTL('f') to change Ctrl-F, for example */
-    el_status_t el_bind_key(int key, el_keymap_func_t function);
-    el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function);
+    el_status_t el_bind_key            (int key, el_keymap_func_t function);
+    el_status_t el_bind_key_in_metamap (int key, el_keymap_func_t function);
     
     /* For compatibility with FSF readline. */
     int         rl_point;
@@ -151,32 +151,32 @@ to [FSF readline][], which may not be entirely up-to-date.
     const char *rl_readline_name;
     
     void (*rl_deprep_term_function)(void);
-    void rl_deprep_terminal(void);
-    void rl_reset_terminal(const char *terminal_name);
+    void rl_deprep_terminal (void);
+    void rl_reset_terminal  (const char *terminal_name);
 
-    void rl_initialize(void);
-    void rl_uninitialize(void);                          /* Free all internal memory */
+    void rl_initialize   (void);
+    void rl_uninitialize (void);                         /* Free all internal memory */
 
-    void rl_save_prompt(void);
-    void rl_restore_prompt(void);
-    void rl_set_prompt(const char *prompt);
+    void rl_save_prompt    (void);
+    void rl_restore_prompt (void);
+    void rl_set_prompt     (const char *prompt);
     
-    void rl_clear_message(void);
-    void rl_forced_update_display(void);
+    void rl_clear_message         (void);
+    void rl_forced_update_display (void);
 
     /* Main function to use, saves history by default */
-    char *readline(const char *prompt);
+    char *readline    (const char *prompt);
 
     /* Use to save a read line to history, when el_no_hist is set */
-    void add_history(const char *line);
+    void add_history  (const char *line);
     
     /* Load and save editline history from/to a file. */
-    int read_history(const char *filename);
-    int write_history(const char *filename);
+    int read_history  (const char *filename);
+    int write_history (const char *filename);
     
     /* Magic completion API, see examples/cli.c for more info */
-    rl_complete_func_t    *rl_set_complete_func(rl_complete_func_t *func);
-    rl_list_possib_func_t *rl_set_list_possib_func(rl_list_possib_func_t *func);
+    rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
+    rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);
     
     /* Alternate interface to plain readline(), for event loops */
     void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhandler);
@@ -216,10 +216,10 @@ Origin & References
 --------------------
 
 This [line editing][]  library was created by [Rich  Salz][] and Simmule
-Turner and  in 1992.  It is  distributed under a “C  News-like” license,
-similar to the [BSD license][].   Rich's latest version is however under
+Turner and in 1992.  It is distributed with a “[C News][]-like” license,
+similar to the [BSD license][].  Rich's current version is however under
 the Apache license.  For details on  the licensing terms of this version
-of the software, see [LICENSE][].
+of the software, see [License][].
 
 This version  of the editline  library was  forked from the  [Minix 3][]
 source tree and is *not* related  to the similarily named NetBSD version
@@ -249,7 +249,7 @@ Outstanding issues are listed in the [TODO.md][] file.
 [line editing]:    https://github.com/troglobit/editline/blob/master/doc/README
 [release tarball]: https://github.com/troglobit/editline/releases
 [maintainer]:      http://troglobit.com
-[LICENSE]:         https://github.com/troglobit/editline/blob/master/LICENSE
+[C News]:          https://en.wikipedia.org/wiki/C_News
 [TODO.md]:         https://github.com/troglobit/editline/blob/master/TODO.md
 [ChangeLog.md]:    https://github.com/troglobit/editline/blob/master/ChangeLog.md
 [FSF readline]:    http://www.gnu.org/software/readline/
@@ -262,6 +262,8 @@ Outstanding issues are listed in the [TODO.md][] file.
 [Heimdal]:         http://www.h5l.org
 [Festival]:        http://festvox.org/festival/
 [Steve Tell]:      http://www.cs.unc.edu/~tell/dist.html
+[License]:         https://github.com/troglobit/editline/blob/master/LICENSE
+[License Badge]:   https://img.shields.io/badge/License-C%20News-orange.svg
 [Travis]:          https://travis-ci.org/troglobit/editline
 [Travis Status]:   https://travis-ci.org/troglobit/editline.png?branch=master
 [Coverity Scan]:   https://scan.coverity.com/projects/2982

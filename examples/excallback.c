@@ -134,6 +134,8 @@ main()
         rl_callback_read_char();
       }
     }
+
+    return 0;
 }
 
 void
@@ -168,7 +170,8 @@ change_prompt(void)
   prompt = !prompt;
 
   /* save away the current contents of the line */
-  strcpy(line_buf, rl_line_buffer);
+  strncpy(line_buf, rl_line_buffer, sizeof(line_buf));
+  line_buf[sizeof(line_buf) - 1] = 0;
 
   /* install a new handler which will change the prompt and erase the current line */
   rl_callback_handler_install(get_prompt(), process_line);
@@ -179,7 +182,7 @@ change_prompt(void)
   /* redraw the current line - this is an undocumented function. It invokes the
    * redraw-current-line command.
    */
-  rl_refresh_line(0, 0);
+  return rl_refresh_line(0, 0);
 }
 
 char *

@@ -1,6 +1,6 @@
 Editline
 ========
-[![Travis Status]][Travis] [![Coverity Status]][Coverity Scan]
+[![License Badge][]][License] [![Travis Status]][Travis] [![Coverity Status]][Coverity Scan]
 
 
 Table of Contents
@@ -20,7 +20,7 @@ This is a small [line editing][]  library.  It can be linked into almost
 any program to  provide command line editing and  history functions.  It
 is call compatible with the [FSF readline][] library, but at a fraction
 of the  size, and as  a result fewer  features.  It is  also distributed
-under a much more liberal [LICENSE][].
+under a much more liberal [License][].
 
 The small size  (<30k), lack of dependencies (ncurses  not needed!), and
 the free license  should make this library interesting  to many embedded
@@ -216,10 +216,10 @@ Origin & References
 --------------------
 
 This [line editing][]  library was created by [Rich  Salz][] and Simmule
-Turner and  in 1992.  It is  distributed under a “C  News-like” license,
-similar to the [BSD license][].   Rich's latest version is however under
+Turner and in 1992.  It is distributed with a “[C News][]-like” license,
+similar to the [BSD license][].  Rich's current version is however under
 the Apache license.  For details on  the licensing terms of this version
-of the software, see [LICENSE][].
+of the software, see [License][].
 
 This version  of the editline  library was  forked from the  [Minix 3][]
 source tree and is *not* related  to the similarily named NetBSD version
@@ -249,7 +249,7 @@ Outstanding issues are listed in the [TODO.md][] file.
 [line editing]:    https://github.com/troglobit/editline/blob/master/doc/README
 [release tarball]: https://github.com/troglobit/editline/releases
 [maintainer]:      http://troglobit.com
-[LICENSE]:         https://github.com/troglobit/editline/blob/master/LICENSE
+[C News]:          https://en.wikipedia.org/wiki/C_News
 [TODO.md]:         https://github.com/troglobit/editline/blob/master/TODO.md
 [ChangeLog.md]:    https://github.com/troglobit/editline/blob/master/ChangeLog.md
 [FSF readline]:    http://www.gnu.org/software/readline/
@@ -262,6 +262,8 @@ Outstanding issues are listed in the [TODO.md][] file.
 [Heimdal]:         http://www.h5l.org
 [Festival]:        http://festvox.org/festival/
 [Steve Tell]:      http://www.cs.unc.edu/~tell/dist.html
+[License]:         https://github.com/troglobit/editline/blob/master/LICENSE
+[License Badge]:   https://img.shields.io/badge/License-C%20News-orange.svg
 [Travis]:          https://travis-ci.org/troglobit/editline
 [Travis Status]:   https://travis-ci.org/troglobit/editline.png?branch=master
 [Coverity Scan]:   https://scan.coverity.com/projects/2982

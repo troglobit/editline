@@ -8,23 +8,6 @@ Remember, the general idea is to keep this library editline small with
 no external dependencies, except a C library.
 
 
-Add support for running in an event loop
-----------------------------------------
-
-To be able to use libeditline from within an event loop like [libuEv][]
-there are few things to do:
-
-- Refactor `editinput()` and `readline()`.  Break out the active code
-  used for set up and teardown, and the character input logic
-- Add bare necessities for external callbacks so that an event loop
-  that monitors `el_infd` has something to call on events
-- GNU Readline has its [alternate interface][gnu] which we should
-  probably implement
-
-Example usecase of the GNU alternate interface can be found here:
-http://www.mcld.co.uk/blog/blog.php?274
-
-
 Verify custom completion handlers
 ---------------------------------
 

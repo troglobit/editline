@@ -4,6 +4,31 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[1.16.0][UNRELEASED] - 2018-03-xx
+---------------------------------
+
+Event loop callback support.
+
+### Changes
+- `rl_unintialize()`, new function to free all memory, by Claus Fischer
+- `rl_insert_text()`, new GNU Readline compat function
+- `rl_refresh_line()`, new GNU Readline compat function
+- `rl_callback_*()`, alternate interface to plain `readline()` for event
+  loops.  Modeled after the GNU Readline API
+- Add support for Ctrl-Right and Ctrl-Left, forward/backward word
+
+### Fixes
+- Fixed header guards, avoid using leading `__`
+- Spell check fixes
+- Remove duplicate code in history check
+- Use `NULL` instead of `0`, and `-1` instead of `NULL`, where applicable
+- Misc. minor Coverity Scan fixes
+- Misc. minor fixes to `testit.c` example code
+- Add `-Wextra` to std `CFLAGS`
+- Check `fclose()` return value in in `write_history()` and `read_history()`
+- Initialize global variables and reset to `NULL` on `free()`
+
+
 [1.15.3][] - 2017-09-07
 -----------------------
 

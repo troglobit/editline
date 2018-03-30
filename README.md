@@ -246,11 +246,11 @@ efforts.
 Outstanding issues are listed in the [TODO.md][] file.
 
 [GitHub]:          https://github.com/troglobit/editline
-[line editing]:    https://github.com/troglobit/editline/blob/master/doc/README
+[line editing]:    https://github.com/troglobit/editline/blob/master/docs/README
 [release tarball]: https://github.com/troglobit/editline/releases
 [maintainer]:      http://troglobit.com
 [C News]:          https://en.wikipedia.org/wiki/C_News
-[TODO.md]:         https://github.com/troglobit/editline/blob/master/TODO.md
+[TODO.md]:         https://github.com/troglobit/editline/blob/master/docs/TODO.md
 [ChangeLog.md]:    https://github.com/troglobit/editline/blob/master/ChangeLog.md
 [FSF readline]:    http://www.gnu.org/software/readline/
 [Rich Salz]:       https://github.com/richsalz/editline/

@@ -1,11 +1,11 @@
 TODO
 ====
 
-Issues in need of work. Mostly compatibility with GNU readline, BSD
-[libedit][], and usability improvements.
+Issues in need of work.  Mostly compatibility with GNU readline,
+BSD [libedit][], and usability improvements.
 
-Remember, the general idea is to keep this library editline small with
-no external dependencies, except a C library.
+Remember, the general idea is to keep this library small with no
+external dependencies, except for a generic C library.
 
 
 Verify custom completion handlers

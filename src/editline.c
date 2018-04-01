@@ -551,12 +551,12 @@ static el_status_t toggle_meta_mode(void)
 }
 
 
-static const char *next_hist(void)
+const char *el_next_hist(void)
 {
     return H.Pos >= H.Size - 1 ? NULL : H.Lines[++H.Pos];
 }
 
-static const char *prev_hist(void)
+const char *el_prev_hist(void)
 {
     return H.Pos == 0 ? NULL : H.Lines[--H.Pos];
 }
@@ -593,7 +593,7 @@ static el_status_t h_next(void)
     if (el_no_hist)
 	return CSstay;
 
-    return do_hist(next_hist);
+    return do_hist(el_next_hist);
 }
 
 static el_status_t h_prev(void)
@@ -601,7 +601,7 @@ static el_status_t h_prev(void)
     if (el_no_hist)
 	return CSstay;
 
-    return do_hist(prev_hist);
+    return do_hist(el_prev_hist);
 }
 
 static el_status_t h_first(void)
@@ -701,7 +701,7 @@ static el_status_t h_search(void)
     rl_prompt = "Search: ";
     tty_puts(rl_prompt);
 
-    search_move = Repeat == NO_ARG ? prev_hist : next_hist;
+    search_move = Repeat == NO_ARG ? el_prev_hist : el_next_hist;
     if (line_handler) {
 	editinput(0);
 	return CSstay;

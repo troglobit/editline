@@ -65,6 +65,9 @@ extern el_status_t el_del_char(void);
 extern el_status_t el_bind_key(int key, el_keymap_func_t function);
 extern el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function);
 
+extern const char *el_next_hist(void);
+extern const char *el_prev_hist(void);
+
 extern char       *rl_complete(char *token, int *match);
 extern int         rl_list_possib(char *token, char ***av);
 

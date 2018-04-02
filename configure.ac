@@ -42,9 +42,6 @@ AC_ARG_ENABLE(unique-history,
    [AS_HELP_STRING([--disable-unique-history],
                    [Disable uniqify of scrollback. Default: duplicate entries are ignored. Use this to save dupes.])])
 
-AC_ARG_ENABLE(default-complete,
-   [AS_HELP_STRING([--disable-default-complete], [Disable default (filename) completion handler.])])
-
 AC_ARG_ENABLE(arrow-keys,
    [AS_HELP_STRING([--disable-arrow-keys], [Disable ANSI arrow keys.])])
 
@@ -68,9 +65,6 @@ AC_ARG_ENABLE(termcap,
 #
 AS_IF([test "x$enable_unique_history" != "xno"],
    AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.]))
-
-AS_IF([test "x$enable_default_complete" != "xno"],
-   AC_DEFINE(CONFIG_DEFAULT_COMPLETE, 1, [Define to enable the default completion handler.]))
 
 AS_IF([test "x$enable_terminal_bell" != "xno"],
    AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))

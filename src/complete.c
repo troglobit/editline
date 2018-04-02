@@ -241,11 +241,7 @@ char *rl_complete(char *token, int *match)
     if (el_complete_func)
 	return el_complete_func(token, match);
 
-#ifdef CONFIG_DEFAULT_COMPLETE
     return el_filename_complete(token, match);
-#else
-    return NULL;
-#endif
 }
 
 static rl_list_possib_func_t *el_list_possib_func = NULL;
@@ -281,11 +277,7 @@ int rl_list_possib(char *token, char ***av)
     if (el_list_possib_func)
 	return el_list_possib_func(token, av);
 
-#ifdef CONFIG_DEFAULT_COMPLETE
     return el_filename_list_possib(token, av);
-#else
-    return 0;
-#endif
 }
 
 

@@ -20,7 +20,7 @@ addons:
   coverity_scan:
     project:
       name: "troglobit/editline"
-      description: "Minix editline"
+      description: "A small line editing library"
     notification_email: troglobit@gmail.com
     build_command_prepend: "./autogen.sh && ./configure --enable-sigstop --enable-terminal-bell"
     build_command:   "make -j5"

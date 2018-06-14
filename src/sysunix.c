@@ -218,14 +218,18 @@ void rl_ttyset(int Reset)
 
 #ifndef HAVE_STRDUP
 /* Return an allocated copy of a string. */
-char *strdup(const char *p)
+char *strdup(const char *s)
 {
-    char *new = malloc(sizeof(char) * strlen(p));
+    size_t len;
+    char *ptr;
 
-    if (new) {
-        strcpy(new, p);
-	return new;
-    }
+    if (!s)
+	return NULL;
+
+    len = strlen(s) + 1;
+    ptr = malloc(len);
+    if (ptr)
+        return memcpy(ptr, s, len);
 
     return NULL;
 }

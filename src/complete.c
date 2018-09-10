@@ -20,9 +20,14 @@
  * 4. This notice may not be removed or altered.
  */
 
+#include <ctype.h>
 #include "editline.h"
 
 #define MAX_TOTAL_MATCHES (256 << sizeof(char *))
+
+int rl_attempted_completion_over = 0;
+rl_completion_func_t *rl_attempted_completion_function = NULL;
+rl_compentry_func_t *rl_completion_entry_function = NULL;
 
 /* Wrap strcmp() for qsort() -- weird construct to pass -Wcast-qual */
 static int compare(const void *p1, const void *p2)
@@ -121,7 +126,7 @@ static int FindMatches(char *dir, char *file, char ***avp)
 }
 
 /* Split a pathname into allocated directory and trailing filename parts. */
-static int SplitPath(char *path, char **dirpart, char **filepart)
+static int SplitPath(const char *path, char **dirpart, char **filepart)
 {
     static char DOT[] = ".";
     char        *dpart;
@@ -177,7 +182,7 @@ char *el_filename_complete(char *pathname, int *match)
     size_t      j;
     size_t      len;
 
-    if (SplitPath(pathname, &dir, &file) < 0)
+    if (SplitPath((const char *)pathname, &dir, &file) < 0)
         return NULL;
 
     if ((ac = FindMatches(dir, file, &av)) == 0) {
@@ -236,10 +241,201 @@ char *el_filename_complete(char *pathname, int *match)
     return p;
 }
 
+char *rl_filename_completion_function(const char *text, int state)
+{
+    char        *dir;
+    char        *file;
+    static char   **av;
+    static size_t i, ac;
+
+    if (!state) {
+	if (SplitPath(text, &dir, &file) < 0)
+	    return NULL;
+
+	ac = FindMatches(dir, file, &av);
+	free(dir);
+	free(file);
+	if (!ac)
+	    return NULL;
+
+	i = 0;
+    }
+
+    if (i < ac)
+	return av[i++];
+
+    do {
+	free(av[--i]);
+    } while (i > 0);
+
+    return NULL;
+}
+
+/* Similar to el_find_word(), but used by GNU Readline API */
+static char *rl_find_token(size_t *len)
+{
+    char *ptr;
+    int pos;
+
+    for (pos = rl_point; pos < rl_end; pos++) {
+	if (isspace(rl_line_buffer[pos])) {
+	    if (pos > 0)
+		pos--;
+	    break;
+	}
+    }
+
+    ptr = &rl_line_buffer[pos];
+    while (pos >= 0 && !isspace(rl_line_buffer[pos])) {
+	if (pos == 0)
+	    break;
+
+	pos--;
+    }
+
+    if (ptr != &rl_line_buffer[pos]) {
+	*len = (size_t)(ptr - &rl_line_buffer[pos]);
+	return &rl_line_buffer[pos];
+    }
+
+    return NULL;
+}
+
+/*
+ * "uses an application-supplied generator function to generate the list
+ * of possible matches, and then returns the array of these matches. The
+ * caller should place the address of its generator function in
+ * rl_completion_entry_function"
+ */
+char **rl_completion_matches(const char *token, rl_compentry_func_t *generator)
+{
+    int state = 0, num = 0;
+    char **array, *entry;
+
+    if (!generator) {
+	generator = rl_completion_entry_function;
+	if (!generator)
+	    generator = rl_filename_completion_function;
+    }
+
+    if (!generator)
+	return NULL;
+
+    array = malloc(512 * sizeof(char *));
+    if (!array)
+	return NULL;
+
+    while (num < 511 && (entry = generator(token, state))) {
+	state = 1;
+	array[num++] = entry;
+    }
+    array[num] = NULL;
+
+    if (!num) {
+	free(array);
+	return NULL;
+    }
+
+    return array;
+}
+
+#if 0 // incomplete + incorrect atm
+/*
+ * Implements the actual FSF readline rl_complete() API
+ *
+ * "isolates the word to be completed and calls rl_completion_matches()
+ * to generate a list of possible completions"
+ */
+int rl_complete2(int ignore, int invoking_key)
+{
+    char *token, *word, **words = NULL;
+    size_t len;
+
+    token = rl_find_token(&len);
+    if (!token)
+	return 0;		/* Nothing inserted */
+
+    word = strndup(token, len);
+
+    rl_attempted_completion_over = 0;
+    if (rl_attempted_completion_function) {
+	int start = token - rl_line_buffer;
+	int end   = start + len;
+
+	words = rl_attempted_completion_function(word, start, end);
+    }
+
+    if (!rl_attempted_completion_over && !words)
+	words = rl_completion_matches(word, NULL);
+
+    if (words && words[0]) {
+	int i = 1;
+
+	free(word);
+	word = words[0];
+
+	while (words[i])
+	    free(words[i++]);
+	free(words);
+
+	return word;
+    }
+
+    return el_filename_complete(word, match);
+}
+#endif
+
+static char *complete(char *token, int *match)
+{
+    size_t len = 0;
+    char *word, **words = NULL;
+    int start, end;
+
+    word = rl_find_token(&len);
+    if (!word)
+	goto fallback;
+
+    start = word - rl_line_buffer;
+    end  = start + len;
+
+    word = strndup(word, len);
+    if (!word)
+	goto fallback;
+
+    rl_attempted_completion_over = 0;
+    words = rl_attempted_completion_function(word, start, end);
+
+    if (!rl_attempted_completion_over && !words)
+	words = rl_completion_matches(word, NULL);
+
+    if (words && words[0]) {
+	int i = 0;
+
+	free(word);
+	word = strdup(words[0] + len);
+
+	while (words[i])
+	    free(words[i++]);
+	free(words);
+
+	return word;
+    }
+
+fallback:
+    return el_filename_complete(token, match);
+}
+
+/*
+ * First check for editline specific custom completion function, then
+ * for any GNU Readline compat, then fallback to filename completion.
+ */
 char *rl_complete(char *token, int *match)
 {
     if (el_complete_func)
 	return el_complete_func(token, match);
+
+    if (rl_attempted_completion_function)
+	return complete(token, match);
 
     return el_filename_complete(token, match);
 }

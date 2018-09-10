@@ -44,7 +44,6 @@ typedef enum {
 } el_status_t;
 
 /* Editline specific types, despite rl_ prefix.  From Heimdal project. */
-typedef char* rl_complete_func_t(char*, int*);
 typedef int rl_list_possib_func_t(char*, char***);
 typedef el_status_t el_keymap_func_t(void);
 typedef int  rl_hook_func_t(void);
@@ -52,6 +51,11 @@ typedef int  rl_getc_func_t(void);
 typedef void rl_voidfunc_t(void);
 typedef void rl_vintfunc_t(int);
 typedef void rl_vcpfunc_t(char *);
+
+/* FSF Readline compat tupes */
+typedef char  *rl_complete_func_t   (char *, int*);
+typedef char  *rl_compentry_func_t  (const char *, int);
+typedef char **rl_completion_func_t (const char *, int, int);
 
 /* Display 8-bit chars "as-is" or as `M-x'? Toggle with M-m. (Default:0 - "as-is") */
 extern int rl_meta_chars;
@@ -70,6 +74,8 @@ extern const char *el_prev_hist(void);
 
 extern char       *rl_complete(char *token, int *match);
 extern int         rl_list_possib(char *token, char ***av);
+extern char      **rl_completion_matches(const char *token, rl_compentry_func_t *generator);
+extern char       *rl_filename_completion_function(const char *text, int state);
 
 /* For compatibility with FSF readline. */
 extern int         rl_point;
@@ -108,8 +114,13 @@ extern void  add_history        (const char *line);
 extern int   read_history       (const char *filename);
 extern int   write_history      (const char *filename);
 
+//extern int   rl_complete2       (int ignore, int invoking_key);
+
+extern rl_completion_func_t  *rl_attempted_completion_function;
 extern rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
 extern rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);
+
+//#define rl_complete(a, b)     _Generic((a), int: rl_complete2, default: rl_complete)(a, b)
 
 /* Alternate interface to plain readline(), for event loops */
 extern void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhandler);

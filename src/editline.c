@@ -67,8 +67,6 @@ rl_hook_func_t *rl_event_hook;
 rl_vintfunc_t  *rl_prep_term_function   = rl_prep_terminal;
 rl_voidfunc_t  *rl_deprep_term_function = rl_deprep_terminal;
 
-char **(*rl_attempted_completion_function)(const char *token, int start, int end);
-
 /*
 **  Globals.
 */

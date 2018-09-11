@@ -15,6 +15,7 @@ Event loop callback support.
 - `rl_refresh_line()`, new GNU Readline compat function
 - `rl_callback_*()`, alternate interface to plain `readline()` for event
   loops.  Modeled after the GNU Readline API
+- `rl_completion_entry_function`, new GNU Readline compat user hook
 - Add support for Ctrl-Right and Ctrl-Left, forward/backward word
 
 ### Fixes
@@ -38,8 +39,8 @@ Bug fix release.
 - Refactor all enable/disable configure options, same problem as in #7
 
 ### Fixes
-- Fix #7: `--enable-termcap` configure option does not work, wrongly
-  enables termcap by default.
+- Fix #7: `--enable-termcap` configure option does not work.  The script
+  enabled termcap by default rather than the other way around.
   
   Also, check for terminfo as well, when `--enable-termcap` is selected.
 

@@ -17,6 +17,8 @@ Event loop callback support.
   loops.  Modeled after the GNU Readline API
 - `rl_completion_entry_function`, new GNU Readline compat user hook
 - Add support for Ctrl-Right and Ctrl-Left, forward/backward word
+- Add new example: `fileman.c` from GNU Readline to demonstrate the
+  level of compatibility of the new completion framework
 
 ### Fixes
 - Fixed header guards, avoid using leading `__`

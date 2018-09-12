@@ -339,7 +339,17 @@ char **rl_completion_matches(const char *token, rl_compentry_func_t *generator)
     return array;
 }
 
-#if 0 // incomplete + incorrect atm
+//
+// TODO: Add configure option --enable-readline-compat, or sth,
+//       so that rl_complete2() becomes the new rl_complete(),
+//       and the current rl_complete() becomes el_complete()
+//
+// Currently rl_complete() to is incomplete (heh ;) and also very
+// incorrect.  At the very least we should  merge with complete()
+// and possibly also refacto rl_find_token() to share code with
+// the legacy el_find_word().
+//
+#if 0
 /*
  * Implements the actual FSF readline rl_complete() API
  *
@@ -383,7 +393,7 @@ int rl_complete2(int ignore, int invoking_key)
 
     return el_filename_complete(word, match);
 }
-#endif
+#endif // Disabled atm.
 
 static char *complete(char *token, int *match)
 {

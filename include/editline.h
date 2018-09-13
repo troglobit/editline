@@ -114,14 +114,9 @@ extern void  add_history        (const char *line);
 extern int   read_history       (const char *filename);
 extern int   write_history      (const char *filename);
 
-//extern int   rl_complete2       (int ignore, int invoking_key);
-
 extern rl_completion_func_t  *rl_attempted_completion_function;
 extern rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
 extern rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);
-
-// TODO: See comment for src/complete.c:rl_complete2()
-//#define rl_complete(a, b)     _Generic((a), int: rl_complete2, default: rl_complete)(a, b)
 
 /* Alternate interface to plain readline(), for event loops */
 extern void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhandler);

@@ -362,17 +362,20 @@ static char *complete(char *token, int *match)
     if (!rl_attempted_completion_over && !words)
 	words = rl_completion_matches(word, NULL);
 
-    if (words && words[0]) {
+    if (words) {
 	int i = 0;
 
 	free(word);
-	word = strdup(words[0] + len);
+	word = NULL;
+	if (words[0])
+	    word = strdup(words[0] + len);
 
 	while (words[i])
 	    free(words[i++]);
 	free(words);
 
-	return word;
+	if (word)
+	    return word;
     }
 
 fallback:

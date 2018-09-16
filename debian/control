@@ -2,7 +2,7 @@ Source: editline
 Section: devel
 Priority: optional
 Build-Depends: debhelper (>= 5.0), libtool
-Maintainer: Sam Hocevar <sho@debian.org>
+Maintainer: Joachim Nilsson <troglobit@gmail.com>
 Standards-Version: 3.8.3
 
 Package: libeditline-dev

@@ -8,7 +8,7 @@ Standards-Version: 3.8.3
 Package: libeditline-dev
 Architecture: any
 Section: libdevel
-Depends: libeditline0 (= ${binary:Version}), ${misc:Depends}
+Depends: libeditline1 (= ${binary:Version}), ${misc:Depends}
 Description: development files for libeditline
  This is a line-editing library. It can be linked into almost any program
  to provide command-line editing and recall. It is call-compatible with a
@@ -18,7 +18,7 @@ Description: development files for libeditline
  This package contains the developer files: static libraries, headers,
  manpages.
 
-Package: libeditline0
+Package: libeditline1
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}

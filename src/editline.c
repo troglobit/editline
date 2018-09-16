@@ -1738,7 +1738,7 @@ static el_status_t fd_kill_word(void)
 
     do_forward(CSstay);
     if (old_point != rl_point) {
-        i = rl_point - old_point;
+        i = rl_point - old_point - 1;
         rl_point = old_point;
         return delete_string(i);
     }

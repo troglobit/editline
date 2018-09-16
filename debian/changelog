@@ -1,3 +1,14 @@
+editline (1.16.0) unstable; urgency=medium
+
+  * New upstream release, v1.60.0
+    + Event loop support
+    + New GNU Readline compat functions and callbacks
+    + Minor compat fixes for movement and deletion
+  * Bump .so/ABI version => libeditline1
+  * New maintainer, upstream author
+
+ -- Joachim Nilsson <troglobit@gmail.com>  Sun, 16 Sep 2018 09:45:53 +0200
+
 editline (1.15.3-1) unstable; urgency=medium
 
   * New upstream bug fix release, v1.15.3

@@ -4,8 +4,8 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
-[1.16.0][UNRELEASED] - 2018-03-xx
----------------------------------
+[1.16.0][] - 2018-09-16
+-----------------------
 
 Event loop callback support.
 
@@ -15,10 +15,14 @@ Event loop callback support.
 - `rl_refresh_line()`, new GNU Readline compat function
 - `rl_callback_*()`, alternate interface to plain `readline()` for event
   loops.  Modeled after the GNU Readline API
-- `rl_completion_entry_function`, new GNU Readline compat user hook
-- Add support for Ctrl-Right and Ctrl-Left, forward/backward word
+- `rl_completion_entry_function`, and `rl_attempted_completion_function`
+  are two new GNU Readline compat user hooks for the completion framework
+- `rl_completion_matches()` and `rl_filename_completion_function()`
+  are two new GNU Readline compat functions
 - Add new example: `fileman.c` from GNU Readline to demonstrate the
-  level of compatibility of the new completion framework
+  level of compatibility of the revamped completion framework
+- Add support for Ctrl-Right and Ctrl-Left, forward/backward word
+- Add .deb package to official release target
 
 ### Fixes
 - Fixed header guards, avoid using leading `__`
@@ -30,6 +34,8 @@ Event loop callback support.
 - Add `-Wextra` to std `CFLAGS`
 - Check `fclose()` return value in in `write_history()` and `read_history()`
 - Initialize global variables and reset to `NULL` on `free()`
+- Fix off-by-one in forward kill word, avoid deleting too much
+- Skip (or kill) leading whitespace when skipping (or killing) forwards
 
 
 [1.15.3][] - 2017-09-07
@@ -197,7 +203,8 @@ Adaptations to Debian editline package.
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.15.3...HEAD
+[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.16.0...HEAD
+[1.16.0]:        https://github.com/troglobit/finit/compare/1.15.3...1.16.0
 [1.15.3]:        https://github.com/troglobit/finit/compare/1.15.2...1.15.3
 [1.15.2]:        https://github.com/troglobit/finit/compare/1.15.1...1.15.2
 [1.15.1]:        https://github.com/troglobit/finit/compare/1.15.0...1.15.1

@@ -4,6 +4,10 @@
 *.o
 *.pc
 .deps
+.testit_history
+GPATH
+GRTAGS
+GTAGS
 Makefile
 Makefile.in
 aclocal.m4

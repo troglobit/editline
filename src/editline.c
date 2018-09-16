@@ -378,6 +378,12 @@ static el_status_t do_forward(el_status_t move)
     do {
         p = &rl_line_buffer[rl_point];
 
+	/* Skip leading whitespace, like FSF Readline */
+        for ( ; rl_point < rl_end && (p[0] == ' ' || !is_alpha_num(p[0])); rl_point++, p++) {
+            if (move == CSmove)
+                right(CSstay);
+	}
+
 	/* Skip to end of word, if inside a word. */
         for (; rl_point < rl_end && is_alpha_num(p[0]); rl_point++, p++) {
             if (move == CSmove)

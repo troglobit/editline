@@ -69,8 +69,8 @@ AS_IF([test "x$enable_unique_history" != "xno"],
 AS_IF([test "x$enable_terminal_bell" != "xno"],
    AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))
 
-AS_IF([test "x$enable_terminal_bell" != "xno"],
-   AC_DEFINE(CONFIG_EOF, 1, [Define to enable EOF (Ctrl-C) key.]))
+AS_IF([test "x$enable_eof" != "xno"],
+   AC_DEFINE(CONFIG_EOF, 1, [Define to enable EOF (Ctrl-D) key.]))
 
 AS_IF([test "x$enable_sigint" != "xno"],
    AC_DEFINE(CONFIG_SIGINT, 1, [Define to enable SIGINT (Ctrl-C) key.]))

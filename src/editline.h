@@ -57,8 +57,10 @@
 #define MEM_INC         64
 #define SCREEN_INC      256
 
-/* http://stackoverflow.com/questions/1598773/is-there-a-standard-function-in-c-that-would-return-the-length-of-an-array/1598827#1598827 */
-#define ARRAY_ELEMENTS(arr) ((sizeof(arr)/sizeof(0[arr])) / ((size_t)(!(sizeof(arr) % sizeof(0[arr])))))
+/* From The Practice of Programming, by Kernighan and Pike */
+#ifndef NELEMS
+#define NELEMS(array) (sizeof(array) / sizeof(array[0]))
+#endif
 
 /*
 **  Variables and routines internal to this package.

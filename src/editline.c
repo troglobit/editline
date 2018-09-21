@@ -1933,12 +1933,12 @@ static el_status_t el_bind_key_in_map(int key, el_keymap_func_t function, el_key
 
 el_status_t el_bind_key(int key, el_keymap_func_t function)
 {
-    return el_bind_key_in_map(key, function, Map, ARRAY_ELEMENTS(Map));
+    return el_bind_key_in_map(key, function, Map, NELEMS(Map));
 }
 
 el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function)
 {
-    return el_bind_key_in_map(key, function, MetaMap, ARRAY_ELEMENTS(MetaMap));
+    return el_bind_key_in_map(key, function, MetaMap, NELEMS(MetaMap));
 }
 
 /**

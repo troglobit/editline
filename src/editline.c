@@ -162,7 +162,10 @@ static void tty_flush(void)
 	return;
 
     if (!el_no_echo) {
-	res = write(el_outfd, Screen, ScreenCount);
+   if (rl_check_secret(rl_line_buffer))
+       res = write(el_outfd, "", 1);
+   else
+	    res = write(el_outfd, Screen, ScreenCount);
 	if (res > 0)
 	    ScreenCount = 0;
     }
@@ -1132,6 +1135,10 @@ static void hist_add(const char *p)
 
     s = strdup(p);
     if (s == NULL)
+        return;
+
+    // Don't add secret information in history
+    if (rl_check_secret(s))
         return;
 
     if (H.Size < el_hist_size) {

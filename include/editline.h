@@ -45,6 +45,7 @@ typedef enum {
 
 /* Editline specific types, despite rl_ prefix.  From Heimdal project. */
 typedef int rl_list_possib_func_t(char*, char***);
+typedef int rl_check_secret_func_t(const char*);
 typedef el_status_t el_keymap_func_t(void);
 typedef int  rl_hook_func_t(void);
 typedef int  rl_getc_func_t(void);
@@ -76,6 +77,7 @@ extern char       *rl_complete(char *token, int *match);
 extern int         rl_list_possib(char *token, char ***av);
 extern char      **rl_completion_matches(const char *token, rl_compentry_func_t *generator);
 extern char       *rl_filename_completion_function(const char *text, int state);
+extern int         rl_check_secret(char *source);
 
 /* For compatibility with FSF readline. */
 extern int         rl_point;
@@ -117,6 +119,7 @@ extern int   write_history      (const char *filename);
 extern rl_completion_func_t  *rl_attempted_completion_function;
 extern rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
 extern rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);
+extern rl_check_secret_func_t *rl_set_check_secret_func (rl_check_secret_func_t *func);
 
 /* Alternate interface to plain readline(), for event loops */
 extern void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhandler);

@@ -117,37 +117,27 @@ el_status_t do_suspend(void)
     return CSstay;
 }
 
-static int my_rl_check_secret(const char* source)
+static int my_rl_check_secret(const char *line)
 {
-    const char* pattern = (char *)"^unlock\\s";
+    const char *pattern = (char *)"^unlock\\s";
     regex_t regex;
+    int rc = 0;
 
-    int reti;
-    int rez = 0;
+    if (!line || regcomp(&regex, pattern, 0))
+        return 0;
 
-    if (!pattern || !source)
-        return rez;
+    if (!regexec(&regex, line, 0, NULL, 0))
+        rc = 1;
 
-    /* Compile regular expression */
-    reti = regcomp(&regex, pattern, 0);
-    if (reti) // If couldn't compile regex
-        return rez;
-
-    /* Execute regular expression */
-    reti = regexec(&regex, source, 0, NULL, 0);
-    if (!reti) // If regex match
-        rez = 1;
-
-    /* Free memory allocated to the pattern buffer by regcomp() */
     regfree(&regex);
 
-    return rez;
+    return rc;
 }
 
 int main(void)
 {
     char *line;
-    char	*prompt = "cli> ";
+    char *prompt = "cli> ";
 
     /* Setup callbacks */
     rl_set_complete_func(&my_rl_complete);

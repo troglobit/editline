@@ -398,17 +398,22 @@ char *rl_complete(char *token, int *match)
 }
 
 static rl_check_secret_func_t *el_check_secret_func = NULL;
-/* For compatibility with the Heimdal project. */
+
+/* Added for the BitShares Core project. */
 rl_check_secret_func_t *rl_set_check_secret_func(rl_check_secret_func_t *func)
 {
     rl_check_secret_func_t *old = el_check_secret_func;
+
     el_check_secret_func = func;
+
     return old;
 }
-int rl_check_secret(char *source)
+
+int rl_check_secret(const char *line)
 {
     if (el_check_secret_func)
-	     return el_check_secret_func(source);
+	     return el_check_secret_func(line);
+
     return 0;
 }
 

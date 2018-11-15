@@ -77,7 +77,7 @@ extern char       *rl_complete(char *token, int *match);
 extern int         rl_list_possib(char *token, char ***av);
 extern char      **rl_completion_matches(const char *token, rl_compentry_func_t *generator);
 extern char       *rl_filename_completion_function(const char *text, int state);
-extern int         rl_check_secret(const char *source);
+extern int         rl_check_secret(char *source);
 
 /* For compatibility with FSF readline. */
 extern int         rl_point;

@@ -1138,7 +1138,7 @@ static void hist_add(const char *p)
     if (s == NULL)
         return;
 
-    /* Don't add secret information in history */
+    // Don't add secret information in history
     if (rl_check_secret(s))
         return;
 

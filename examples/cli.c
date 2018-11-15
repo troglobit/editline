@@ -21,7 +21,6 @@
 
 #include "editline.h"
 #include <string.h>
-#include <regex.h>
 
 #define HISTORY "/tmp/.cli-history"
 
@@ -117,33 +116,6 @@ el_status_t do_suspend(void)
     return CSstay;
 }
 
-static int my_rl_check_secret(const char* source)
-{
-    const char* pattern = (char *)"^unlock\\s";
-    regex_t regex;
-
-    int reti;
-    int rez = 0;
-
-    if (!pattern || !source)
-        return rez;
-
-    /* Compile regular expression */
-    reti = regcomp(&regex, pattern, 0);
-    if (reti) // If couldn't compile regex
-        return rez;
-
-    /* Execute regular expression */
-    reti = regexec(&regex, source, 0, NULL, 0);
-    if (!reti) // If regex match
-        rez = 1;
-
-    /* Free memory allocated to the pattern buffer by regcomp() */
-    regfree(&regex);
-
-    return rez;
-}
-
 int main(void)
 {
     char *line;
@@ -152,7 +124,6 @@ int main(void)
     /* Setup callbacks */
     rl_set_complete_func(&my_rl_complete);
     rl_set_list_possib_func(&my_rl_list_possib);
-    rl_set_check_secret_func(&my_rl_check_secret);
     el_bind_key('?', list_possible);
     el_bind_key(CTL('C'), do_break);
     el_bind_key(CTL('D'), do_exit);

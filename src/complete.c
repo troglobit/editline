@@ -397,9 +397,9 @@ char *rl_complete(char *token, int *match)
     return el_filename_complete(token, match);
 }
 
+/* Added for the BitShares Core project. */
 static rl_check_secret_func_t *el_check_secret_func = NULL;
 
-/* Added for the BitShares Core project. */
 rl_check_secret_func_t *rl_set_check_secret_func(rl_check_secret_func_t *func)
 {
     rl_check_secret_func_t *old = el_check_secret_func;
@@ -412,9 +412,29 @@ rl_check_secret_func_t *rl_set_check_secret_func(rl_check_secret_func_t *func)
 int rl_check_secret(const char *line)
 {
     if (el_check_secret_func)
-	     return el_check_secret_func(line);
+	    return el_check_secret_func(line);
 
     return 0;
+}
+
+/* Added for the BitShares Core project. */
+static rl_flush_secret_mode_func_t *el_flush_secret_mode_func = NULL;
+
+rl_flush_secret_mode_func_t *rl_set_flush_secret_mode_func(rl_flush_secret_mode_func_t *func)
+{
+    rl_flush_secret_mode_func_t *old = el_flush_secret_mode_func;
+
+    el_flush_secret_mode_func = func;
+
+    return old;
+}
+
+void rl_flush_secret_mode()
+{
+    if (el_flush_secret_mode_func)
+	    return el_flush_secret_mode_func();
+
+    return;
 }
 
 static rl_list_possib_func_t *el_list_possib_func = NULL;

@@ -134,6 +134,11 @@ static int my_rl_check_secret(const char *line)
     return rc;
 }
 
+static void my_rl_flush_secret_mode()
+{
+    return;
+}
+
 int main(void)
 {
     char *line;
@@ -143,6 +148,7 @@ int main(void)
     rl_set_complete_func(&my_rl_complete);
     rl_set_list_possib_func(&my_rl_list_possib);
     rl_set_check_secret_func(&my_rl_check_secret);
+    rl_set_flush_secret_mode_func(&my_rl_flush_secret_mode);
     el_bind_key('?', list_possible);
     el_bind_key(CTL('C'), do_break);
     el_bind_key(CTL('D'), do_exit);

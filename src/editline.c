@@ -114,6 +114,7 @@ static const char *old_prompt = NULL;
 static rl_vcpfunc_t *line_handler = NULL;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
+int               el_old_no_echo = 0;
 int               el_no_hist = 0;
 int               rl_point;
 int               rl_mark;
@@ -121,7 +122,9 @@ int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 int               rl_inhibit_complete = 0;
 char             *rl_line_buffer = NULL;
+char             *rl_saved_line_buffer = NULL;
 const char       *rl_prompt = NULL;
+const char       *rl_secret_prompt = "\nEnter secret: ";
 const char       *rl_readline_name = NULL; /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 FILE             *rl_instream = NULL;  /* The stdio stream from which input is read. Defaults to stdin if NULL */
 FILE             *rl_outstream = NULL; /* The stdio stream to which output is flushed. Defaults to stdout if NULL */
@@ -154,6 +157,57 @@ static int is_alpha_num(unsigned char c)
 **  TTY input/output functions.
 */
 
+static void tty_push(int c)
+{
+    el_pushed = 1;
+    el_push_back = c;
+}
+
+ssize_t tty_enter_secret_mode(void)
+{
+    el_old_no_echo = el_no_echo;
+    el_no_echo = 1;
+
+    rl_saved_line_buffer = strdup(rl_line_buffer);
+
+    rl_end = 0;
+    rl_line_buffer[0] = '\0';
+
+    tty_push(CSeof);
+
+    ssize_t rez = write(el_outfd, rl_secret_prompt, strlen(rl_secret_prompt));
+
+    rl_flush_secret_mode();
+
+    return rez;
+}
+
+void tty_exit_secret_mode(void)
+{
+    if (!rl_saved_line_buffer)
+        return;
+
+    unsigned int saved_len = strlen(rl_saved_line_buffer);
+    unsigned int len = strlen(rl_line_buffer) + saved_len;
+
+    char* str = malloc(sizeof(char) * len);
+
+    for (unsigned int i=0; i < len; i++) {
+        if (i < saved_len)
+            str[i] = rl_saved_line_buffer[i];
+        else
+            str[i] = rl_line_buffer[i - strlen(rl_saved_line_buffer)];
+    }
+    
+    rl_end += saved_len;
+
+    free(rl_line_buffer);
+    rl_line_buffer = strdup(str);
+
+    free(str);
+    free(rl_saved_line_buffer);
+}
+
 static void tty_flush(void)
 {
     ssize_t res;
@@ -163,7 +217,7 @@ static void tty_flush(void)
 
     if (!el_no_echo) {
         if (rl_check_secret(rl_line_buffer))
-            res = write(el_outfd, "", 1);
+            res = tty_enter_secret_mode();
         else
             res = write(el_outfd, Screen, ScreenCount);
 
@@ -211,12 +265,6 @@ static void tty_string(char *p)
 {
     while (*p)
         tty_show(*p++);
-}
-
-static void tty_push(int c)
-{
-    el_pushed = 1;
-    el_push_back = c;
 }
 
 int rl_getc(void)
@@ -1242,6 +1290,8 @@ void rl_initialize(void)
     if (!rl_prompt)
 	rl_prompt = "? ";
 
+    el_no_echo = el_old_no_echo;
+
     hist_alloc();
 
     /* Setup I/O descriptors */
@@ -1642,6 +1692,7 @@ static el_status_t c_complete(void)
 
 static el_status_t accept_line(void)
 {
+    tty_exit_secret_mode();
     rl_line_buffer[rl_end] = '\0';
     return CSdone;
 }

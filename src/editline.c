@@ -91,6 +91,7 @@ static const char *el_input = NILSTR;
 static char       *Yanked;
 static char       *Screen;
 static char       NEWLINE[]= CRLF;
+static char       CLEAR[]= "\ec";
 static const char *el_term = "dumb";
 static int        Repeat;
 static int        old_point;
@@ -535,7 +536,7 @@ int rl_insert_text(const char *text)
 static el_status_t redisplay(void)
 {
     /* XXX: Use "\r\e[K" to get really neat effect on ANSI capable terminals. */
-    tty_puts(NEWLINE);
+    tty_puts(CLEAR);
     tty_puts(rl_prompt);
     tty_string(rl_line_buffer);
 

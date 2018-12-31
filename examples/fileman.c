@@ -26,8 +26,6 @@ void initialize_readline();
 int execute_line(char *line);
 int valid_argument(char *caller, char *arg);
 
-typedef int rl_icpfunc_t(char *);
-
 /* The names of functions that actually do the manipulation. */
 int com_list(char *);
 int com_view(char *);
@@ -40,39 +38,36 @@ int com_help(char *);
 int com_cd(char *);
 int com_quit(char *);
 
-/* A structure which contains information on the commands this program
-   can understand. */
+struct cmd {
+    char *name;		      /* User printable name of the function. */
+    int  (*func)(char *);     /* Function to call to do the job. */
+    char *doc;		      /* Documentation for this function.  */
+};
 
-typedef struct {
-    char *name;		/* User printable name of the function. */
-    rl_icpfunc_t *func;	/* Function to call to do the job. */
-    char *doc;		/* Documentation for this function.  */
-} COMMAND;
-
-COMMAND commands[] = {
-    {"cd", com_cd, "Change to directory DIR"},
-    {"delete", com_delete, "Delete FILE"},
-    {"help", com_help, "Display this text"},
-    {"?", com_help, "Synonym for `help'"},
-    {"list", com_list, "List files in DIR"},
-    {"ls", com_list, "Synonym for `list'"},
-    {"pwd", com_pwd, "Print the current working directory"},
-    {"quit", com_quit, "Quit using Fileman"},
-    {"rename", com_rename, "Rename FILE to NEWNAME"},
-    {"stat", com_stat, "Print out statistics on FILE"},
-    {"view", com_view, "View the contents of FILE"},
-    {"history", com_history, "List editline history"},
-    {(char *)NULL, (rl_icpfunc_t *) NULL, (char *)NULL}
+struct cmd commands[] = {
+    { "cd",      com_cd,      "Change to directory DIR"},
+    { "delete",  com_delete,  "Delete FILE"},
+    { "help",    com_help,    "Display this text"},
+    { "?",       com_help,    "Synonym for `help'"},
+    { "list",    com_list,    "List files in DIR"},
+    { "ls",      com_list,    "Synonym for `list'"},
+    { "pwd",     com_pwd,     "Print the current working directory"},
+    { "quit",    com_quit,    "Quit using Fileman"},
+    { "rename",  com_rename,  "Rename FILE to NEWNAME"},
+    { "stat",    com_stat,    "Print out statistics on FILE"},
+    { "view",    com_view,    "View the contents of FILE"},
+    { "history", com_history, "List editline history"},
+    { NULL, NULL, NULL },
 };
 
 /* Forward declarations. */
 char *stripwhite();
-COMMAND *find_command();
+struct cmd *find_command();
 
 /* When non-zero, this means the user is done using this program. */
 int done;
 
-int main(int argc __attribute__ ((__unused__)), char **argv)
+int main(int argc, char **argv)
 {
     char *line, *s;
 
@@ -119,7 +114,7 @@ int main(int argc __attribute__ ((__unused__)), char **argv)
 int execute_line(char *line)
 {
     int i;
-    COMMAND *command;
+    struct cmd *command;
     char *word;
 
     /* Isolate the command word. */
@@ -153,7 +148,7 @@ int execute_line(char *line)
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
-COMMAND *find_command(char *name)
+struct cmd *find_command(char *name)
 {
     int i;
 
@@ -288,7 +283,7 @@ int com_view(char *arg)
     return system(syscom);
 }
 
-int com_history(char *arg __attribute__ ((__unused__)))
+int com_history(char *arg)
 {
     const char *he;
 
@@ -301,7 +296,7 @@ int com_history(char *arg __attribute__ ((__unused__)))
     return 0;
 }
 
-int com_rename(char *arg __attribute__ ((__unused__)))
+int com_rename(char *arg)
 {
     too_dangerous("rename");
     return 1;
@@ -332,7 +327,7 @@ int com_stat(char *arg)
     return 0;
 }
 
-int com_delete(char *arg __attribute__ ((__unused__)))
+int com_delete(char *arg)
 {
     too_dangerous("delete");
     return 1;
@@ -387,7 +382,7 @@ int com_cd(char *arg)
 }
 
 /* Print out the current working directory. */
-int com_pwd(char *ignore __attribute__ ((__unused__)))
+int com_pwd(char *ignore)
 {
     char dir[1024], *s;
 
@@ -403,7 +398,7 @@ int com_pwd(char *ignore __attribute__ ((__unused__)))
 
 /* The user wishes to quit using this program.  Just set DONE
    non-zero. */
-int com_quit(char *arg __attribute__ ((__unused__)))
+int com_quit(char *arg)
 {
     done = 1;
     return 0;

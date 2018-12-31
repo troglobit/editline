@@ -134,7 +134,7 @@ int main(int argc __attribute__ ((__unused__)), char **argv)
 /* Execute a command line. */
 int execute_line(char *line)
 {
-    register int i;
+    int i;
     COMMAND *command;
     char *word;
 
@@ -171,7 +171,7 @@ int execute_line(char *line)
    command.  Return a NULL pointer if NAME isn't a command name. */
 COMMAND *find_command(char *name)
 {
-    register int i;
+    int i;
 
     for (i = 0; commands[i].name; i++)
 	if (strcmp(name, commands[i].name) == 0)
@@ -184,7 +184,7 @@ COMMAND *find_command(char *name)
    into STRING. */
 char *stripwhite(char *string)
 {
-    register char *s, *t;
+    char *s, *t;
 
     for (s = string; isspace(*s); s++) ;
 
@@ -354,7 +354,7 @@ int com_delete(char *arg __attribute__ ((__unused__)))
    not present. */
 int com_help(char *arg)
 {
-    register int i;
+    int i;
     int printed = 0;
 
     for (i = 0; commands[i].name; i++) {

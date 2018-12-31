@@ -138,7 +138,7 @@ int execute_line(char *line)
 
     if (!command) {
 	fprintf(stderr, "%s: No such command for FileMan.\n", word);
-	return (-1);
+	return -1;
     }
 
     /* Get argument to command, if any. */
@@ -148,7 +148,7 @@ int execute_line(char *line)
     word = line + i;
 
     /* Call the function. */
-    return ((*(command->func)) (word));
+    return command->func(word);
 }
 
 /* Look up NAME as the name of a command, and return a pointer to that
@@ -159,13 +159,15 @@ COMMAND *find_command(char *name)
 
     for (i = 0; commands[i].name; i++)
 	if (strcmp(name, commands[i].name) == 0)
-	    return (&commands[i]);
+	    return &commands[i];
 
-    return ((COMMAND *) NULL);
+    return NULL;
 }
 
-/* Strip whitespace from the start and end of STRING.  Return a pointer
-   into STRING. */
+/*
+ * Strip whitespace from the start and end of STRING.  Return a pointer
+ * into STRING.
+ */
 char *stripwhite(char *string)
 {
     char *s, *t;
@@ -173,7 +175,7 @@ char *stripwhite(char *string)
     for (s = string; isspace(*s); s++) ;
 
     if (*s == 0)
-	return (s);
+	return s;
 
     t = s + strlen(s) - 1;
     while (t > s && isspace(*t))
@@ -192,10 +194,12 @@ char *stripwhite(char *string)
 char *command_generator(const char *, int);
 char **fileman_completion(const char *, int, int);
 
-/* Tell the GNU Readline library how to complete.  We want to try to
-   complete on command names if this is the first word in the line, or
-   on filenames if not. */
-void initialize_readline()
+/*
+ * Tell the GNU Readline library how to complete.  We want to try to
+ * complete on command names if this is the first word in the line, or
+ * on filenames if not.
+ */
+void initialize_readline(void)
 {
     /* Allow conditional parsing of the ~/.inputrc file. */
     rl_readline_name = "FileMan";
@@ -204,17 +208,16 @@ void initialize_readline()
     rl_attempted_completion_function = fileman_completion;
 }
 
-/* Attempt to complete on the contents of TEXT.  START and END
-   bound the region of rl_line_buffer that contains the word to
-   complete.  TEXT is the word to complete.  We can use the entire
-   contents of rl_line_buffer in case we want to do some simple
-   parsing.  Returnthe array of matches, or NULL if there aren't any. */
-char **fileman_completion(const char *text, int start, int end
-			  __attribute__ ((__unused__)))
+/*
+ * Attempt to complete on the contents of TEXT.  START and END
+ * bound the region of rl_line_buffer that contains the word to
+ * complete.  TEXT is the word to complete.  We can use the entire
+ * contents of rl_line_buffer in case we want to do some simple
+ * parsing.  Returnthe array of matches, or NULL if there aren't any.
+ */
+char **fileman_completion(const char *text, int start, int end)
 {
-    char **matches;
-
-    matches = (char **)NULL;
+    char **matches = NULL;
 
     /* If this word is at the start of the line, then it is a command
        to complete.  Otherwise it is the name of a file in the current
@@ -222,15 +225,13 @@ char **fileman_completion(const char *text, int start, int end
     if (start == 0)
 	matches = rl_completion_matches(text, command_generator);
 
-    return (matches);
+    return matches;
 }
 
 /* Generator function for command completion.  STATE lets us
    know whether to start from scratch; without any state
    (i.e. STATE == 0), then we start at the top of the list. */
-char *command_generator(text, state)
-const char *text;
-int state;
+char *command_generator(const char *text, int state)
 {
     static int list_index, len;
     char *name;
@@ -253,7 +254,7 @@ int state;
     }
 
     /* If no names matched, then return NULL. */
-    return ((char *)NULL);
+    return NULL;
 }
 
 /* **************************************************************** */
@@ -273,7 +274,8 @@ int com_list(char *arg)
 	arg = "";
 
     sprintf(syscom, "ls -FClg %s", arg);
-    return (system(syscom));
+
+    return system(syscom);
 }
 
 int com_view(char *arg)
@@ -282,7 +284,8 @@ int com_view(char *arg)
 	return 1;
 
     sprintf(syscom, "more %s", arg);
-    return (system(syscom));
+
+    return system(syscom);
 }
 
 int com_history(char *arg __attribute__ ((__unused__)))
@@ -301,7 +304,7 @@ int com_history(char *arg __attribute__ ((__unused__)))
 int com_rename(char *arg __attribute__ ((__unused__)))
 {
     too_dangerous("rename");
-    return (1);
+    return 1;
 }
 
 int com_stat(char *arg)
@@ -309,11 +312,11 @@ int com_stat(char *arg)
     struct stat finfo;
 
     if (!valid_argument("stat", arg))
-	return (1);
+	return 1;
 
     if (stat(arg, &finfo) == -1) {
 	perror(arg);
-	return (1);
+	return 1;
     }
 
     printf("Statistics for `%s':\n", arg);
@@ -325,13 +328,14 @@ int com_stat(char *arg)
     printf("Inode Last Change at: %s", ctime(&finfo.st_ctime));
     printf("      Last access at: %s", ctime(&finfo.st_atime));
     printf("    Last modified at: %s", ctime(&finfo.st_mtime));
-    return (0);
+
+    return 0;
 }
 
 int com_delete(char *arg __attribute__ ((__unused__)))
 {
     too_dangerous("delete");
-    return (1);
+    return 1;
 }
 
 /* Print out help for ARG, or for all of the commands if ARG is
@@ -366,7 +370,8 @@ int com_help(char *arg)
 	if (printed)
 	    printf("\n");
     }
-    return (0);
+
+    return 0;
 }
 
 /* Change to the directory ARG. */
@@ -378,7 +383,7 @@ int com_cd(char *arg)
     }
 
     com_pwd("");
-    return (0);
+    return 0;
 }
 
 /* Print out the current working directory. */
@@ -386,8 +391,8 @@ int com_pwd(char *ignore __attribute__ ((__unused__)))
 {
     char dir[1024], *s;
 
-    s = (char *)getcwd(dir, sizeof(dir) - 1);
-    if (s == 0) {
+    s = getcwd(dir, sizeof(dir) - 1);
+    if (!s) {
 	printf("Error getting pwd: %s\n", dir);
 	return 1;
     }
@@ -401,7 +406,7 @@ int com_pwd(char *ignore __attribute__ ((__unused__)))
 int com_quit(char *arg __attribute__ ((__unused__)))
 {
     done = 1;
-    return (0);
+    return 0;
 }
 
 /* Function which tells you that you can't do this. */
@@ -417,10 +422,10 @@ int valid_argument(char *caller, char *arg)
 {
     if (!arg || !*arg) {
 	fprintf(stderr, "%s: Argument required.\n", caller);
-	return (0);
+	return 0;
     }
 
-    return (1);
+    return 1;
 }
 
 /**

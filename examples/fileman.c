@@ -21,7 +21,6 @@
 
 #include "editline.h"
 
-void *xmalloc(size_t size);
 void too_dangerous(char *caller);
 void initialize_readline();
 int execute_line(char *line);
@@ -70,26 +69,12 @@ COMMAND commands[] = {
 char *stripwhite();
 COMMAND *find_command();
 
-/* The name of this program, as taken from argv[0]. */
-char *progname;
-
 /* When non-zero, this means the user is done using this program. */
 int done;
-
-char *dupstr(char *s)
-{
-    char *r;
-
-    r = xmalloc(strlen(s) + 1);
-    strcpy(r, s);
-    return (r);
-}
 
 int main(int argc __attribute__ ((__unused__)), char **argv)
 {
     char *line, *s;
-
-    progname = argv[0];
 
     setlocale(LC_CTYPE, "");
 
@@ -126,7 +111,6 @@ int main(int argc __attribute__ ((__unused__)), char **argv)
 #endif
 	free(line);
     }
-    exit(0);
 
     return 0;
 }
@@ -265,7 +249,7 @@ int state;
 	list_index++;
 
 	if (strncmp(name, text, len) == 0)
-	    return (dupstr(name));
+	    return strdup(name);
     }
 
     /* If no names matched, then return NULL. */
@@ -437,14 +421,6 @@ int valid_argument(char *caller, char *arg)
     }
 
     return (1);
-}
-
-void *xmalloc(size_t size)
-{
-    register void *value = (void *)malloc(size);
-    if (value == 0)
-	fprintf(stderr, "virtual memory exhausted");
-    return value;
 }
 
 /**

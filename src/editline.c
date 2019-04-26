@@ -284,13 +284,16 @@ void el_print_columns(int ac, char **av)
     int         skip;
     int         longest;
     int         cols;
+    int         colwidth;
 
     /* Find longest name, determine column count from that. */
     for (longest = 0, i = 0; i < ac; i++) {
         if ((j = strlen((char *)av[i])) > longest)
             longest = j;
     }
-    cols = tty_cols / (longest + 3);
+    colwidth = longest + 3;
+    if (colwidth > tty_cols) colwidth = tty_cols;
+    cols = tty_cols / colwidth;
 
     tty_puts(NEWLINE);
     for (skip = ac / cols + 1, i = 0; i < skip; i++) {
@@ -299,7 +302,7 @@ void el_print_columns(int ac, char **av)
                 tty_put(*p);
 
             if (j + skip < ac) {
-                while (++len < longest + 3)
+                while (++len < colwidth)
                     tty_put(' ');
 	    }
         }

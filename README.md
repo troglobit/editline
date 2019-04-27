@@ -221,7 +221,7 @@ similar to the [BSD license][].  Rich's current version is however under
 the Apache license.  For details on  the licensing terms of this version
 of the software, see [License][].
 
-This version  of the editline  library was  forked from the  [Minix 3][]
+This version  of the editline  library was  forked from the  [Minix 2][]
 source tree and is *not* related  to the similarily named NetBSD version
 that [Jess Thrysøe][jess]  disitributes to the world  outside *BSD.  The
 libraries have much in common, but  the latter is heavily refactored and
@@ -255,7 +255,7 @@ Outstanding issues are listed in the [TODO.md][] file.
 [FSF readline]:    http://www.gnu.org/software/readline/
 [Rich Salz]:       https://github.com/richsalz/editline/
 [comp.sources.unix]: http://ftp.cs.toronto.edu/pub/white/pub/rc/editline.shar
-[Minix 3]:         http://www.cise.ufl.edu/~cop4600/cgi-bin/lxr/http/source.cgi/lib/editline/
+[Minix 2]:         http://www.cise.ufl.edu/~cop4600/cgi-bin/lxr/http/source.cgi/lib/editline/
 [jess]:            http://thrysoee.dk/editline/
 [BSD license]:     http://en.wikipedia.org/wiki/BSD_licenses
 [libeditline]:     http://packages.qa.debian.org/e/editline.html

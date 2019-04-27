@@ -7,9 +7,13 @@ All notable changes to the project are documented in this file.
 [1.16.1][UNRELEASED]
 --------------------
 
+### Changes
+- Major updates to the `editline.3` man page
+
 ### Fixes
 - Fix #20: `configure --disable-eof` does not bite
 - Fix #23: Make Ctrl-L clear the screan instead of starting a new line
+- Fix #24: Fix behavior when TTY is narrower than column width, by Will Dietz
 
 
 [1.16.0][] - 2018-09-16

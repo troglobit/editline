@@ -21,7 +21,7 @@ Description: development files for libeditline
 Package: libeditline1
 Architecture: any
 Section: libs
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}
 Description: line editing library similar to readline
  This is a line-editing library. It can be linked into almost any program
  to provide command-line editing and recall. It is call-compatible with a

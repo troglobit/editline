@@ -1130,7 +1130,7 @@ static void hist_add(const char *p)
     char *s;
 
 #ifdef CONFIG_UNIQUE_HISTORY
-    if (H.Pos && strcmp(p, H.Lines[H.Pos - 1]) == 0)
+    if (H.Size && strcmp(p, H.Lines[H.Size - 1]) == 0)
         return;
 #endif
 

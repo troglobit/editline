@@ -771,7 +771,7 @@ static el_status_t delete_string(int count)
         }
         tty_backn(i);
         *p = '\0';
-        return CSmove;
+        return CSstay;
     }
 
     if (rl_point + count > rl_end && (count = rl_end - rl_point) <= 0)

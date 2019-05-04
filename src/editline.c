@@ -187,27 +187,33 @@ static void tty_puts(const char *p)
         tty_put(*p++);
 }
 
-static void tty_show(unsigned char c)
+static int tty_show(unsigned char c)
 {
     if (c == DEL) {
         tty_put('^');
         tty_put('?');
+        return 2;
     } else if (ISCTL(c)) {
         tty_put('^');
         tty_put(UNCTL(c));
+        return 2;
     } else if (rl_meta_chars && ISMETA(c)) {
         tty_put('M');
         tty_put('-');
         tty_put(UNMETA(c));
+        return 3;
     } else {
         tty_put(c);
+        return 1;
     }
 }
 
-static void tty_string(char *p)
+static int tty_string(char *p)
 {
+    int n = 0;
     while (*p)
-        tty_show(*p++);
+        n += tty_show(*p++);
+    return n;
 }
 
 static void tty_push(int c)
@@ -784,9 +790,10 @@ static el_status_t delete_string(int count)
         p[0] = p[count];
     ceol();
     rl_end -= count;
-    tty_string(&rl_line_buffer[rl_point]);
+    i = tty_string(&rl_line_buffer[rl_point]);
+    tty_backn(i);
 
-    return CSmove;
+    return CSstay;
 }
 
 static el_status_t bk_char(void)

@@ -580,14 +580,27 @@ const char *el_prev_hist(void)
 
 static el_status_t do_insert_hist(const char *p)
 {
+    const char *pc;
+
     if (p == NULL)
         return el_ring_bell();
 
-    clear_line();
+    while (rl_point > 0)
+    {
+        --rl_point;
+        pc = &rl_line_buffer[rl_point];
+        tty_back();
+        if (ISCTL(*pc)) {
+            tty_back();
+        } else if (rl_meta_chars && ISMETA(*pc)) {
+            tty_back();
+            tty_back();
+        }
+    }
 
-    rl_point = 0;
-    reposition();
+    ceol();
     rl_end = 0;
+    rl_line_buffer[0] = '\0';
 
     return insert_string(p);
 }

@@ -187,7 +187,7 @@ static void tty_puts(const char *p)
         tty_put(*p++);
 }
 
-static int tty_show(unsigned char c)
+static size_t tty_show(unsigned char c)
 {
     if (c == DEL) {
         tty_put('^');
@@ -208,9 +208,9 @@ static int tty_show(unsigned char c)
     }
 }
 
-static int tty_string(char *p)
+static size_t tty_string(char *p)
 {
-    int n = 0;
+    size_t n = 0;
     while (*p)
         n += tty_show(*p++);
     return n;
@@ -501,6 +501,7 @@ static void clear_line(void)
 static el_status_t insert_string(const char *p)
 {
     size_t      len;
+    size_t      bk;
     int         i;
     char        *line;
     char        *q;
@@ -526,10 +527,12 @@ static el_status_t insert_string(const char *p)
     memcpy(&rl_line_buffer[rl_point], p, len);
     rl_end += len;
     rl_line_buffer[rl_end] = '\0';
-    tty_string(&rl_line_buffer[rl_point]);
+    bk = tty_string(&rl_line_buffer[rl_point]);
     rl_point += len;
+    if (bk > len)
+        tty_backn(bk-len);
 
-    return rl_point == rl_end ? CSstay : CSmove;
+    return CSstay;
 }
 
 int rl_insert_text(const char *text)
@@ -757,6 +760,7 @@ static el_status_t delete_string(int count)
 {
     int i;
     char *p;
+    size_t bk;
 
     if (count <= 0 || rl_end == rl_point)
         return el_ring_bell();
@@ -790,8 +794,8 @@ static el_status_t delete_string(int count)
         p[0] = p[count];
     ceol();
     rl_end -= count;
-    i = tty_string(&rl_line_buffer[rl_point]);
-    tty_backn(i);
+    bk = tty_string(&rl_line_buffer[rl_point]);
+    tty_backn(bk);
 
     return CSstay;
 }

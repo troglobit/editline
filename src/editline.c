@@ -892,7 +892,7 @@ static el_status_t end_line(void)
 
 static el_status_t del_char(void)
 {
-    return delete_string(Repeat == NO_ARG ? 1 : Repeat);
+    return delete_string(Repeat == NO_ARG ? CSeof : Repeat);
 }
 
 el_status_t el_del_char(void)

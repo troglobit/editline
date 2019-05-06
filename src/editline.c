@@ -114,6 +114,10 @@ static const char *(*search_move)(void);
 static const char *old_prompt = NULL;
 static rl_vcpfunc_t *line_handler = NULL;
 
+int               el_ret_signals = 0; /* return an empty string by default when got a signal */
+const char* const el_ret_sigint  = "^C";
+const char* const el_ret_sigtstp = "^Z";
+
 int               el_no_echo = 0; /* e.g., under Emacs */
 int               el_no_hist = 0;
 int               rl_point;
@@ -686,7 +690,9 @@ static el_status_t h_search_end(const char *p)
     rl_prompt = old_prompt;
     Searching = 0;
 
-    if (p == NULL && el_intr_pending > 0) {
+    /* When got a signal, editinput() will either return an empty string, or NULL, or a constant,
+       none of them makes sense to search with. And we always need to clear el_intr_pending. */
+    if (el_intr_pending > 0) {
         el_intr_pending = 0;
         clear_line();
         return redisplay();
@@ -1069,6 +1075,23 @@ static el_status_t tty_special(int c)
     return CSdispatch;
 }
 
+static int is_signal(char* line)
+{
+    return (line == el_ret_sigint || line == el_ret_sigtstp);
+}
+
+static char* get_signal_str()
+{
+    if (el_ret_signals)
+    {
+        if (el_intr_pending == SIGINT)
+            return el_ret_sigint;
+        if (el_intr_pending == SIGTSTP)
+            return el_ret_sigtstp;
+    }
+    return (char *)"";
+}
+
 static char *editinput(int complete)
 {
     int c;
@@ -1086,7 +1109,7 @@ static char *editinput(int complete)
 	    return NULL;
 
 	case CSsignal:
-	    return (char *)"";
+	    return get_signal_str();
 
 	case CSmove:
 	    reposition();
@@ -1101,7 +1124,7 @@ static char *editinput(int complete)
 		return NULL;
 
 	    case CSsignal:
-		return (char *)"";
+		return get_signal_str();
 
 	    case CSmove:
 		reposition();
@@ -1350,7 +1373,8 @@ static int el_prep(const char *prompt)
 static char *el_deprep(char *line)
 {
     if (line) {
-        line = strdup(line);
+        if (!is_signal(line))
+            line = strdup(line);
         tty_puts(NEWLINE);
         tty_flush();
     }
@@ -1366,7 +1390,7 @@ static char *el_deprep(char *line)
 
     /* Add to history, unless no-echo or no-history mode ... */
     if (!el_no_echo && !el_no_hist) {
-	if (line != NULL && *line != '\0')
+	if (line != NULL && *line != '\0' && !is_signal(line))
 	    hist_add(line);
     }
 
@@ -1436,7 +1460,8 @@ void rl_callback_read_char(void)
 	}
 
 	l = el_deprep(line);
-	line_handler(l);
+	line_handler(l); /* l can be el_ret_sigint or el_ret_sigtstp,
+                            in this case the callback function can not free it */
 
 	if (el_prep(rl_prompt))
 	    line_handler(NULL);

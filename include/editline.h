@@ -90,6 +90,12 @@ extern int         el_no_echo;   /* E.g under emacs, don't echo except prompt */
 extern int         el_no_hist;   /* Disable auto-save of and access to history -- e.g. for password prompts or wizards */
 extern int         el_hist_size; /* size of history scrollback buffer, default: 15 */
 
+extern int               el_ret_signals; /* Set this to non-zero to enable use of following constants. Disabled by default.
+                                            The constants can be returned by readline(), or be used as callback_handler's parameter.
+                                            The caller can not free the constants.  */
+extern const char* const el_ret_sigint;  /* If got SIGINT  from tty, readline will return this if el_ret_signals is non zero */
+extern const char* const el_ret_sigtstp; /* If got SIGTSTP from tty, readline will return this if el_ret_signals is non zero */
+
 extern void  rl_initialize      (void);
 extern void  rl_reset_terminal  (const char *terminal_name);
 extern void  rl_uninitialize    (void);

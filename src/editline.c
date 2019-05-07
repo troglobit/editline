@@ -1948,6 +1948,13 @@ el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function)
     return el_bind_key_in_map(key, function, MetaMap, NELEMS(MetaMap));
 }
 
+rl_getc_func_t *rl_set_getc_func(rl_getc_func_t *func)
+{
+    rl_getc_func_t *old = rl_getc_function;
+    rl_getc_function = func;
+    return old;
+}
+
 /**
  * Local Variables:
  *  c-file-style: "k&r"

@@ -114,6 +114,8 @@ extern void  add_history        (const char *line);
 extern int   read_history       (const char *filename);
 extern int   write_history      (const char *filename);
 
+extern rl_getc_func_t *rl_set_getc_func(rl_getc_func_t *func);
+
 extern rl_completion_func_t  *rl_attempted_completion_function;
 extern rl_complete_func_t    *rl_set_complete_func    (rl_complete_func_t *func);
 extern rl_list_possib_func_t *rl_set_list_possib_func (rl_list_possib_func_t *func);

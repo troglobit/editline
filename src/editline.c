@@ -1036,7 +1036,8 @@ static el_status_t tty_special(int c)
 {
 #ifdef CONFIG_SIGINT
     if (c == rl_intr) {
-        el_intr_pending = SIGINT;
+	if (!Searching)
+	    el_intr_pending = SIGINT;
         return CSsignal;
     }
 #endif

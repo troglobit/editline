@@ -536,9 +536,9 @@ int rl_insert_text(const char *text)
     return rl_point - mark;
 }
 
-static el_status_t redisplay(void)
+static el_status_t redisplay(int cls)
 {
-    if (rl_point == 0)
+    if (cls && rl_point == 0 && rl_end == 0)
 	tty_puts(CLEAR);
     else
 	tty_puts("\r\e[K");
@@ -549,16 +549,21 @@ static el_status_t redisplay(void)
     return CSmove;
 }
 
+static el_status_t refresh(void)
+{
+    return redisplay(1);
+}
+
 int rl_refresh_line(int ignore1 __attribute__((unused)), int ignore2 __attribute__((unused)))
 {
-    redisplay();
+    redisplay(0);
     return 0;
 }
 
 static el_status_t toggle_meta_mode(void)
 {
     rl_meta_chars = ! rl_meta_chars;
-    return redisplay();
+    return redisplay(0);
 }
 
 
@@ -689,13 +694,13 @@ static el_status_t h_search_end(const char *p)
     if (p == NULL && el_intr_pending > 0) {
         el_intr_pending = 0;
         clear_line();
-        return redisplay();
+        return redisplay(0);
     }
 
     p = search_hist(p, search_move);
     if (p == NULL) {
         el_ring_bell();
-        return redisplay();
+        return redisplay(0);
     }
 
     return do_insert_hist(p);
@@ -1304,7 +1309,7 @@ void rl_clear_message(void)
 
 void rl_forced_update_display()
 {
-    redisplay();
+    redisplay(0);
     tty_flush();
 }
 
@@ -1850,7 +1855,7 @@ static el_keymap_t Map[64] = {
     {   CTL('I'),       c_complete      },
     {   CTL('J'),       accept_line     },
     {   CTL('K'),       kill_line       },
-    {   CTL('L'),       redisplay       },
+    {   CTL('L'),       refresh         },
     {   CTL('M'),       accept_line     },
     {   CTL('N'),       h_next          },
     {   CTL('O'),       el_ring_bell    },

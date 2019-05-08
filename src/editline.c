@@ -700,6 +700,7 @@ static el_status_t h_search_end(const char *p)
     p = search_hist(p, search_move);
     if (p == NULL) {
         el_ring_bell();
+        clear_line();
         return redisplay(0);
     }
 

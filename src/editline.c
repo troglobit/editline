@@ -691,7 +691,7 @@ static el_status_t h_search_end(const char *p)
     rl_prompt = old_prompt;
     Searching = 0;
 
-    if (p == NULL && el_intr_pending > 0) {
+    if (el_intr_pending > 0) {
         el_intr_pending = 0;
         clear_line();
         return redisplay(0);

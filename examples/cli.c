@@ -106,6 +106,7 @@ el_status_t do_suspend(void)
 
 static void breakit(int signo)
 {
+    puts("Got SIGINT");
 }
 
 int main(void)

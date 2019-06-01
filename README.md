@@ -37,10 +37,11 @@ Editline is maintained collaboratively at [GitHub][].
 Example
 -------
 
-Below follows a brief example to  illustrate how one can use Editline to
-create a  simple CLI, use  Ctrl-D to exit  the program.  For  a slightly
-more  advanced example,  see <https://github.com/troglobit/jush/>.   The
-Editline sources also include an `examples/` sub-directory.
+Below is a very brief example to illustrate how one can use Editline to
+create a simple CLI, Ctrl-D exits the program.  A slightly more advanced
+example is Jush, <https://github.com/troglobit/jush/>, a small and very
+simplistic UNIX shell.  The Editline sources also include an `examples/`
+sub-directory.
 
 1. Build and install the library, preferably using a [release tarball][]
    The configure script defaults to a `/usr/local` prefix.

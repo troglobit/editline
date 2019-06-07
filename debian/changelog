@@ -1,8 +1,9 @@
 editline (1.16.1) unstable; urgency=medium
 
   * Minor bug fix and documentation update release.
+  * Add missing pkg-config .pc file to -dev package
 
- -- Joachim Nilsson <troglobit@gmail.com>  Sat, 27 Apr 2019 15:01:07 +0200
+ -- Joachim Nilsson <troglobit@gmail.com>  Fri, 07 Jun 2019 11:45:50 +0200
 
 editline (1.16.0) unstable; urgency=medium
 

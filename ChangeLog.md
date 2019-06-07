@@ -4,16 +4,23 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
-[1.16.1][UNRELEASED]
---------------------
+[1.16.1] - 2019-06-07
+---------------------
 
 ### Changes
 - Major updates to the `editline.3` man page
+- Cleanup of examples `cli.c` and `fileman.c`
+- Add example of hidden input prompt to `cli.c`
 
 ### Fixes
 - Fix #20: `configure --disable-eof` does not bite
-- Fix #23: Make Ctrl-L clear the screan instead of starting a new line
+- Fix #23: Make Ctrl-L clear the screan instead of starting a new line  
+  Like Ctrl-D, which exits, Ctrl-L only clears the screen when the line
+  is empty and the cursor is at the start of the line, otherwise Ctrl-L
+  will redraw/refresh the current line.
 - Fix #24: Fix behavior when TTY is narrower than column width, by Will Dietz
+- Fix #25: Avoid continuously duplicate commands in history
+- Fix #31: Aborting i-search with Ctrl-C should not generate signal
 
 
 [1.16.0][] - 2018-09-16

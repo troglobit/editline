@@ -113,6 +113,9 @@ static int        Searching = 0;
 static const char *(*search_move)(void);
 static const char *old_prompt = NULL;
 static rl_vcpfunc_t *line_handler = NULL;
+static char       *line_up = "\x1b[A";
+static char       *line_down = "\x1b[B";
+int prompt_len = 0;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
 int               el_no_hist = 0;
@@ -206,8 +209,12 @@ static void tty_show(unsigned char c)
 
 static void tty_string(char *p)
 {
-    while (*p)
+    int i = rl_point + prompt_len + 1;
+    while (*p) {
         tty_show(*p++);
+	if ((i++) % tty_cols == 0)
+	    tty_put('\n');
+    }
 }
 
 static void tty_push(int c)
@@ -311,20 +318,77 @@ void el_print_columns(int ac, char **av)
     }
 }
 
-static void reposition(void)
+static void reposition(int key)
 {
-    int i;
+    int i = 0;
+    int len_with_prompt = prompt_len + rl_end;
+    int n =  len_with_prompt / tty_cols;                  // determine the number of lines
 
     tty_put('\r');
-    tty_puts(rl_prompt);
-    for (i = 0; i < rl_point; i++)
+    
+    if (n > 0) {
+        int line;
+        if (key == CTL('A') || key == CTL('E') || key == rl_kill)
+            line = (prompt_len + old_point) / tty_cols;  // determine num of current line
+        else
+            line = len_with_prompt / tty_cols;
+
+        if (key == CTL('E')) {                           // move to end of line(s)
+       	    for(int k = line; k < n; k++) 
+                tty_puts(line_down);
+            i = rl_point - (len_with_prompt % tty_cols); // determine reminder of last line and redraw only it
+        } else {
+       	    for(int k = line; k > 0; k--)                // CTRL-A, CTRL-U, insert (end, middle), remove (end, middle) 
+                tty_puts(line_up);                       // redraw characters until changed data
+            tty_puts(rl_prompt);
+        }
+    }
+    else if (n == 0) {
+        tty_puts(rl_prompt);
+    }
+
+    for (i; i < rl_point; i++) {
         tty_show(rl_line_buffer[i]);
+	if ((i + prompt_len + 1) % tty_cols == 0) {      // move to the next line
+            tty_put('\n');
+	}
+    }
+}
+
+void itoa(int val, char* buf)
+{     
+    int digits = 0;
+    int temp = val;
+    while (temp != 0) {
+        temp = temp / 10;
+        ++digits;
+    }
+    *(buf+digits) = 'C';
+    int i = 5; digits--;
+    for(; val && i ; --i, val /= 10) {
+        *(buf+digits) = "0123456789"[val % 10];
+        digits--;
+    }
+}
+
+static void move_cursor_forward(int columns)
+{
+    char buf[12] = {0};
+    const char* line_forward = "\x1b[";
+    strcpy(buf, line_forward);
+    itoa(columns, buf+2);
+    tty_puts(buf);
 }
 
 static void left(el_status_t Change)
 {
     if (rl_point) {
-	tty_back();
+        if ((rl_point + prompt_len) % tty_cols == 0) {
+            tty_puts(line_up);
+            move_cursor_forward(tty_cols);
+        } else {
+            tty_back();
+        }
 	if (ISMETA(rl_line_buffer[rl_point - 1])) {
 	    if (rl_meta_chars) {
 		tty_back();
@@ -341,7 +405,10 @@ static void left(el_status_t Change)
 
 static void right(el_status_t Change)
 {
-    tty_show(rl_line_buffer[rl_point]);
+    if ((rl_point + prompt_len + 1) % tty_cols == 0)
+        tty_put('\n');
+    else
+        tty_show(rl_line_buffer[rl_point]);
 
     if (Change == CSmove)
         rl_point++;
@@ -461,11 +528,15 @@ static void ceol(void)
     while (rl_point < 0) {
         tty_put(' ');
 	rl_point++;
-	extras++;
     }
 
     for (i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
-        tty_put(' ');
+        if ((i + prompt_len + 1) % tty_cols == 0){
+            tty_put(' ');
+            tty_put('\n');
+	}
+	else
+            tty_put(' ');
         if (ISMETA(*p)) {
 	    if (rl_meta_chars) {
 		tty_put(' ');
@@ -478,15 +549,32 @@ static void ceol(void)
         }
     }
 
-    for (i += extras; i > rl_point; i--)
-        tty_back();
+    for (i += extras; i > rl_point; i--) {
+        if ((i + prompt_len) % tty_cols == 0) {
+            tty_puts(line_up);
+            move_cursor_forward(tty_cols);
+        } else {
+            tty_back();
+	}
+    }
 }
 
 static void clear_line(void)
 {
+    int n = (rl_point + prompt_len) / tty_cols;
     rl_point = -(int)strlen(rl_prompt);
-    tty_put('\r');
+
+    if (n > 0) {
+        for(int k = 0; k < n; k++)
+            tty_puts(line_up);
+        tty_put('\r');
+    }
+    else {
+        tty_put('\r');
+    }
+
     ceol();
+
     rl_point = 0;
     rl_end = 0;
     rl_line_buffer[0] = '\0';
@@ -538,14 +626,15 @@ int rl_insert_text(const char *text)
 
 static el_status_t redisplay(int cls)
 {
-    if (cls && rl_point == 0 && rl_end == 0)
-	tty_puts(CLEAR);
-    else
+    if (cls)
+    	tty_puts(CLEAR);
+    else 
 	tty_puts("\r\e[K");
 
     tty_puts(rl_prompt);
+    rl_point = 0;
     tty_string(rl_line_buffer);
-
+    rl_point = rl_end;
     return CSmove;
 }
 
@@ -585,7 +674,7 @@ static el_status_t do_insert_hist(const char *p)
     clear_line();
 
     rl_point = 0;
-    reposition();
+    reposition(-1);
     rl_end = 0;
 
     return insert_string(p);
@@ -792,6 +881,7 @@ static el_status_t delete_string(int count)
     for (p = &rl_line_buffer[rl_point], i = rl_end - (rl_point + count) + 1; --i >= 0; p++)
         p[0] = p[count];
     ceol();
+
     rl_end -= count;
     tty_string(&rl_line_buffer[rl_point]);
 
@@ -832,7 +922,7 @@ static el_status_t kill_line(void)
         if (Repeat < rl_point) {
             i = rl_point;
             rl_point = Repeat;
-            reposition();
+            reposition(-1);
             delete_string(i - rl_point);
         } else if (Repeat > rl_point) {
             right(CSmove);
@@ -1059,8 +1149,9 @@ static el_status_t tty_special(int c)
 
     if (c == rl_kill) {
         if (rl_point != 0) {
+            old_point = rl_point;
             rl_point = 0;
-            reposition();
+            reposition(c);
         }
         Repeat = NO_ARG;
 
@@ -1095,7 +1186,7 @@ static char *editinput(int complete)
 	    return (char *)"";
 
 	case CSmove:
-	    reposition();
+	    reposition(c);
 	    break;
 
 	case CSdispatch:
@@ -1110,7 +1201,7 @@ static char *editinput(int complete)
 		return (char *)"";
 
 	    case CSmove:
-		reposition();
+		reposition(c);
 		break;
 
 	    case CSdispatch:
@@ -1334,6 +1425,8 @@ static int el_prep(const char *prompt)
 	return -1;
 
     rl_prompt = prompt ? prompt : NILSTR;
+    prompt_len = strlen(rl_prompt);
+
     if (el_no_echo) {
 	int old = el_no_echo;
 

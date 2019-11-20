@@ -145,11 +145,11 @@ extern int      tgetnum(const char *);
 static int is_alpha_num(unsigned char c)
 {
     if (isalnum(c))
-	return 1;
+        return 1;
     if (ISMETA(c))
-	return 1;
+        return 1;
     if (ISCTL(c))
-	return 1;
+        return 1;
 
     return 0;
 }
@@ -163,19 +163,19 @@ static void tty_flush(void)
     ssize_t res;
 
     if (!ScreenCount)
-	return;
+        return;
 
     if (!el_no_echo) {
-	res = write(el_outfd, Screen, ScreenCount);
-	if (res > 0)
-	    ScreenCount = 0;
+        res = write(el_outfd, Screen, ScreenCount);
+        if (res > 0)
+            ScreenCount = 0;
     }
 }
 
 static void tty_put(const char c)
 {
     if (el_no_echo)
-	return;
+        return;
 
     Screen[ScreenCount] = c;
     if (++ScreenCount >= ScreenSize) {
@@ -212,8 +212,8 @@ static void tty_string(char *p)
     int i = rl_point + prompt_len + 1;
     while (*p) {
         tty_show(*p++);
-	if ((i++) % tty_cols == 0)
-	    tty_put('\n');
+        if ((i++) % tty_cols == 0)
+            tty_put('\n');
     }
 }
 
@@ -229,7 +229,7 @@ int rl_getc(void)
     char c;
 
     do {
-	r = read(el_infd, &c, 1);
+        r = read(el_infd, &c, 1);
     } while (r == -1 && errno == EINTR);
 
     return r == 1 ? c : EOF;
@@ -299,7 +299,8 @@ void el_print_columns(int ac, char **av)
             longest = j;
     }
     colwidth = longest + 3;
-    if (colwidth > tty_cols) colwidth = tty_cols;
+    if (colwidth > tty_cols)
+        colwidth = tty_cols;
     cols = tty_cols / colwidth;
 
     tty_puts(NEWLINE);
@@ -338,7 +339,7 @@ static void reposition(int key)
                 tty_puts(line_down);
             i = rl_point - (len_with_prompt % tty_cols); // determine reminder of last line and redraw only it
         } else {
-       	    for(int k = line; k > 0; k--)                // CTRL-A, CTRL-U, insert (end, middle), remove (end, middle) 
+            for(int k = line; k > 0; k--)                // CTRL-A, CTRL-U, insert (end, middle), remove (end, middle)
                 tty_puts(line_up);                       // redraw characters until changed data
             tty_puts(rl_prompt);
         }
@@ -696,7 +697,7 @@ static el_status_t do_hist(const char *(*move)(void))
 static el_status_t h_next(void)
 {
     if (el_no_hist)
-	return CSstay;
+        return CSstay;
 
     return do_hist(el_next_hist);
 }
@@ -704,7 +705,7 @@ static el_status_t h_next(void)
 static el_status_t h_prev(void)
 {
     if (el_no_hist)
-	return CSstay;
+        return CSstay;
 
     return do_hist(el_prev_hist);
 }
@@ -809,8 +810,8 @@ static el_status_t h_search(void)
 
     search_move = Repeat == NO_ARG ? el_prev_hist : el_next_hist;
     if (line_handler) {
-	editinput(0);
-	return CSstay;
+        editinput(0);
+        return CSstay;
     }
 
     return h_search_end(editinput(1));
@@ -1036,43 +1037,43 @@ static el_status_t meta(void)
     /* Also include VT-100 arrows. */
     if (c == '[' || c == 'O') {
         switch (tty_get()) {
-	case EOF:  return CSeof;
-	case '1':
-	{
-	    char seq[4] = { 0 };
+        case EOF:  return CSeof;
+        case '1':
+        {
+            char seq[4] = { 0 };
 
-	    for (c = 0; c < 3; c++)
-		seq[c] = tty_get();
+            for (c = 0; c < 3; c++)
+                seq[c] = tty_get();
 
-	    if (!strncmp(seq, ";5C", 3))
-		return fd_word(); /* Ctrl+Right */
-	    if (!strncmp(seq, ";5D", 3))
-		return bk_word(); /* Ctrl+Left */
+            if (!strncmp(seq, ";5C", 3))
+                return fd_word(); /* Ctrl+Right */
+            if (!strncmp(seq, ";5D", 3))
+                return bk_word(); /* Ctrl+Left */
 
-	    break;
-	}
-	case '2':  tty_get(); return CSstay;     /* Insert */
-	case '3':  tty_get(); return del_char(); /* Delete */
-	case '5':  tty_get(); return CSstay;     /* PgUp */
-	case '6':  tty_get(); return CSstay;     /* PgDn */
-	case 'A':  return h_prev();              /* Up */
-	case 'B':  return h_next();              /* Down */
-	case 'C':  return fd_char();             /* Left */
-	case 'D':  return bk_char();             /* Right */
-	case 'F':  return end_line();            /* End */
-	case 'H':  return beg_line();            /* Home */
-	default:                                 /* Fall through */
-	    break;
+            break;
+        }
+        case '2':  tty_get(); return CSstay;     /* Insert */
+        case '3':  tty_get(); return del_char(); /* Delete */
+        case '5':  tty_get(); return CSstay;     /* PgUp */
+        case '6':  tty_get(); return CSstay;     /* PgDn */
+        case 'A':  return h_prev();              /* Up */
+        case 'B':  return h_next();              /* Down */
+        case 'C':  return fd_char();             /* Left */
+        case 'D':  return bk_char();             /* Right */
+        case 'F':  return end_line();            /* End */
+        case 'H':  return beg_line();            /* Home */
+        default:                                 /* Fall through */
+            break;
         }
 
-	return el_ring_bell();
+        return el_ring_bell();
     }
 #endif /* CONFIG_ANSI_ARROWS */
 
     if (isdigit(c)) {
         for (Repeat = c - '0'; (c = tty_get()) != EOF && isdigit(c); )
             Repeat = Repeat * 10 + c - '0';
-	tty_push(c);
+        tty_push(c);
 
         return CSstay;
     }
@@ -1097,7 +1098,7 @@ static el_status_t emacs(int c)
     old_point = rl_point;
 
     if (rl_meta_chars && ISMETA(c)) {
-	tty_push(UNMETA(c));
+        tty_push(UNMETA(c));
         return meta();
     }
 
@@ -1107,11 +1108,11 @@ static el_status_t emacs(int c)
     }
 
     if (kp->Function) {
-	s = kp->Function();
-	if (s == CSdispatch)	/* If Function is inhibited. */
-	    s = insert_char(c);
+        s = kp->Function();
+        if (s == CSdispatch)	/* If Function is inhibited. */
+            s = insert_char(c);
     } else {
-	s = insert_char(c);
+        s = insert_char(c);
     }
 
     if (!el_pushed) {
@@ -1155,7 +1156,7 @@ static el_status_t tty_special(int c)
         }
         Repeat = NO_ARG;
 
-	return kill_line();
+        return kill_line();
     }
 
 #ifdef CONFIG_EOF
@@ -1171,47 +1172,47 @@ static char *editinput(int complete)
     int c;
 
     do {
-	c = tty_get();
-	if (c == EOF)
-	    break;
+        c = tty_get();
+        if (c == EOF)
+            break;
 
         switch (tty_special(c)) {
-	case CSdone:
-	    return rl_line_buffer;
+        case CSdone:
+            return rl_line_buffer;
 
-	case CSeof:
-	    return NULL;
+        case CSeof:
+            return NULL;
 
-	case CSsignal:
-	    return (char *)"";
+        case CSsignal:
+            return (char *)"";
 
-	case CSmove:
-	    reposition(c);
-	    break;
+        case CSmove:
+            reposition(c);
+            break;
 
-	case CSdispatch:
-	    switch (emacs(c)) {
-	    case CSdone:
-		return rl_line_buffer;
+        case CSdispatch:
+            switch (emacs(c)) {
+            case CSdone:
+                return rl_line_buffer;
 
-	    case CSeof:
-		return NULL;
+            case CSeof:
+                return NULL;
 
-	    case CSsignal:
-		return (char *)"";
+            case CSsignal:
+                return (char *)"";
 
-	    case CSmove:
-		reposition(c);
-		break;
+            case CSmove:
+                reposition(c);
+                break;
 
-	    case CSdispatch:
-	    case CSstay:
-		break;
-	    }
-	    break;
+            case CSdispatch:
+            case CSstay:
+                break;
+            }
+            break;
 
-	case CSstay:
-	    break;
+        case CSstay:
+            break;
         }
     } while (complete);
 
@@ -1221,7 +1222,7 @@ static char *editinput(int complete)
 static void hist_alloc(void)
 {
     if (!H.Lines)
-	H.Lines = calloc(el_hist_size, sizeof(char *));
+        H.Lines = calloc(el_hist_size, sizeof(char *));
 }
 
 static void hist_add(const char *p)
@@ -1258,7 +1259,7 @@ static char *read_redirected(void)
 
     p = line = malloc(sizeof(char) * size);
     if (!p)
-	return NULL;
+        return NULL;
 
     end = p + size;
     while (1) {
@@ -1267,8 +1268,8 @@ static char *read_redirected(void)
 
             size += MEM_INC;
             p = line = realloc(line, sizeof(char) * size);
-	    if (!p)
-		return NULL;
+            if (!p)
+                return NULL;
             end = p + size;
 
             p += oldpos;        /* Continue where we left off... */
@@ -1280,7 +1281,7 @@ static char *read_redirected(void)
             return NULL;
         }
 
-	if (*p == '\n')
+        if (*p == '\n')
             break;
         p++;
     }
@@ -1312,31 +1313,31 @@ void rl_reset_terminal(const char *terminal_name)
 #ifdef CONFIG_USE_TERMCAP
     bp = buf;
     if (-1 != tgetent(buf, el_term)) {
-	if ((backspace = tgetstr("le", &bp)) != NULL)
-	    backspace = strdup(backspace);
-	tty_cols = tgetnum("co");
-	tty_rows = tgetnum("li");
+        if ((backspace = tgetstr("le", &bp)) != NULL)
+            backspace = strdup(backspace);
+        tty_cols = tgetnum("co");
+        tty_rows = tgetnum("li");
     }
     /* Make sure to check width & rows and fallback to TIOCGWINSZ if available. */
 #endif
 
     if (tty_cols <= 0 || tty_rows <= 0) {
 #ifdef TIOCGWINSZ
-	if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
-	    tty_cols = (int)W.ws_col;
-	    tty_rows = (int)W.ws_row;
-	    return;
-	}
+        if (ioctl(el_outfd, TIOCGWINSZ, &W) >= 0 && W.ws_col > 0 && W.ws_row > 0) {
+            tty_cols = (int)W.ws_col;
+            tty_rows = (int)W.ws_row;
+            return;
+        }
 #endif
-	tty_cols = SCREEN_COLS;
-	tty_rows = SCREEN_ROWS;
+        tty_cols = SCREEN_COLS;
+        tty_rows = SCREEN_ROWS;
     }
 }
 
 void rl_initialize(void)
 {
     if (!rl_prompt)
-	rl_prompt = "? ";
+        rl_prompt = "? ";
 
     hist_alloc();
 
@@ -1355,24 +1356,24 @@ void rl_uninitialize(void)
 
     /* Uninitialize the history */
     if (H.Lines) {
-	for (i = 0; i < el_hist_size; i++) {
-	    if (H.Lines[i])
-		free(H.Lines[i]);
-	    H.Lines[i] = NULL;
-	}
-	free(H.Lines);
-	H.Lines = NULL;
+        for (i = 0; i < el_hist_size; i++) {
+            if (H.Lines[i])
+                free(H.Lines[i]);
+            H.Lines[i] = NULL;
+        }
+        free(H.Lines);
+        H.Lines = NULL;
     }
     H.Size = 0;
     H.Pos = 0;
 
     if (old_search)
-	free(old_search);
+        free(old_search);
     old_search = NULL;
 
     /* Uninitialize the line buffer */
     if (rl_line_buffer)
-	free(rl_line_buffer);
+        free(rl_line_buffer);
     rl_line_buffer = NULL;
     Length = 0;
 }
@@ -1386,7 +1387,7 @@ void rl_save_prompt(void)
 void rl_restore_prompt(void)
 {
     if (rl_saved_prompt)
-	rl_prompt = rl_saved_prompt;
+        rl_prompt = rl_saved_prompt;
 }
 
 void rl_set_prompt(const char *prompt)
@@ -1411,9 +1412,9 @@ static int el_prep(const char *prompt)
 
     if (!rl_line_buffer) {
         Length = MEM_INC;
-	rl_line_buffer = malloc(sizeof(char) * Length);
+        rl_line_buffer = malloc(sizeof(char) * Length);
         if (!rl_line_buffer)
-	    return -1;
+            return -1;
     }
 
     tty_info();
@@ -1422,20 +1423,20 @@ static int el_prep(const char *prompt)
     ScreenSize = SCREEN_INC;
     Screen = malloc(sizeof(char) * ScreenSize);
     if (!Screen)
-	return -1;
+        return -1;
 
     rl_prompt = prompt ? prompt : NILSTR;
     prompt_len = strlen(rl_prompt);
 
     if (el_no_echo) {
-	int old = el_no_echo;
+        int old = el_no_echo;
 
-	el_no_echo = 0;
-	tty_puts(rl_prompt);
-	tty_flush();
-	el_no_echo = old;
+        el_no_echo = 0;
+        tty_puts(rl_prompt);
+        tty_flush();
+        el_no_echo = old;
     } else {
-	tty_puts(rl_prompt);
+        tty_puts(rl_prompt);
     }
 
     Repeat = NO_ARG;
@@ -1456,8 +1457,8 @@ static char *el_deprep(char *line)
 
     rl_deprep_term_function();
     if (Screen) {
-	free(Screen);
-	Screen = NULL;
+        free(Screen);
+        Screen = NULL;
     }
 
     free(H.Lines[--H.Size]);
@@ -1465,14 +1466,14 @@ static char *el_deprep(char *line)
 
     /* Add to history, unless no-echo or no-history mode ... */
     if (!el_no_echo && !el_no_hist) {
-	if (line != NULL && *line != '\0')
-	    hist_add(line);
+        if (line != NULL && *line != '\0')
+            hist_add(line);
     }
 
     if (el_intr_pending > 0) {
-	int signo = el_intr_pending;
+        int signo = el_intr_pending;
 
-	el_intr_pending = 0;
+        el_intr_pending = 0;
         kill(getpid(), signo);
     }
 
@@ -1482,7 +1483,7 @@ static char *el_deprep(char *line)
 void rl_callback_handler_install(const char *prompt, rl_vcpfunc_t *lhandler)
 {
     if (!lhandler)
-	return;
+        return;
     line_handler = lhandler;
 
     /*
@@ -1510,8 +1511,8 @@ void rl_callback_read_char(void)
     char *line;
 
     if (!line_handler) {
-	errno = EINVAL;
-	return;
+        errno = EINVAL;
+        return;
     }
 
     /*
@@ -1519,26 +1520,26 @@ void rl_callback_read_char(void)
      * This is the only point where we can tell user
      */
     if (!Screen || !rl_line_buffer) {
-	errno = ENOMEM;
-	line_handler(el_deprep(NULL));
-	return;
+        errno = ENOMEM;
+        line_handler(el_deprep(NULL));
+        return;
     }
 
     line = editinput(0);
     if (line) {
-	char *l;
+        char *l;
 
-	if (Searching) {
-	    h_search_end(line);
-	    tty_flush();
-	    return;
-	}
+        if (Searching) {
+            h_search_end(line);
+            tty_flush();
+            return;
+        }
 
-	l = el_deprep(line);
-	line_handler(l);
+        l = el_deprep(line);
+        line_handler(l);
 
-	if (el_prep(rl_prompt))
-	    line_handler(NULL);
+        if (el_prep(rl_prompt))
+            line_handler(NULL);
     }
     tty_flush();
 }
@@ -1546,7 +1547,7 @@ void rl_callback_read_char(void)
 void rl_callback_handler_remove(void)
 {
     if (!line_handler)
-	return;
+        return;
 
     el_deprep(NULL);
     line_handler = NULL;
@@ -1564,7 +1565,7 @@ char *readline(const char *prompt)
     }
 
     if (el_prep(prompt))
-	return NULL;
+        return NULL;
 
     return el_deprep(editinput(1));
 }
@@ -1590,16 +1591,16 @@ int read_history(const char *filename)
     hist_alloc();
     fp = fopen(filename, "r");
     if (fp) {
-	H.Size = 0;
-	while (H.Size < el_hist_size) {
-	    if (!fgets(buf, SCREEN_INC, fp))
-		break;
+        H.Size = 0;
+        while (H.Size < el_hist_size) {
+            if (!fgets(buf, SCREEN_INC, fp))
+                break;
 
-	    buf[strlen(buf) - 1] = 0; /* Remove '\n' */
-	    add_history(buf);
-	}
+            buf[strlen(buf) - 1] = 0; /* Remove '\n' */
+            add_history(buf);
+        }
 
-	return fclose(fp);
+        return fclose(fp);
     }
 
     return errno;
@@ -1612,12 +1613,12 @@ int write_history(const char *filename)
     hist_alloc();
     fp = fopen(filename, "w");
     if (fp) {
-	int i = 0;
+        int i = 0;
 
-	while (i < H.Size)
-	    fprintf(fp, "%s\n", H.Lines[i++]);
+        while (i < H.Size)
+            fprintf(fp, "%s\n", H.Lines[i++]);
 
-	return fclose(fp);
+        return fclose(fp);
     }
 
     return errno;
@@ -1656,7 +1657,7 @@ char *el_find_word(void)
     while (p < &rl_line_buffer[rl_point]) {
         if (*p == '\\') {
             if (++p == &rl_line_buffer[rl_point])
-		break;
+                break;
         }
         *q++ = *p++;
     }
@@ -1696,7 +1697,7 @@ static el_status_t c_complete(void)
     el_status_t s = CSdone;
 
     if (rl_inhibit_complete)
-	return CSdispatch;
+        return CSdispatch;
 
     word = el_find_word();
     p = rl_complete(word, &unique);
@@ -1707,14 +1708,14 @@ static el_status_t c_complete(void)
         word = p;
 
         string = q = malloc(sizeof(char) * (2 * len + 1));
-	if (!string) {
-	    free(word);
-	    return CSstay;
-	}
+        if (!string) {
+            free(word);
+            return CSstay;
+        }
 
         while (*p) {
             if ((*p < ' ' || strchr(SEPS, *p) != NULL)
-		&& (!unique || p[1] != 0)) {
+                && (!unique || p[1] != 0)) {
                 *q++ = '\\';
             }
             *q++ = *p++;
@@ -1732,7 +1733,7 @@ static el_status_t c_complete(void)
         free(string);
 
         if (len > 0)
-	    return s;
+            return s;
     }
 
     return c_possible();
@@ -1872,7 +1873,7 @@ static int argify(char *line, char ***avp)
     i = MEM_INC;
     *avp = p = malloc(sizeof(char *) * i);
     if (!p)
-	return 0;
+        return 0;
 
     for (c = line; isspace(*c); c++)
         continue;
@@ -1882,26 +1883,26 @@ static int argify(char *line, char ***avp)
 
     for (ac = 0, p[ac++] = c; *c && *c != '\n'; ) {
         if (!isspace(*c)) {
-	    c++;
-	    continue;
-	}
+            c++;
+            continue;
+        }
 
-	*c++ = '\0';
-	if (*c && *c != '\n') {
-	    if (ac + 1 == i) {
-		arg = malloc(sizeof(char *) * (i + MEM_INC));
-		if (!arg) {
-		    p[ac] = NULL;
-		    return ac;
-		}
-		
-		memcpy(arg, p, i * sizeof(char *));
-		i += MEM_INC;
-		free(p);
-		*avp = p = arg;
-	    }
-	    p[ac++] = c;
-	}
+        *c++ = '\0';
+        if (*c && *c != '\n') {
+            if (ac + 1 == i) {
+                arg = malloc(sizeof(char *) * (i + MEM_INC));
+                if (!arg) {
+                    p[ac] = NULL;
+                    return ac;
+                }
+
+                memcpy(arg, p, i * sizeof(char *));
+                i += MEM_INC;
+                free(p);
+                *avp = p = arg;
+            }
+            p[ac++] = c;
+        }
     }
 
     *c = '\0';
@@ -2000,12 +2001,12 @@ static size_t find_key_in_map(int key, el_keymap_t map[], size_t mapsz)
     size_t i;
 
     for (i = 0; map[i].Function && i < mapsz; i++) {
-	if (map[i].Key == key)
-	    return i;
+        if (map[i].Key == key)
+            return i;
     }
 
     if (i < mapsz)
-	return i;
+        return i;
 
     return mapsz;
 }
@@ -2017,8 +2018,8 @@ static el_status_t el_bind_key_in_map(int key, el_keymap_func_t function, el_key
     /* Must check that pos is not the next to last array position,
      * otherwise we will write out-of-bounds to terminate the list. */
     if (pos + 1 >= mapsz) {
-	errno = ENOMEM;
-	return CSeof;
+        errno = ENOMEM;
+        return CSeof;
     }
 
     /* Add at end, create new? */
@@ -2030,8 +2031,8 @@ static el_status_t el_bind_key_in_map(int key, el_keymap_func_t function, el_key
 
     /* Terminate list */
     if (creat) {
-	map[pos + 1].Key      = 0;
-	map[pos + 1].Function = NULL;
+        map[pos + 1].Key      = 0;
+        map[pos + 1].Function = NULL;
     }
 
     return CSdone;

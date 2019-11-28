@@ -358,7 +358,7 @@ static void reposition(int key)
         tty_puts(rl_prompt);
     }
 
-    for (i; i < rl_point; i++) {
+    for (; i < rl_point; i++) {
         tty_show(rl_line_buffer[i]);
 
 	/* move to the next line */

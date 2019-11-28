@@ -4,8 +4,15 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
-[1.16.1] - 2019-06-07
----------------------
+[1.17.0][UNRELEASED]
+--------------------
+
+### Changes
+- Simple multi-line support by Dima Volynets, @dvolynets
+
+
+[1.16.1][] - 2019-06-07
+-----------------------
 
 ### Changes
 - Major updates to the `editline.3` man page
@@ -222,7 +229,7 @@ Adaptations to Debian editline package.
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.16.0...HEAD
+[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.16.1...HEAD
 [1.16.1]:        https://github.com/troglobit/finit/compare/1.16.0...1.16.1
 [1.16.0]:        https://github.com/troglobit/finit/compare/1.15.3...1.16.0
 [1.15.3]:        https://github.com/troglobit/finit/compare/1.15.2...1.15.3

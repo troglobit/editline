@@ -137,7 +137,6 @@ extern char     *tgetstr(const char *, char **);
 extern int      tgetent(char *, const char *);
 extern int      tgetnum(const char *);
 #endif
-
 
 /*
 **  Misc. local helper functions.
@@ -210,6 +209,7 @@ static void tty_show(unsigned char c)
 static void tty_string(char *p)
 {
     int i = rl_point + prompt_len + 1;
+
     while (*p) {
         tty_show(*p++);
         if ((i++) % tty_cols == 0)
@@ -262,7 +262,6 @@ static void tty_info(void)
 {
     rl_reset_terminal(NULL);
 }
-
 
 /*
 **  Glue routines to rl_ttyset()
@@ -298,6 +297,7 @@ void el_print_columns(int ac, char **av)
         if ((j = strlen((char *)av[i])) > longest)
             longest = j;
     }
+
     colwidth = longest + 3;
     if (colwidth > tty_cols)
         colwidth = tty_cols;
@@ -321,38 +321,49 @@ void el_print_columns(int ac, char **av)
 
 static void reposition(int key)
 {
-    int i = 0;
     int len_with_prompt = prompt_len + rl_end;
-    int n =  len_with_prompt / tty_cols;                  // determine the number of lines
+    int n =  len_with_prompt / tty_cols;                  /* determine the number of lines */
+    int i = 0;
 
     tty_put('\r');
 
     if (n > 0) {
         int line;
+
+	/* determine num of current line */
         if (key == CTL('A') || key == CTL('E') || key == rl_kill)
-            line = (prompt_len + old_point) / tty_cols;  // determine num of current line
+            line = (prompt_len + old_point) / tty_cols;
         else
             line = len_with_prompt / tty_cols;
 
-        if (key == CTL('E')) {                           // move to end of line(s)
-            for(int k = line; k < n; k++)
+	/* move to end of line(s) */
+        if (key == CTL('E')) {
+	    int k;
+
+            for (k = line; k < n; k++)
                 tty_puts(line_down);
-            i = rl_point - (len_with_prompt % tty_cols); // determine reminder of last line and redraw only it
+
+	    /* determine reminder of last line and redraw only it */
+            i = rl_point - (len_with_prompt % tty_cols);
         } else {
-            for(int k = line; k > 0; k--)                // CTRL-A, CTRL-U, insert (end, middle), remove (end, middle)
-                tty_puts(line_up);                       // redraw characters until changed data
+	    int k;
+
+	    /* CTRL-A, CTRL-U, insert (end, middle), remove (end, middle) */
+            for (k = line; k > 0; k--)
+                tty_puts(line_up); /* redraw characters until changed data */
+
             tty_puts(rl_prompt);
         }
-    }
-    else if (n == 0) {
+    } else if (n == 0) {
         tty_puts(rl_prompt);
     }
 
     for (i; i < rl_point; i++) {
         tty_show(rl_line_buffer[i]);
-        if ((i + prompt_len + 1) % tty_cols == 0) {      // move to the next line
+
+	/* move to the next line */
+        if ((i + prompt_len + 1) % tty_cols == 0)
             tty_put('\n');
-        }
     }
 }
 
@@ -360,10 +371,12 @@ void itoa(int val, char* buf)
 {
     int digits = 0;
     int temp = val;
+
     while (temp != 0) {
         temp = temp / 10;
         ++digits;
     }
+
     *(buf+digits) = 'C';
     int i = 5; digits--;
     for(; val && i ; --i, val /= 10) {
@@ -374,10 +387,11 @@ void itoa(int val, char* buf)
 
 static void move_cursor_forward(int columns)
 {
-    char buf[12] = {0};
     const char* line_forward = "\x1b[";
+    char buf[12] = {0};
+
     strcpy(buf, line_forward);
-    itoa(columns, buf+2);
+    itoa(columns, buf + 2);
     tty_puts(buf);
 }
 
@@ -390,6 +404,7 @@ static void left(el_status_t Change)
         } else {
             tty_back();
         }
+
         if (ISMETA(rl_line_buffer[rl_point - 1])) {
             if (rl_meta_chars) {
                 tty_back();
@@ -629,7 +644,7 @@ static el_status_t redisplay(int cls)
 {
     if (cls)
         tty_puts(CLEAR);
-    else 
+    else
         tty_puts("\r\e[K");
 
     tty_puts(rl_prompt);
@@ -655,7 +670,6 @@ static el_status_t toggle_meta_mode(void)
     rl_meta_chars = ! rl_meta_chars;
     return redisplay(0);
 }
-
 
 const char *el_next_hist(void)
 {
@@ -1623,7 +1637,6 @@ int write_history(const char *filename)
 
     return errno;
 }
-
 
 /*
 **  Move back to the beginning of the current word and return an

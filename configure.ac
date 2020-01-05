@@ -1,4 +1,4 @@
-AC_INIT(editline, 1.17.0-dev, https://github.com/troglobit/editline/issues)
+AC_INIT(editline, 1.17.0, https://github.com/troglobit/editline/issues)
 AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
 

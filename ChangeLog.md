@@ -4,8 +4,8 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
-[1.17.0][UNRELEASED]
---------------------
+[1.17.0][] - 2020-01-05
+-----------------------
 
 ### Changes
 - Simple multi-line support by Dima Volynets, @dvolynets
@@ -237,7 +237,8 @@ Adaptations to Debian editline package.
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.16.1...HEAD
+[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.17.0...HEAD
+[1.17.0]:        https://github.com/troglobit/finit/compare/1.16.1...1.17.0
 [1.16.1]:        https://github.com/troglobit/finit/compare/1.16.0...1.16.1
 [1.16.0]:        https://github.com/troglobit/finit/compare/1.15.3...1.16.0
 [1.15.3]:        https://github.com/troglobit/finit/compare/1.15.2...1.15.3
@@ -255,9 +256,3 @@ Adaptations to Debian editline package.
 [Travis-CI]:     https://travis-ci.org/troglobit/uftpd
 [Coverity Scan]: https://scan.coverity.com/projects/2947
 [README.md]:     https://github.com/troglobit/editline/blob/master/README.md
-
-<!--
-  -- Local Variables:
-  -- mode: markdown
-  -- End:
-  -->

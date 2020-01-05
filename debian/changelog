@@ -1,3 +1,12 @@
+editline (1.17.0) unstable; urgency=medium
+
+  * Simple multi-line support
+  * Handle internal realloc() errors better
+  * Fix return value from read_history() and write_history()
+  * Fix potential NULL pointer dereference in key binging lookup
+
+ -- Joachim Nilsson <troglobit@gmail.com>  Sun, 05 Jan 2020 09:47:34 +0100
+
 editline (1.16.1) unstable; urgency=medium
 
   * Minor bug fix and documentation update release.

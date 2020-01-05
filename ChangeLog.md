@@ -10,6 +10,14 @@ All notable changes to the project are documented in this file.
 ### Changes
 - Simple multi-line support by Dima Volynets, @dvolynets
 
+### Fixes
+- Fix return value from `read_history()` and `write_history()`, could
+  return `errno` instead of `EOF` to indicate error.  Now both functions
+  have uniform return values on error
+- Handle internal `realloc()` errors better.  Now memory is not leaked
+  if `realloc()` fails
+- Fix possible NULL pointer dereference in key binding lookup function
+
 
 [1.16.1][] - 2019-06-07
 -----------------------

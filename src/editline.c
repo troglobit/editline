@@ -1999,7 +1999,7 @@ static size_t find_key_in_map(int key, el_keymap_t map[], size_t mapsz)
 {
     size_t i;
 
-    for (i = 0; map[i].Function && i < mapsz; i++) {
+    for (i = 0; i < mapsz && map[i].Function; i++) {
         if (map[i].Key == key)
             return i;
     }

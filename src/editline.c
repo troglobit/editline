@@ -262,6 +262,14 @@ static void tty_backn(int n)
         tty_back();
 }
 
+static void tty_forwardn(int n)
+{
+    char buf[12];
+
+    snprintf(buf, sizeof(buf), "\x1b[%dC", n);
+    tty_puts(buf);
+}
+
 static void tty_info(void)
 {
     rl_reset_terminal(NULL);
@@ -371,40 +379,12 @@ static void reposition(int key)
     }
 }
 
-void itoa(int val, char* buf)
-{
-    int digits = 0;
-    int temp = val;
-
-    while (temp != 0) {
-        temp = temp / 10;
-        ++digits;
-    }
-
-    *(buf+digits) = 'C';
-    int i = 5; digits--;
-    for(; val && i ; --i, val /= 10) {
-        *(buf+digits) = "0123456789"[val % 10];
-        digits--;
-    }
-}
-
-static void move_cursor_forward(int columns)
-{
-    const char* line_forward = "\x1b[";
-    char buf[12] = {0};
-
-    strcpy(buf, line_forward);
-    itoa(columns, buf + 2);
-    tty_puts(buf);
-}
-
 static void left(el_status_t Change)
 {
     if (rl_point) {
         if ((rl_point + prompt_len) % tty_cols == 0) {
             tty_puts(line_up);
-            move_cursor_forward(tty_cols);
+            tty_forwardn(tty_cols);
         } else {
             tty_back();
         }
@@ -572,7 +552,7 @@ static void ceol(void)
     for (i += extras; i > rl_point; i--) {
         if ((i + prompt_len) % tty_cols == 0) {
             tty_puts(line_up);
-            move_cursor_forward(tty_cols);
+            tty_forwardn(tty_cols);
         } else {
             tty_back();
         }

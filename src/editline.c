@@ -178,8 +178,12 @@ static void tty_put(const char c)
 
     Screen[ScreenCount] = c;
     if (++ScreenCount >= ScreenSize) {
+	char *ptr;
+
         ScreenSize += SCREEN_INC;
-        Screen = realloc(Screen, sizeof(char) * ScreenSize);
+        ptr = realloc(Screen, sizeof(char) * ScreenSize);
+	if (ptr)
+	    Screen = ptr;
     }
 }
 
@@ -1281,9 +1285,12 @@ static char *read_redirected(void)
             int oldpos = end - line;
 
             size += MEM_INC;
-            p = line = realloc(line, sizeof(char) * size);
-            if (!p)
+            p = realloc(line, sizeof(char) * size);
+            if (!p) {
+		free(line);
                 return NULL;
+	    }
+	    line = p;
             end = p + size;
 
             p += oldpos;        /* Continue where we left off... */

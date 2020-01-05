@@ -1603,39 +1603,38 @@ int read_history(const char *filename)
     char buf[SCREEN_INC];
 
     hist_alloc();
+
     fp = fopen(filename, "r");
-    if (fp) {
-        H.Size = 0;
-        while (H.Size < el_hist_size) {
-            if (!fgets(buf, SCREEN_INC, fp))
-                break;
+    if (!fp)
+	return EOF;
 
-            buf[strlen(buf) - 1] = 0; /* Remove '\n' */
-            add_history(buf);
-        }
+    H.Size = 0;
+    while (H.Size < el_hist_size) {
+	if (!fgets(buf, SCREEN_INC, fp))
+	    break;
 
-        return fclose(fp);
+	buf[strlen(buf) - 1] = 0; /* Remove '\n' */
+	add_history(buf);
     }
 
-    return errno;
+    return fclose(fp);
 }
 
 int write_history(const char *filename)
 {
     FILE *fp;
+    int i = 0;
 
     hist_alloc();
+
     fp = fopen(filename, "w");
-    if (fp) {
-        int i = 0;
+    if (!fp)
+	return EOF;
 
-        while (i < H.Size)
-            fprintf(fp, "%s\n", H.Lines[i++]);
+    while (i < H.Size)
+	fprintf(fp, "%s\n", H.Lines[i++]);
 
-        return fclose(fp);
-    }
-
-    return errno;
+    return fclose(fp);
 }
 
 /*

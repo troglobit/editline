@@ -23,7 +23,7 @@ addons:
       description: "A small line editing library"
     notification_email: troglobit@gmail.com
     build_command_prepend: "./autogen.sh && ./configure --enable-sigstop --enable-terminal-bell"
-    build_command:   "make -j5"
+    build_command:   "make clean all"
     branch_pattern: dev
 
 # We don't store generated files (configure and Makefile) in GIT,
@@ -31,4 +31,4 @@ addons:
 script:
   - ./autogen.sh
   - ./configure --enable-sigstop --enable-terminal-bell 
-  - make -j5
+  - make clean all

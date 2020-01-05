@@ -673,7 +673,7 @@ static el_status_t do_insert_hist(const char *p)
     clear_line();
 
     rl_point = 0;
-    reposition(-1);
+    reposition(EOF);
     rl_end = 0;
 
     return insert_string(p);
@@ -921,7 +921,7 @@ static el_status_t kill_line(void)
         if (Repeat < rl_point) {
             i = rl_point;
             rl_point = Repeat;
-            reposition(-1);
+            reposition(EOF);
             delete_string(i - rl_point);
         } else if (Repeat > rl_point) {
             right(CSmove);

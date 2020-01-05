@@ -38,9 +38,9 @@ static char *my_rl_complete(char *token, int *match)
     int count = 0;
 
     for (i = 0; list[i]; i++) {
-	int partlen = strlen (token); /* Part of token */
+	int partlen = strlen(token); /* Part of token */
 
-	if (!strncmp (list[i], token, partlen)) {
+	if (!strncmp(list[i], token, partlen)) {
 	    index = i;
 	    matchlen = partlen;
 	    count ++;
@@ -49,7 +49,7 @@ static char *my_rl_complete(char *token, int *match)
 
     if (count == 1) {
 	*match = 1;
-	return strdup (list[index] + matchlen);
+	return strdup(list[index] + matchlen);
     }
 
     return NULL;
@@ -64,11 +64,14 @@ static int my_rl_list_possib(char *token, char ***av)
     for (num = 0; list[num]; num++)
 	;
 
-    copy = (char **) malloc (num * sizeof(char *));
+    if (!num)
+	return 0;
+
+    copy = malloc(num * sizeof(char *));
     for (i = 0; i < num; i++) {
-	if (!strncmp (list[i], token, strlen (token))) {
-	    copy[total] = strdup (list[i]);
-	    total ++;
+	if (!strncmp(list[i], token, strlen (token))) {
+	    copy[total] = strdup(list[i]);
+	    total++;
 	}
     }
     *av = copy;
@@ -106,14 +109,41 @@ el_status_t do_suspend(void)
 
 static void breakit(int signo)
 {
+    (void)signo;
     puts("Got SIGINT");
+}
+
+/* Use el_no_echo when reading passwords and similar */
+static int unlock(const char *passwd)
+{
+    char *prompt = "Enter password: ";
+    char *line;
+    int rc = 1;
+
+    el_no_echo = 1;
+
+    while ((line = readline(prompt))) {
+	rc = strncmp(line, passwd, strlen(passwd));
+	free(line);
+
+	if (rc) {
+	    printf("\nWrong password, please try again, it's secret.\n");
+	    continue;
+	}
+
+	printf("\nAchievement unlocked!\n");
+	break;
+    }
+
+    el_no_echo = 0;
+
+    return rc;
 }
 
 int main(void)
 {
     char *line;
     char *prompt = "cli> ";
-    char *passwd = "Enter password: ";
 
     signal(SIGINT, breakit);
 
@@ -126,29 +156,11 @@ int main(void)
     read_history(HISTORY);
 
     while ((line = readline(prompt))) {
-	int next = 0;
-
-	/* Use el_no_echo when reading passwords and similar */
-	if (!strncmp(line, "unlock", 6)) {
-	    el_no_echo = 1;
-	    while ((line = readline(passwd))) {
-		if (strncmp(line, "secret", 6)) {
-		    printf("\nWrong password, please try again, it's secret.\n");
-		    free(line);
-		    continue;
-		}
-
-		el_no_echo = 0;
-
-		printf("\nAchievement unlocked!\n");
-		free(line);
-		next = 1;
-		break;
-	    }
+	if (!strncmp(line, "unlock", 6) && unlock("secret")) {
+	    free(line);
+	    fprintf(stderr, "\nSecurity breach, user logged out!\n");
+	    break;
 	}
-
-	if (next)
-	    continue;
 
 	if (*line != '\0')
 	    printf("\t\t\t|%s|\n", line);

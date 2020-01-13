@@ -216,8 +216,10 @@ static void tty_string(char *p)
 
     while (*p) {
         tty_show(*p++);
-        if ((i++) % tty_cols == 0)
-            tty_put('\n');
+        if ((i++) % tty_cols == 0) {
+            tty_put(' ');
+            tty_put('\b');
+        }
     }
 }
 

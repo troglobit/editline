@@ -1,4 +1,4 @@
-editline (1.17.1) unstable; urgency=medium
+editline (1.17.1) stable; urgency=medium
 
   * Fix multiline representing as one line
   * Fix missing content in libedtline1, introduced in 1.16.0

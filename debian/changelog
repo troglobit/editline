@@ -1,3 +1,11 @@
+editline (1.17.1) unstable; urgency=medium
+
+  * Fix multiline representing as one line
+  * Fix missing content in libedtline1, introduced in 1.16.0
+  * Update packaging to latest std version
+
+ -- Joachim Nilsson <troglobit@gmail.com>  Sun, 23 Feb 2020 18:46:41 +0100
+
 editline (1.17.0) unstable; urgency=medium
 
   * Simple multi-line support

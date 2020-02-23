@@ -4,6 +4,18 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[1.17.1][] - 2020-02-23
+-----------------------
+
+### Fixes
+- Fix #38: Fix for multiline representing as one line
+- Fix packaging, missing files in libeditline1, regression from 1.16.0
+- Fix packaging, update to latest std version
+- Fix formatting of function names in man page
+- Restore tar.gz distribution, for usability on systems that do not
+  have xz in their default install
+
+
 [1.17.0][] - 2020-01-05
 -----------------------
 
@@ -237,7 +249,8 @@ Adaptations to Debian editline package.
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.17.0...HEAD
+[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.17.1...HEAD
+[1.17.1]:        https://github.com/troglobit/finit/compare/1.17.0...1.17.1
 [1.17.0]:        https://github.com/troglobit/finit/compare/1.16.1...1.17.0
 [1.16.1]:        https://github.com/troglobit/finit/compare/1.16.0...1.16.1
 [1.16.0]:        https://github.com/troglobit/finit/compare/1.15.3...1.16.0

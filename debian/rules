@@ -11,3 +11,6 @@ include /usr/share/dpkg/default.mk  # provides DEB_VERSION
 %:
 	dh $@ --with autoreconf
 
+override_dh_installchangelogs:
+	dh_installchangelogs ChangeLog.md
+

@@ -1,9 +1,9 @@
 Source: editline
 Section: devel
 Priority: optional
-Build-Depends: debhelper (>= 5.0), libtool
+Build-Depends: debhelper (>= 10), libtool
 Maintainer: Joachim Nilsson <troglobit@gmail.com>
-Standards-Version: 3.8.3
+Standards-Version: 4.3.0
 
 Package: libeditline-dev
 Architecture: any
@@ -21,7 +21,7 @@ Description: development files for libeditline
 Package: libeditline1
 Architecture: any
 Section: libs
-Depends: ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: line editing library similar to readline
  This is a line-editing library. It can be linked into almost any program
  to provide command-line editing and recall. It is call-compatible with a

@@ -1,4 +1,4 @@
-.Dd April 27, 2019
+.Dd February 23, 2020
 .Dt EDITLINE 3
 .Os
 .Sh NAME
@@ -8,10 +8,22 @@
 .Lb libeditline
 .Sh SYNOPSIS
 .In editline.h
-.Fn "char *readline" "const char *prompt"
-.Fn "void add_history"  "const char *line"
-.Fn "int read_history"  "const char *filename"
-.Fn "int write_history" "const char *filename"
+.Ft char *
+.Fo readline
+.Fa const char *prompt
+.Fc
+.Ft void
+.Fo add_history
+.Fa const char *line
+.Fc
+.Ft int
+.Fo read_history
+.Fa const char *filename
+.Fc
+.Ft int
+.Fo write_history
+.Fa const char *filename
+.Fc
 .Sh DESCRIPTION
 .Nm
 is a library that provides n line-editing interface with history.  It

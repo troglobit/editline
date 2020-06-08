@@ -61,6 +61,10 @@ AC_ARG_ENABLE(terminal-bell,
 AC_ARG_ENABLE(termcap,
    AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.]))
 
+AC_ARG_ENABLE([examples],
+	[AC_HELP_STRING([--enable-examples], [Build examples/ directory])],
+	[], [enable_examples=no])
+
 #
 # Check what features have been enabled
 #
@@ -81,6 +85,8 @@ AS_IF([test "x$enable_sigstop" = "xyes"],
 
 AS_IF([test "x$enable_terminal_bell" = "xyes"],
    AC_DEFINE(CONFIG_TERMINAL_BELL, 1, [Define to enable terminal bell on completion.]))
+
+AM_CONDITIONAL([ENABLE_EXAMPLES], [test "$enable_examples" = yes])
 
 # Check for a termcap compatible library if enabled
 AS_IF([test "x$enable_termcap" = "xyes"],

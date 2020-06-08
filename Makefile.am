@@ -2,7 +2,11 @@ pkgconfigdir    = $(libdir)/pkgconfig
 pkgconfig_DATA  = libeditline.pc
 doc_DATA        = README.md LICENSE
 EXTRA_DIST      = README.md LICENSE ChangeLog.md INSTALL.md
-SUBDIRS         = src include man examples
+SUBDIRS         = src include man
+
+if ENABLE_EXAMPLES
+SUBDIRS            += examples
+endif
 
 ## Generate MD5 checksum file
 MD5 = md5sum

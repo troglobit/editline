@@ -39,6 +39,7 @@ Jeff
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/select.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

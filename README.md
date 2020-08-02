@@ -56,6 +56,7 @@ sub-directory.
    e.g. `~/src/example.c`
 
 ```C
+    #include <stdio.h>
     #include <stdlib.h>
     #include <editline.h>
 

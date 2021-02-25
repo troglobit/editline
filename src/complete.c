@@ -197,14 +197,14 @@ char *el_filename_complete(char *pathname, int *match)
     if (ac == 1) {
         /* Exactly one match -- finish it off. */
         *match = 1;
-        j = strlen(av[0]) - len + 2;
-	p = malloc(sizeof(char) * (j + 1));
+        j = strlen(av[0]) - len + 1;
+        p = malloc(sizeof(char) * (j + 1));
         if (p) {
             memcpy(p, av[0] + len, j);
-	    len = strlen(dir) + strlen(av[0]) + 2;
-	    path = malloc(sizeof(char) * len);
+            len = strlen(dir) + strlen(av[0]) + 2;
+            path = malloc(sizeof(char) * len);
             if (path) {
-		snprintf(path, len, "%s/%s", dir, av[0]);
+                snprintf(path, len, "%s/%s", dir, av[0]);
                 rl_add_slash(path, p);
                 free(path);
             }

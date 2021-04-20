@@ -89,9 +89,12 @@ Jeff
 void process_line(char *line);
 int  change_prompt(void);
 char *get_prompt(void);
+#ifdef EDITLINE_LIBRARY
+el_status_t change_prompt_wrap(void);
+#endif
 
 int prompt = 1;
-char prompt_buf[40], line_buf[256];
+char prompt_buf[64], line_buf[256];
 tcflag_t old_lflag;
 cc_t     old_vtime;
 struct termios term;
@@ -119,7 +122,12 @@ main()
         exit(1);
     }
 
-//    rl_add_defun("change-prompt", change_prompt, CTRL('t'));
+#ifdef EDITLINE_LIBRARY
+    el_bind_key(CTRL('t'), change_prompt_wrap);
+#else
+    rl_add_defun("change-prompt", change_prompt, CTRL('t'));
+#endif
+
     rl_callback_handler_install(get_prompt(), process_line);
 
     while(1) {
@@ -164,6 +172,15 @@ process_line(char *line)
   free (line);
 }
 
+#ifdef EDITLINE_LIBRARY
+el_status_t
+change_prompt_wrap(void)
+{
+  change_prompt();
+  return CSstay;
+}
+#endif
+
 int
 change_prompt(void)
 {
@@ -190,7 +207,8 @@ char *
 get_prompt(void)
 {
   /* The prompts can even be different lengths! */
-  sprintf(prompt_buf, "%s", 
-    prompt ? "Hit ctrl-t to toggle prompt> " : "Pretty cool huh?> ");
+  sprintf(prompt_buf, "%s", prompt ?
+    "Hit \1\033[1;31m\2ctrl-t\1\033[0m\2 to toggle prompt> " :
+    "Pretty cool huh 😉?> ");
   return prompt_buf;
 }

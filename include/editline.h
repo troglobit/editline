@@ -125,6 +125,9 @@ extern void rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *lhand
 extern void rl_callback_read_char       (void);
 extern void rl_callback_handler_remove  (void);
 
+#define RL_PROMPT_START_IGNORE	'\1'
+#define RL_PROMPT_END_IGNORE	'\2'
+
 #ifdef __cplusplus
 }
 #endif

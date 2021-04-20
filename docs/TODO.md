@@ -29,11 +29,9 @@ Other minor TODO's
   `el_bind_key()` exists.
 - Make `char *rl_prompt;` globally visible.
 - Add support for `rl_set_prompt()`
-- Add support for `--enable-utf8` to configure script
 - Use `strcmp(nl_langinfo(CODESET), "UTF-8")` to look for utf8 capable
   terminal
-- Implement simple UTF-8 parser according to
-  http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+- Make the input multibyte-aware in `insert_string` and `delete_string`.
 
 
 [gnu]:     http://www.delorie.com/gnu/docs/readline/rlman_41.html#IDX288

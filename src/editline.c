@@ -26,6 +26,11 @@
 
 #include "editline.h"
 
+#if CONFIG_UNIWIDTH
+#define _XOPEN_SOURCE
+#include <wchar.h>
+#endif
+
 /*
 **  Manifest constants.
 */
@@ -115,7 +120,7 @@ static const char *old_prompt = NULL;
 static rl_vcpfunc_t *line_handler = NULL;
 static char       *line_up = "\x1b[A";
 static char       *line_down = "\x1b[B";
-int prompt_len = 0;
+int prompt_width = 0;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
 int               el_no_hist = 0;
@@ -152,6 +157,55 @@ static int is_alpha_num(unsigned char c)
 
     return 0;
 }
+
+#if CONFIG_UNIWIDTH
+static int uniwidth(const char *str)
+{
+    int col = 0;
+    int ignore = 0;
+
+    int len;
+    mbstate_t state;
+    memset(&state, 0, sizeof state);
+    wchar_t wc;
+
+    const char *end = str + strlen(str);
+
+    while ((len = mbrtowc(&wc, str, end - str, &state)) > 0) {
+        if (wc == RL_PROMPT_START_IGNORE)
+            ignore = 1;
+        else if (wc == RL_PROMPT_END_IGNORE)
+            ignore = 0;
+        
+        if (!ignore) {
+            int width = wcwidth(wc);
+            col += (width >= 0) ? width : 0;
+        }
+
+        str += len;
+    }
+
+    return col;
+}
+#else
+static int uniwidth(const char *str)
+{
+    int ignore = 0;
+    int count = 0;
+
+    for (; *str; str++) {
+        if (*str == RL_PROMPT_START_IGNORE)
+            ignore = 1;
+        else if (*str == RL_PROMPT_END_IGNORE)
+            ignore = 0;
+
+        if (!ignore && *str > 0x1f)
+            count++;
+    }
+
+    return count;
+}
+#endif
 
 /*
 **  TTY input/output functions.
@@ -212,7 +266,7 @@ static void tty_show(unsigned char c)
 
 static void tty_string(char *p)
 {
-    int i = rl_point + prompt_len + 1;
+    int i = rl_point + prompt_width + 1;
 
     while (*p) {
         tty_show(*p++);
@@ -308,7 +362,7 @@ void el_print_columns(int ac, char **av)
 
     /* Find longest name, determine column count from that. */
     for (longest = 0, i = 0; i < ac; i++) {
-        if ((j = strlen((char *)av[i])) > longest)
+        if ((j = uniwidth((char *)av[i])) > longest)
             longest = j;
     }
 
@@ -320,7 +374,7 @@ void el_print_columns(int ac, char **av)
     tty_puts(NEWLINE);
     for (skip = ac / cols + 1, i = 0; i < skip; i++) {
         for (j = i; j < ac; j += skip) {
-            for (p = av[j], len = strlen((char *)p), k = len; --k >= 0; p++)
+            for (p = av[j], len = uniwidth((char *)p), k = len; --k >= 0; p++)
                 tty_put(*p);
 
             if (j + skip < ac) {
@@ -335,7 +389,7 @@ void el_print_columns(int ac, char **av)
 
 static void reposition(int key)
 {
-    int len_with_prompt = prompt_len + rl_end;
+    int len_with_prompt = prompt_width + rl_end;
     int n =  len_with_prompt / tty_cols;                  /* determine the number of lines */
     int i = 0;
 
@@ -346,7 +400,7 @@ static void reposition(int key)
 
 	/* determine num of current line */
         if (key == CTL('A') || key == CTL('E') || key == rl_kill)
-            line = (prompt_len + old_point) / tty_cols;
+            line = (prompt_width + old_point) / tty_cols;
         else
             line = len_with_prompt / tty_cols;
 
@@ -376,7 +430,7 @@ static void reposition(int key)
         tty_show(rl_line_buffer[i]);
 
 	/* move to the next line */
-        if ((i + prompt_len + 1) % tty_cols == 0)
+        if ((i + prompt_width + 1) % tty_cols == 0)
             tty_put('\n');
     }
 }
@@ -384,7 +438,7 @@ static void reposition(int key)
 static void left(el_status_t Change)
 {
     if (rl_point) {
-        if ((rl_point + prompt_len) % tty_cols == 0) {
+        if ((rl_point + prompt_width) % tty_cols == 0) {
             tty_puts(line_up);
             tty_forwardn(tty_cols);
         } else {
@@ -407,7 +461,7 @@ static void left(el_status_t Change)
 
 static void right(el_status_t Change)
 {
-    if ((rl_point + prompt_len + 1) % tty_cols == 0)
+    if ((rl_point + prompt_width + 1) % tty_cols == 0)
         tty_put('\n');
     else
         tty_show(rl_line_buffer[rl_point]);
@@ -533,7 +587,7 @@ static void ceol(void)
     }
 
     for (i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
-        if ((i + prompt_len + 1) % tty_cols == 0){
+        if ((i + prompt_width + 1) % tty_cols == 0){
             tty_put(' ');
             tty_put('\n');
         }
@@ -552,7 +606,7 @@ static void ceol(void)
     }
 
     for (i += extras; i > rl_point; i--) {
-        if ((i + prompt_len) % tty_cols == 0) {
+        if ((i + prompt_width) % tty_cols == 0) {
             tty_puts(line_up);
             tty_forwardn(tty_cols);
         } else {
@@ -563,7 +617,7 @@ static void ceol(void)
 
 static void clear_line(void)
 {
-    int n = (rl_point + prompt_len) / tty_cols;
+    int n = (rl_point + prompt_width) / tty_cols;
     rl_point = -(int)strlen(rl_prompt);
 
     if (n > 0) {
@@ -805,7 +859,7 @@ static el_status_t h_search(void)
 
     clear_line();
     old_prompt = rl_prompt;
-    rl_prompt = "Search: ";
+    rl_prompt = strdup("Search: ");
     tty_puts(rl_prompt);
 
     search_move = Repeat == NO_ARG ? el_prev_hist : el_next_hist;
@@ -1340,7 +1394,7 @@ void rl_reset_terminal(const char *terminal_name)
 void rl_initialize(void)
 {
     if (!rl_prompt)
-        rl_prompt = "? ";
+        rl_prompt = strdup("? ");
 
     hist_alloc();
 
@@ -1428,8 +1482,8 @@ static int el_prep(const char *prompt)
     if (!Screen)
         return -1;
 
-    rl_prompt = prompt ? prompt : NILSTR;
-    prompt_len = strlen(rl_prompt);
+    rl_set_prompt(prompt ? prompt : NILSTR);
+    prompt_width = uniwidth(rl_prompt);
 
     if (el_no_echo) {
         int old = el_no_echo;

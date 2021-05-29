@@ -1041,8 +1041,12 @@ static el_status_t meta(void)
         case '1':
         {
             char seq[4] = { 0 };
+            seq[0] = tty_get();
 
-            for (c = 0; c < 3; c++)
+            if (seq[0] == '~')
+                return beg_line(); /* Home */
+
+            for (c = 1; c < 3; c++)
                 seq[c] = tty_get();
 
             if (!strncmp(seq, ";5C", 3))
@@ -1054,6 +1058,7 @@ static el_status_t meta(void)
         }
         case '2':  tty_get(); return CSstay;     /* Insert */
         case '3':  tty_get(); return del_char(); /* Delete */
+        case '4':  tty_get(); return end_line(); /* End */
         case '5':  tty_get(); return CSstay;     /* PgUp */
         case '6':  tty_get(); return CSstay;     /* PgDn */
         case 'A':  return h_prev();              /* Up */

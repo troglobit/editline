@@ -1061,6 +1061,8 @@ static el_status_t meta(void)
         case '4':  tty_get(); return end_line(); /* End */
         case '5':  tty_get(); return CSstay;     /* PgUp */
         case '6':  tty_get(); return CSstay;     /* PgDn */
+        case '7':  tty_get(); return beg_line(); /* Home (urxvt) */
+        case '8':  tty_get(); return end_line(); /* End (urxvt) */
         case 'A':  return h_prev();              /* Up */
         case 'B':  return h_next();              /* Down */
         case 'C':  return fd_char();             /* Left */

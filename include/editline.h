@@ -21,6 +21,8 @@
 #ifndef EDITLINE_H_
 #define EDITLINE_H_
 
+#include <stdio.h>
+
 /* Handy macros when binding keys. */
 #define CTL(x)          ((x) & 0x1F)
 #define ISCTL(x)        ((x) && (x) < ' ')

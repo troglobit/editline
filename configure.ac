@@ -1,5 +1,5 @@
 AC_INIT(editline, 1.17.1, https://github.com/troglobit/editline/issues)
-AC_CONFIG_AUX_DIR(aux)
+AC_CONFIG_AUX_DIR(build-aux)
 AM_INIT_AUTOMAKE([1.11 foreign dist-xz])
 AM_SILENT_RULES([yes])
 

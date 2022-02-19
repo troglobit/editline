@@ -1753,14 +1753,6 @@ static el_status_t accept_line(void)
     return CSdone;
 }
 
-#ifdef SYSTEM_IS_WIN32
-static el_status_t end_of_input(void)
-{
-    rl_line_buffer[rl_end] = '\0';
-    return CSeof;
-}
-#endif
-
 static el_status_t transpose(void)
 {
     char        c;
@@ -1972,11 +1964,7 @@ static el_keymap_t Map[64] = {
     {   CTL('W'),       bk_kill_word    },
     {   CTL('X'),       exchange        },
     {   CTL('Y'),       yank            },
-#ifdef SYSTEM_IS_WIN32
-    {   CTL('Z'),       end_of_input    },
-#else
     {   CTL('Z'),       el_ring_bell    },
-#endif
     {   CTL('['),       meta            },
     {   CTL(']'),       move_to_char    },
     {   CTL('^'),       el_ring_bell    },

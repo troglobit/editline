@@ -33,6 +33,8 @@ to use the library is available in the `examples/` directory.
 
 Editline is maintained collaboratively at [GitHub][].
 
+> **Note:** Windows is not a supported target for editline.
+
 
 Example
 -------

@@ -1,3 +1,3 @@
 AUTOMAKE_OPTIONS = foreign
 
-dist_man_MANS = editline.3
+dist_man_MANS = libeditline.3

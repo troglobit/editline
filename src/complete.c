@@ -278,7 +278,7 @@ static char *rl_find_token(size_t *len)
     int pos;
 
     for (pos = rl_point; pos < rl_end; pos++) {
-	if (isspace(rl_line_buffer[pos])) {
+	if (isspace((unsigned char) rl_line_buffer[pos])) {
 	    if (pos > 0)
 		pos--;
 	    break;
@@ -286,7 +286,7 @@ static char *rl_find_token(size_t *len)
     }
 
     ptr = &rl_line_buffer[pos];
-    while (pos >= 0 && !isspace(rl_line_buffer[pos])) {
+    while (pos >= 0 && !isspace((unsigned char) rl_line_buffer[pos])) {
 	if (pos == 0)
 	    break;
 

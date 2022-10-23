@@ -494,10 +494,10 @@ static el_status_t do_case(el_case_t type)
 
         for (i = rl_point, p = &rl_line_buffer[i]; rl_point < end; p++) {
             if ((type == TOupper) || (type == TOcapitalize && rl_point == i)) {
-                if (islower(*p))
-                    *p = toupper(*p);
-            } else if (isupper(*p)) {
-                *p = tolower(*p);
+                if (islower((unsigned char)(*p)))
+                    *p = toupper((unsigned char)(*p));
+            } else if (isupper((unsigned char)(*p))) {
+                *p = tolower((unsigned char)(*p));
             }
             right(CSmove);
         }
@@ -1875,14 +1875,14 @@ static int argify(char *line, char ***avp)
     if (!p)
         return 0;
 
-    for (c = line; isspace(*c); c++)
+    for (c = line; isspace((unsigned char)(*c)); c++)
         continue;
 
     if (*c == '\n' || *c == '\0')
         return 0;
 
     for (ac = 0, p[ac++] = c; *c && *c != '\n'; ) {
-        if (!isspace(*c)) {
+        if (!isspace((unsigned char)(*c))) {
             c++;
             continue;
         }

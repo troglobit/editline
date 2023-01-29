@@ -198,7 +198,7 @@ current maintainer works exclusively on GNU/Linux systems, so it may use
 GCC and  GNU Make specific  extensions here and  there.  This is  not on
 purpose and patches or pull requests to correct this are most welcome!
 
-0. Call <kbd>./automake.sh</kbd> if you build from git
+0. Call <kbd>./autogen.sh</kbd> if you build from git
 1. Configure editline with default features: <kbd>./configure</kbd>
 2. Build the library and examples: <kbd>make all</kbd>
 3. Install using <kbd>make install</kbd>

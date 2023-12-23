@@ -89,7 +89,7 @@ AS_IF([test "x$enable_terminal_bell" = "xyes"],
 AM_CONDITIONAL([ENABLE_EXAMPLES], [test "$enable_examples" = yes])
 
 # Check for a termcap compatible library if enabled
-AS_IF([test "x$enable_termcap" = "xyes"],
+AS_IF([test "x$enable_termcap" = "xyes"], [
    AC_DEFINE(CONFIG_USE_TERMCAP, 1, [Define to use the termcap library for terminal size.])
    AC_CHECK_LIB(terminfo, tgetent, , [
       AC_CHECK_LIB(termcap, tgetent, , [
@@ -100,7 +100,7 @@ AS_IF([test "x$enable_termcap" = "xyes"],
                ])
             ])
          ])
-      ]))
+      ])])
 
 # Generate all files
 AC_OUTPUT

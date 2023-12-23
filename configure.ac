@@ -68,23 +68,23 @@ AC_ARG_ENABLE([examples],
 #
 # Check what features have been enabled
 #
-AS_IF([test "x$enable_unique_history" != "xno"],
-   AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.]))
+AS_IF([test "x$enable_unique_history" != "xno"], [
+   AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.])])
 
-AS_IF([test "x$enable_terminal_bell" != "xno"],
-   AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.]))
+AS_IF([test "x$enable_terminal_bell" != "xno"], [
+   AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.])])
 
-AS_IF([test "x$enable_eof" != "xno"],
-   AC_DEFINE(CONFIG_EOF, 1, [Define to enable EOF (Ctrl-D) key.]))
+AS_IF([test "x$enable_eof" != "xno"], [
+   AC_DEFINE(CONFIG_EOF, 1, [Define to enable EOF (Ctrl-D) key.])])
 
-AS_IF([test "x$enable_sigint" != "xno"],
-   AC_DEFINE(CONFIG_SIGINT, 1, [Define to enable SIGINT (Ctrl-C) key.]))
+AS_IF([test "x$enable_sigint" != "xno"], [
+   AC_DEFINE(CONFIG_SIGINT, 1, [Define to enable SIGINT (Ctrl-C) key.])])
 
-AS_IF([test "x$enable_sigstop" = "xyes"],
-   AC_DEFINE(CONFIG_SIGSTOP, 1, [Define to enable SIGSTOP (Ctrl-Z) key.]))
+AS_IF([test "x$enable_sigstop" = "xyes"], [
+   AC_DEFINE(CONFIG_SIGSTOP, 1, [Define to enable SIGSTOP (Ctrl-Z) key.])])
 
-AS_IF([test "x$enable_terminal_bell" = "xyes"],
-   AC_DEFINE(CONFIG_TERMINAL_BELL, 1, [Define to enable terminal bell on completion.]))
+AS_IF([test "x$enable_terminal_bell" = "xyes"], [
+   AC_DEFINE(CONFIG_TERMINAL_BELL, 1, [Define to enable terminal bell on completion.])])
 
 AM_CONDITIONAL([ENABLE_EXAMPLES], [test "$enable_examples" = yes])
 

@@ -61,6 +61,9 @@ AC_ARG_ENABLE(terminal-bell,
 AC_ARG_ENABLE(termcap,
    AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.]))
 
+AC_ARG_ENABLE(locale,
+   AS_HELP_STRING([--enable-locale], [Use standard POSIX functions to handle locales (multibyte width, etc.).]))
+
 AC_ARG_ENABLE([examples],
 	[AC_HELP_STRING([--enable-examples], [Build examples/ directory])],
 	[], [enable_examples=no])
@@ -85,6 +88,10 @@ AS_IF([test "x$enable_sigstop" = "xyes"], [
 
 AS_IF([test "x$enable_terminal_bell" = "xyes"], [
    AC_DEFINE(CONFIG_TERMINAL_BELL, 1, [Define to enable terminal bell on completion.])])
+
+AS_IF([test "x$enable_locale" = "xyes"],
+   AC_DEFINE(CONFIG_UNIWIDTH, 1, [Define to enable locale-sensitive width calculation.])
+   AC_CHECK_FUNCS([wcwidth mbrtowc]))
 
 AM_CONDITIONAL([ENABLE_EXAMPLES], [test "$enable_examples" = yes])
 

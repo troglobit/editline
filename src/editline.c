@@ -1435,7 +1435,8 @@ static int el_prep(const char *prompt)
     if (!Screen)
         return -1;
 
-    rl_prompt = prompt ? prompt : NILSTR;
+    if (prompt)
+        rl_prompt = prompt;
     prompt_len = strlen(rl_prompt);
 
     if (el_no_echo) {

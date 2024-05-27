@@ -1229,7 +1229,7 @@ static char *editinput(int complete)
 static void hist_alloc(void)
 {
     if (!H.Lines)
-        H.Lines = calloc(el_hist_size, sizeof(char *));
+        H.Lines = calloc(1 + el_hist_size, sizeof(char *));
 }
 
 static void hist_add(const char *p)
@@ -1246,11 +1246,11 @@ static void hist_add(const char *p)
     if (s == NULL)
         return;
 
-    if (H.Size < el_hist_size) {
+    if (H.Size <= el_hist_size) {
         H.Lines[H.Size++] = s;
     } else {
         free(H.Lines[0]);
-        for (i = 0; i < el_hist_size - 1; i++)
+        for (i = 0; i < el_hist_size; i++)
             H.Lines[i] = H.Lines[i + 1];
         H.Lines[i] = s;
     }
@@ -1366,7 +1366,7 @@ void rl_uninitialize(void)
 
     /* Uninitialize the history */
     if (H.Lines) {
-        for (i = 0; i < el_hist_size; i++) {
+        for (i = 0; i <= el_hist_size; i++) {
             if (H.Lines[i])
                 free(H.Lines[i]);
             H.Lines[i] = NULL;

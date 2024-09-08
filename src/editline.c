@@ -1025,6 +1025,15 @@ static el_status_t bk_word(void)
     return CSstay;
 }
 
+static el_status_t bk_kill_line(void)
+{
+    beg_line();
+    if (old_point != rl_point)
+        return delete_string(old_point - rl_point);
+
+    return CSstay;
+}
+
 static el_status_t meta(void)
 {
     int c;
@@ -1156,14 +1165,7 @@ static el_status_t tty_special(int c)
         return bk_del_char();
 
     if (c == rl_kill) {
-        if (rl_point != 0) {
-            old_point = rl_point;
-            rl_point = 0;
-            reposition(c);
-        }
-        Repeat = NO_ARG;
-
-        return kill_line();
+        return bk_kill_line();
     }
 
 #ifdef CONFIG_EOF

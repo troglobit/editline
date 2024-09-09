@@ -1074,9 +1074,11 @@ static el_status_t meta(void)
             for (c = 1; c < 3; c++)
                 seq[c] = tty_get();
 
-            if (!strncmp(seq, ";5C", 3))
+            if (!strncmp(seq, ";5C", 3)
+                || !strncmp(seq, ";3C", 3))
                 return fd_word(); /* \e[1;5C = Ctrl+Right */
-            if (!strncmp(seq, ";5D", 3))
+            if (!strncmp(seq, ";5D", 3)
+                || !strncmp(seq, ";3D", 3))
                 return bk_word(); /* \e[1;5D = Ctrl+Left */
 
             break;

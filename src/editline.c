@@ -1034,6 +1034,30 @@ static el_status_t meta(void)
         return CSeof;
 
 #ifdef CONFIG_ANSI_ARROWS
+    /* See: https://en.wikipedia.org/wiki/ANSI_escape_code */
+    /* Recognize ANSI escapes for `Meta+Left` and `Meta+Right`. */
+    if (c == '\e') {
+        switch (tty_get()) {
+        case '[':
+        {
+            switch (tty_get()) {
+            /* \e\e[C = Meta+Left */
+            case 'C': return fd_word();
+            /* \e\e[D = Meta+Right */
+            case 'D': return bk_word();
+            default:
+                break;
+            }
+
+            return el_ring_bell();
+        }
+        default:
+            break;
+        }
+
+        return el_ring_bell();
+    }
+
     /* Also include VT-100 arrows. */
     if (c == '[' || c == 'O') {
         switch (tty_get()) {
@@ -1043,16 +1067,19 @@ static el_status_t meta(void)
             char seq[4] = { 0 };
             seq[0] = tty_get();
 
+            /* \e[1~ */
             if (seq[0] == '~')
                 return beg_line(); /* Home */
 
             for (c = 1; c < 3; c++)
                 seq[c] = tty_get();
 
-            if (!strncmp(seq, ";5C", 3))
-                return fd_word(); /* Ctrl+Right */
-            if (!strncmp(seq, ";5D", 3))
-                return bk_word(); /* Ctrl+Left */
+            if (!strncmp(seq, ";5C", 3)
+                || !strncmp(seq, ";3C", 3))
+                return fd_word(); /* \e[1;5C = Ctrl+Right */
+            if (!strncmp(seq, ";5D", 3)
+                || !strncmp(seq, ";3D", 3))
+                return bk_word(); /* \e[1;5D = Ctrl+Left */
 
             break;
         }

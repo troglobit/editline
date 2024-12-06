@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: editline
-Upstream-Contact: Joachim Nilsson <troglobit@gmail.com>
+Upstream-Contact: Joachim Wiberg <troglobit@gmail.com>
 Source: http://github.com/troglobit/editline
 Comment: This package was originally debianized by Jim Studt <jim@federated.com>
 	 on Fri,  5 May 2000 13:25:51 -0500.  It was received from, then upstream
@@ -11,7 +11,7 @@ Copyright: 1992,1993 Simmule Turner and Rich Salz.
 License: C-News
 
 Files: debian/*
-Copyright: 2010-2020 Joachim Nilsson <troglobit@gmail.com>
+Copyright: 2010-2020 Joachim Wiberg <troglobit@gmail.com>
 License: BSD-2-clause
 
 License: C-News

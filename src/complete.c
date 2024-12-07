@@ -243,9 +243,7 @@ char *el_filename_complete(char *pathname, int *match)
 
 char *rl_filename_completion_function(const char *text, int state)
 {
-    char        *dir;
-    char        *file;
-    static char   **av;
+    static char   **av, *dir, *file;
     static size_t i, ac;
 
     if (!state) {
@@ -253,20 +251,35 @@ char *rl_filename_completion_function(const char *text, int state)
 	    return NULL;
 
 	ac = FindMatches(dir, file, &av);
-	free(dir);
-	free(file);
-	if (!ac)
+	if (!ac) {
+	    free(dir);
+	    free(file);
 	    return NULL;
+	}
 
 	i = 0;
     }
 
-    if (i < ac)
-	return av[i++];
+    if (i < ac) {
+	size_t len = (dir ? strlen(dir) : 0) + strlen(av[i]) + 3;
+	char *ptr = malloc(len);
+
+	if (ptr) {
+	    snprintf(ptr, len, "%s%s", dir, av[i++]);
+	    if (ac == 1)
+		rl_add_slash(ptr, ptr);
+
+	    return ptr;
+	}
+    }
 
     do {
 	free(av[--i]);
     } while (i > 0);
+
+    free(av);
+    free(dir);
+    free(file);
 
     return NULL;
 }
@@ -367,8 +380,12 @@ static char *complete(char *token, int *match)
 
 	free(word);
 	word = NULL;
-	if (words[0])
+
+        /* Exactly one match -- finish it off. */
+	if (words[0] && !words[1]) {
+	    *match = 1;
 	    word = strdup(words[0] + len);
+	}
 
 	while (words[i])
 	    free(words[i++]);
@@ -377,6 +394,9 @@ static char *complete(char *token, int *match)
 	if (word)
 	    return word;
     }
+
+    if (word)
+	free(word);
 
 fallback:
     return el_filename_complete(token, match);

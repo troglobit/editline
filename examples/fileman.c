@@ -7,6 +7,7 @@
    
 */
 
+#include <assert.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/file.h>
@@ -22,7 +23,7 @@
 #include "editline.h"
 
 void too_dangerous(char *caller);
-void initialize_readline();
+void initialize_readline(const char *prompt);
 int execute_line(char *line);
 int valid_argument(char *caller, char *arg);
 
@@ -64,6 +65,13 @@ struct cmd commands[] = {
 char *stripwhite();
 struct cmd *find_command();
 
+/* ~/.fileman_history */
+char *fileman_history;
+
+/* Prompt base and current */
+const char *prompt_init;
+char *prompt_curr;
+
 /* When non-zero, this means the user is done using this program. */
 int done;
 
@@ -72,12 +80,11 @@ int main(int argc, char **argv)
     char *line, *s;
 
     setlocale(LC_CTYPE, "");
-
-    initialize_readline();	/* Bind our completer. */
+    initialize_readline("(FileMan)");
 
     /* Loop reading and executing lines until the user quits. */
     for (; done == 0;) {
-	line = readline("FileMan: ");
+	line = readline(NULL);
 
 	if (!line)
 	    break;
@@ -106,6 +113,10 @@ int main(int argc, char **argv)
 #endif
 	free(line);
     }
+
+    puts("");
+    write_history(fileman_history);
+    free(fileman_history);
 
     return 0;
 }
@@ -188,19 +199,58 @@ char *stripwhite(char *string)
 
 char *command_generator(const char *, int);
 char **fileman_completion(const char *, int, int);
+void fileman_prompt(void);
 
 /*
  * Tell the GNU Readline library how to complete.  We want to try to
  * complete on command names if this is the first word in the line, or
  * on filenames if not.
  */
-void initialize_readline(void)
+void initialize_readline(const char *prompt)
 {
+    const char *home;
+    size_t len;
+
     /* Allow conditional parsing of the ~/.inputrc file. */
     rl_readline_name = "FileMan";
 
     /* Tell the completer that we want a crack first. */
     rl_attempted_completion_function = fileman_completion;
+
+    /* Restore command history */
+    home = getenv("HOME");
+    len = (home ? strlen(home) : 0) + 14;
+    fileman_history = malloc(len);
+    assert(fileman_history);
+    snprintf(fileman_history, len, "%s/.fileman_history", home ? home : ".");
+
+    read_history(fileman_history);
+
+    /* Prompt is updated when moving around in the tree */
+    prompt_init = prompt;
+    fileman_prompt();
+}
+
+/*
+ * Update prompt when changing directory.  Use an allocated string to
+ * show off the rl_set_prompt() API for issue #51.
+ */
+void fileman_prompt(void)
+{
+    char cwd[1024];
+    size_t len;
+
+    if (prompt_curr)
+	free(prompt_curr);
+
+    assert(getcwd(cwd, sizeof(cwd)));
+    len = strlen(prompt_init) + strlen(cwd) + 10;
+    prompt_curr = malloc(len);
+    assert(prompt_curr);
+
+    snprintf(prompt_curr, len, "%s %s/> ", prompt_init, cwd);
+
+    rl_set_prompt(prompt_curr);
 }
 
 /*
@@ -377,7 +427,8 @@ int com_cd(char *arg)
 	return 1;
     }
 
-    com_pwd("");
+    //com_pwd("");
+    fileman_prompt();
     return 0;
 }
 

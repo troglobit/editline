@@ -1159,6 +1159,8 @@ static el_status_t emacs(int c)
 
 static el_status_t tty_special(int c)
 {
+    el_status_t rc;
+
 #ifdef CONFIG_SIGINT
     if (c == rl_intr) {
         el_intr_pending = SIGINT;
@@ -1183,14 +1185,10 @@ static el_status_t tty_special(int c)
         return bk_del_char();
 
     if (c == rl_kill) {
-        if (rl_point != 0) {
-            old_point = rl_point;
-            rl_point = 0;
-            reposition(c);
-        }
-        Repeat = NO_ARG;
-
-        return kill_line();
+	Repeat = rl_point;
+	rc = bk_del_char();
+	Repeat = NO_ARG;
+	return rc;
     }
 
 #ifdef CONFIG_EOF

@@ -463,12 +463,6 @@ static el_status_t do_forward(el_status_t move)
                 right(CSstay);
         }
 
-        /* Skip to next word, or skip leading white space if outside a word. */
-        for ( ; rl_point < rl_end && (p[0] == ' ' || !is_alpha_num(p[0])); rl_point++, p++) {
-            if (move == CSmove)
-                right(CSstay);
-        }
-
         if (rl_point == rl_end)
             break;
     } while (++i < Repeat);

@@ -211,7 +211,7 @@ static void tty_show(unsigned char c)
     }
 }
 
-static void tty_string(char *p)
+static void tty_string(const char *p)
 {
     int i = rl_point + prompt_len + 1;
 
@@ -1282,7 +1282,7 @@ static char *read_redirected(void)
     int         size = MEM_INC;
     char        *p;
     char        *line;
-    char        *end;
+    const char  *end;
 
     p = line = malloc(sizeof(char) * size);
     if (!p)

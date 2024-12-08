@@ -40,7 +40,7 @@ static int compare(const void *p1, const void *p2)
 
 /* Fill in *avp with an array of names that match file, up to its length.
  * Ignore . and .. . */
-static int FindMatches(char *dir, char *file, char ***avp)
+static int FindMatches(const char *dir, const char *file, char ***avp)
 {
     char        **av;
     char        **word;
@@ -128,7 +128,7 @@ static int FindMatches(char *dir, char *file, char ***avp)
 /* Split a pathname into allocated directory and trailing filename parts. */
 static int SplitPath(const char *path, char **dirpart, char **filepart)
 {
-    static char DOT[] = ".";
+    static const char DOT[] = ".";
     char        *dpart;
     char        *fpart;
 
@@ -287,7 +287,7 @@ char *rl_filename_completion_function(const char *text, int state)
 /* Similar to el_find_word(), but used by GNU Readline API */
 static char *rl_find_token(size_t *len)
 {
-    char *ptr;
+    const char *ptr;
     int pos;
 
     for (pos = rl_point; pos < rl_end; pos++) {

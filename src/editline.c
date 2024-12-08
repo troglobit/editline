@@ -115,7 +115,7 @@ static const char *old_prompt = NULL;
 static rl_vcpfunc_t *line_handler = NULL;
 static char       *line_up = "\x1b[A";
 static char       *line_down = "\x1b[B";
-int prompt_len = 0;
+static int        prompt_len = 0;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
 int               el_no_hist = 0;
@@ -125,6 +125,7 @@ int               rl_end;
 int               rl_meta_chars = 0; /* Display 8-bit chars as the actual char(0) or as `M-x'(1)? */
 int               rl_inhibit_complete = 0;
 char             *rl_line_buffer = NULL;
+static const char *rl_saved_prompt = NULL;
 const char       *rl_prompt = NULL;
 const char       *rl_readline_name = NULL; /* Set by calling program, for conditional parsing of ~/.inputrc - Not supported yet! */
 FILE             *rl_instream = NULL;  /* The stdio stream from which input is read. Defaults to stdin if NULL */
@@ -772,7 +773,7 @@ static const char *search_hist(const char *search, const char *(*move)(void))
 
 static el_status_t h_search_end(const char *p)
 {
-    rl_prompt = old_prompt;
+    rl_set_prompt(old_prompt);
     Searching = 0;
 
     if (el_intr_pending > 0) {
@@ -799,8 +800,8 @@ static el_status_t h_search(void)
 
     clear_line();
     old_prompt = rl_prompt;
-    rl_prompt = "Search: ";
-    tty_puts(rl_prompt);
+    rl_set_prompt("Search: ");
+    reposition(EOF);
 
     search_move = Repeat == NO_ARG ? el_prev_hist : el_next_hist;
     if (line_handler) {
@@ -1363,10 +1364,28 @@ void rl_reset_terminal(const char *terminal_name)
     }
 }
 
+void rl_set_prompt(const char *prompt)
+{
+    if (prompt)
+        rl_prompt = prompt;
+    prompt_len = strlen(rl_prompt);
+}
+
+void rl_save_prompt(void)
+{
+    rl_saved_prompt = rl_prompt;
+}
+
+void rl_restore_prompt(void)
+{
+    if (rl_saved_prompt)
+        rl_set_prompt(rl_saved_prompt);
+}
+
 void rl_initialize(void)
 {
     if (!rl_prompt)
-        rl_prompt = "? ";
+        rl_set_prompt("? ");
 
     hist_alloc();
 
@@ -1407,23 +1426,6 @@ void rl_uninitialize(void)
     Length = 0;
 }
 
-static const char *rl_saved_prompt = NULL;
-void rl_save_prompt(void)
-{
-    rl_saved_prompt = rl_prompt;
-}
-
-void rl_restore_prompt(void)
-{
-    if (rl_saved_prompt)
-        rl_prompt = rl_saved_prompt;
-}
-
-void rl_set_prompt(const char *prompt)
-{
-    rl_prompt = prompt;
-}
-
 void rl_clear_message(void)
 {
     /* Nothing to do atm. */
@@ -1454,9 +1456,7 @@ static int el_prep(const char *prompt)
     if (!Screen)
         return -1;
 
-    if (prompt)
-        rl_prompt = prompt;
-    prompt_len = strlen(rl_prompt);
+    rl_set_prompt(prompt);
 
     if (el_no_echo) {
         int old = el_no_echo;

@@ -1431,7 +1431,7 @@ void rl_clear_message(void)
     /* Nothing to do atm. */
 }
 
-void rl_forced_update_display()
+void rl_forced_update_display(void)
 {
     redisplay(0);
     tty_flush();

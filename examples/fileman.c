@@ -62,8 +62,8 @@ struct cmd commands[] = {
 };
 
 /* Forward declarations. */
-char *stripwhite();
-struct cmd *find_command();
+char *stripwhite(char *string);
+struct cmd *find_command(char *name);
 
 /* ~/.fileman_history */
 char *fileman_history;

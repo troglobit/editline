@@ -1,6 +1,6 @@
 Editline
 ========
-[![License Badge][]][License] [![Travis Status]][Travis] [![Coverity Status]][Coverity Scan]
+[![License Badge][]][License] [![GitHub Status][]][GitHub] [![Coverity Status]][Coverity Scan]
 
 
 Table of Contents
@@ -31,7 +31,7 @@ supplying different options to the GNU configure script.  See the output
 from <kbd>configure --help</kbd> for details.  Some useful hints on how
 to use the library is available in the `examples/` directory.
 
-Editline is maintained collaboratively at [GitHub][].
+Editline is maintained collaboratively at [GitHub][1].
 
 > **Note:** Windows is not a supported target for editline.
 
@@ -251,7 +251,7 @@ efforts.
 
 Outstanding issues are listed in the [TODO.md][] file.
 
-[GitHub]:          https://github.com/troglobit/editline
+[1]:               https://github.com/troglobit/editline
 [line editing]:    https://github.com/troglobit/editline/blob/master/docs/README
 [release tarball]: https://github.com/troglobit/editline/releases
 [maintainer]:      http://troglobit.com
@@ -270,7 +270,7 @@ Outstanding issues are listed in the [TODO.md][] file.
 [Steve Tell]:      http://www.cs.unc.edu/~tell/dist.html
 [License]:         https://github.com/troglobit/editline/blob/master/LICENSE
 [License Badge]:   https://img.shields.io/badge/License-C%20News-orange.svg
-[Travis]:          https://travis-ci.org/troglobit/editline
-[Travis Status]:   https://travis-ci.org/troglobit/editline.png?branch=master
+[GitHub]:          https://github.com/troglobit/editline/actions/workflows/build.yml/
+[GitHub Status]:   https://github.com/troglobit/editline/actions/workflows/build.yml/badge.svg
 [Coverity Scan]:   https://scan.coverity.com/projects/2982
 [Coverity Status]: https://scan.coverity.com/projects/2982/badge.svg

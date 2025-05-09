@@ -1,0 +1,76 @@
+name: Coverity Scan
+
+on:
+  push:
+    branches:
+      - 'dev'
+
+env:
+  PROJECT_NAME: editline
+  CONTACT_EMAIL: troglobit@gmail.com
+  COVERITY_NAME: troglobit-editline
+  COVERITY_PROJ: troglobit%2Feditline
+
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch latest Coverity Scan MD5
+        id: var
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        run: |
+          wget -q https://scan.coverity.com/download/cxx/linux64         \
+               --post-data "token=$TOKEN&project=${COVERITY_PROJ}&md5=1" \
+               -O coverity-latest.tar.gz.md5
+          echo "md5=$(cat coverity-latest.tar.gz.md5)" | tee -a $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: coverity-latest.tar.gz
+          key: ${{ runner.os }}-coverity-${{ steps.var.outputs.md5 }}
+          restore-keys: |
+            ${{ runner.os }}-coverity-${{ steps.var.outputs.md5 }}
+            ${{ runner.os }}-coverity-
+            ${{ runner.os }}-coverity
+      - name: Download Coverity Scan
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        run: |
+          if [ ! -f coverity-latest.tar.gz ]; then
+            wget -q https://scan.coverity.com/download/cxx/linux64   \
+                 --post-data "token=$TOKEN&project=${COVERITY_PROJ}" \
+                 -O coverity-latest.tar.gz
+          else
+            echo "Latest Coverity Scan available from cache :-)"
+            md5sum coverity-latest.tar.gz
+          fi
+          mkdir coverity
+          tar xzf coverity-latest.tar.gz --strip 1 -C coverity
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --prefix= --enable-sigstop --enable-terminal-bell --enable-examples
+      - name: Build
+        run: |
+          export PATH=`pwd`/coverity/bin:$PATH
+          cov-build --dir cov-int make
+      - name: Submit results to Coverity Scan
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        run: |
+          tar czvf ${PROJECT_NAME}.tgz cov-int
+          curl \
+            --form project=${COVERITY_NAME} \
+            --form token=$TOKEN \
+            --form email=${CONTACT_EMAIL} \
+            --form file=@${PROJECT_NAME}.tgz \
+            --form version=trunk \
+            --form description="${PROJECT_NAME} $(git rev-parse HEAD)" \
+            https://scan.coverity.com/builds?project=${COVERITY_PROJ}
+      - name: Upload build.log
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverity-build.log
+          path: cov-int/build-log.txt

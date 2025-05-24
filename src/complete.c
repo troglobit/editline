@@ -273,13 +273,21 @@ char *rl_filename_completion_function(const char *text, int state)
 	}
     }
 
-    do {
+    while (i > 0)
 	free(av[--i]);
-    } while (i > 0);
 
-    free(av);
-    free(dir);
-    free(file);
+    if (av) {
+	free(av);
+	av = NULL;
+    }
+    if (dir) {
+	free(dir);
+	dir = NULL;
+    }
+    if (file) {
+	free(file);
+	file = NULL;
+    }
 
     return NULL;
 }

@@ -1342,9 +1342,10 @@ void rl_reset_terminal(const char *terminal_name)
 
 #ifdef CONFIG_USE_TERMCAP
     bp = buf;
-    if (-1 != tgetent(buf, el_term)) {
-        if ((backspace = tgetstr("le", &bp)) != NULL)
-            backspace = strdup(backspace);
+    if (1 == tgetent(buf, el_term)) {
+        char *maybe_backspace = tgetstr("le", &bp);
+        if (maybe_backspace != NULL)
+            backspace = strdup(maybe_backspace);
         tty_cols = tgetnum("co");
         tty_rows = tgetnum("li");
     }

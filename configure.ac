@@ -71,7 +71,7 @@ AC_ARG_ENABLE([examples],
 AS_IF([test "x$enable_unique_history" != "xno"], [
    AC_DEFINE(CONFIG_UNIQUE_HISTORY, 1, [Define to skip duplicate lines in the scrollback history.])])
 
-AS_IF([test "x$enable_terminal_bell" != "xno"], [
+AS_IF([test "x$enable_arrow_keys" != "xno"], [
    AC_DEFINE(CONFIG_ANSI_ARROWS, 1, [Define to include ANSI arrow keys support.])])
 
 AS_IF([test "x$enable_eof" != "xno"], [

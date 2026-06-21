@@ -425,6 +425,12 @@ char *rl_complete(char *token, int *match)
     return el_filename_complete(token, match);
 }
 
+/* Custom completers return literal text that must not be shell-quoted. */
+int rl_complete_is_custom(void)
+{
+    return el_complete_func != NULL;
+}
+
 static rl_list_possib_func_t *el_list_possib_func = NULL;
 
 /* For compatibility with the Heimdal project. */

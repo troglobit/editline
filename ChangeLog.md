@@ -8,6 +8,8 @@ All notable changes to the project are documented in this file.
 --------------
 
 ### Fixes
+- Fix #5: don't shell-quote completions from a custom completer; only
+  built-in filename completion escapes spaces and special characters
 - Fix #66: `write_history()` now detects and reports `fprintf()` write
   errors, e.g. a full disk, instead of silently returning success
 

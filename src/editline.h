@@ -76,6 +76,7 @@ extern int	rl_susp;
 void  rl_ttyset(int Reset);
 void  rl_add_slash(char *path, char *p);
 char *rl_complete(char *token, int *match);
+int   rl_complete_is_custom(void);
 int   rl_list_possib(char *token, char ***av);
 
 #ifndef HAVE_STDLIB_H

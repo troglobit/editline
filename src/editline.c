@@ -1747,7 +1747,8 @@ static el_status_t c_complete(void)
         }
 
         while (*p) {
-            if ((*p < ' ' || strchr(SEPS, *p) != NULL)
+            if (!rl_complete_is_custom()
+                && (*p < ' ' || strchr(SEPS, *p) != NULL)
                 && (!unique || p[1] != 0)) {
                 *q++ = '\\';
             }

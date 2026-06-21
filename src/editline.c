@@ -115,6 +115,9 @@ static const char *old_prompt = NULL;
 static rl_vcpfunc_t *line_handler = NULL;
 static char       *line_up = "\x1b[A";
 static char       *line_down = "\x1b[B";
+/* Used as a display-column proxy in the wrap math: exact only for a
+ * printable single-width prompt.  A multibyte or escape-bearing prompt
+ * needs a real width (see RL_PROMPT_START/END_IGNORE, issue #48). */
 static int        prompt_len = 0;
 
 int               el_no_echo = 0; /* e.g., under Emacs */
@@ -189,6 +192,26 @@ static int next_glyph(int pos)
     return pos;
 }
 
+/* Display columns occupied by rl_line_buffer[0 .. b): one column per glyph,
+ * like the wrap math's byte==column assumption but corrected for multibyte
+ * (continuation bytes add no column).  Equals b for plain ASCII. */
+static int disp_col(int b)
+{
+    return glyph_count(0, b);
+}
+
+/* Inverse of disp_col(): byte offset of the glyph boundary at display
+ * column col.  Clamped to [0, rl_end]. */
+static int disp_col_to_byte(int col)
+{
+    int b = 0;
+
+    while (b < rl_end && col-- > 0)
+        b = next_glyph(b);
+
+    return b;
+}
+
 /*
 **  TTY input/output functions.
 */
@@ -248,14 +271,23 @@ static void tty_show(unsigned char c)
 
 static void tty_string(const char *p)
 {
-    int i = rl_point + prompt_len + 1;
+    int i = disp_col(rl_point) + prompt_len + 1;
 
     while (*p) {
-        tty_show(*p++);
-        if ((i++) % tty_cols == 0) {
+        unsigned char c = *p++;
+
+        tty_show(c);
+        if (utf8_is_cont(c))
+            continue;                  /* continuation byte: zero columns */
+        /* The margin glitch forces the terminal's deferred wrap.  A glyph
+         * is echoed one keystroke at a time, so firing it after a multibyte
+         * start byte would split the glyph; let the terminal handle the
+         * wrap natively for those and only glitch on ASCII. */
+        if (i % tty_cols == 0 && c < 0x80) {
             tty_put(' ');
             tty_put('\b');
         }
+        i++;
     }
 }
 
@@ -371,9 +403,10 @@ void el_print_columns(int ac, char **av)
 
 static void reposition(int key)
 {
-    int len_with_prompt = prompt_len + rl_end;
+    int len_with_prompt = prompt_len + disp_col(rl_end);
     int n =  len_with_prompt / tty_cols;                  /* determine the number of lines */
     int i = 0;
+    int col;
 
     tty_put('\r');
 
@@ -382,7 +415,7 @@ static void reposition(int key)
 
 	/* determine num of current line */
         if (key == CTL('A') || key == CTL('E') || key == rl_kill)
-            line = (prompt_len + old_point) / tty_cols;
+            line = (prompt_len + disp_col(old_point)) / tty_cols;
         else
             line = len_with_prompt / tty_cols;
 
@@ -394,7 +427,7 @@ static void reposition(int key)
                 tty_puts(line_down);
 
 	    /* determine reminder of last line and redraw only it */
-            i = rl_point - (len_with_prompt % tty_cols);
+            i = disp_col_to_byte(disp_col(rl_point) - (len_with_prompt % tty_cols));
         } else {
 	    int k;
 
@@ -408,11 +441,17 @@ static void reposition(int key)
         tty_puts(rl_prompt);
     }
 
+    col = disp_col(i) + prompt_len;
     for (; i < rl_point; i++) {
         tty_show(rl_line_buffer[i]);
-
-	/* move to the next line */
-        if ((i + prompt_len + 1) % tty_cols == 0)
+        /* Look ahead at the next byte, not this one: the wrap newline is
+         * emitted inline with the glyph's bytes, so it must wait until the
+         * whole glyph is written or it would split it.  (tty_string and
+         * ceol guard on the current byte because their boundary action is
+         * a glitch/erase, not a byte of the glyph -- do not unify these.) */
+        if (utf8_is_cont((unsigned char)rl_line_buffer[i + 1]))
+            continue;
+        if ((++col) % tty_cols == 0)
             tty_put('\n');
     }
 }
@@ -422,11 +461,9 @@ static void left(el_status_t Change)
     if (rl_point) {
         unsigned char c = rl_line_buffer[rl_point - 1];
 
-        /* Continuation bytes are zero-width: emit no cursor movement.
-         * The % tty_cols below is byte-granular column math, to be
-         * superseded by a display-column mapper in the wrapped-line slice. */
+        /* Continuation bytes are zero-width: emit no cursor movement. */
         if (!utf8_is_cont(c)) {
-            if ((rl_point + prompt_len) % tty_cols == 0) {
+            if ((disp_col(rl_point) + prompt_len) % tty_cols == 0) {
                 tty_puts(line_up);
                 tty_forwardn(tty_cols);
             } else {
@@ -453,7 +490,7 @@ static void right(el_status_t Change)
     unsigned char c = rl_line_buffer[rl_point];
 
     /* A continuation byte is zero-width, so it never triggers a wrap. */
-    if (!utf8_is_cont(c) && (rl_point + prompt_len + 1) % tty_cols == 0)
+    if (!utf8_is_cont(c) && (disp_col(rl_point) + prompt_len + 1) % tty_cols == 0)
         tty_put('\n');
     else
         tty_show(c);
@@ -582,7 +619,7 @@ static el_status_t case_cap_word(void)
 static void ceol(void)
 {
     int         extras = 0;
-    int         i;
+    int         base, col, i;
     char        *p;
 
     while (rl_point < 0) {
@@ -590,8 +627,12 @@ static void ceol(void)
         rl_point++;
     }
 
+    base = disp_col(rl_point) + prompt_len;
+    col = base;
     for (i = rl_point, p = &rl_line_buffer[i]; i <= rl_end; i++, p++) {
-        if ((i + prompt_len + 1) % tty_cols == 0){
+        if (utf8_is_cont((unsigned char)*p))
+            continue;               /* continuation byte: no display column */
+        if ((++col) % tty_cols == 0) {
             tty_put(' ');
             tty_put('\n');
         }
@@ -609,8 +650,8 @@ static void ceol(void)
         }
     }
 
-    for (i += extras; i > rl_point; i--) {
-        if ((i + prompt_len) % tty_cols == 0) {
+    for (col += extras; col > base; col--) {
+        if (col % tty_cols == 0) {
             tty_puts(line_up);
             tty_forwardn(tty_cols);
         } else {
@@ -621,7 +662,7 @@ static void ceol(void)
 
 static void clear_line(void)
 {
-    int n = (rl_point + prompt_len) / tty_cols;
+    int n = (disp_col(rl_point) + prompt_len) / tty_cols;
     rl_point = -(int)strlen(rl_prompt);
 
     if (n > 0) {

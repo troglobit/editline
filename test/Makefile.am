@@ -4,7 +4,7 @@ libeltest_a_SOURCES    = eltest.c eltest.h
 libeltest_a_CPPFLAGS   = -I$(top_srcdir)/include
 
 ## One test program per phase, so a regression points at the area.
-check_PROGRAMS         = basic utf8-move utf8-delete utf8-word
+check_PROGRAMS         = basic utf8-move utf8-delete utf8-word utf8-wrap
 TESTS                  = $(check_PROGRAMS)
 
 AM_CPPFLAGS            = -I$(top_srcdir)/include
@@ -14,3 +14,4 @@ basic_SOURCES          = basic.c
 utf8_move_SOURCES      = utf8-move.c
 utf8_delete_SOURCES    = utf8-delete.c
 utf8_word_SOURCES      = utf8-word.c
+utf8_wrap_SOURCES      = utf8-wrap.c

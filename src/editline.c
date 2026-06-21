@@ -154,6 +154,14 @@ static int is_alpha_num(unsigned char c)
     return 0;
 }
 
+/* True for a UTF-8 continuation byte (0x80-0xBF), i.e. a trailing byte of
+ * a multibyte glyph.  Continuation bytes occupy zero display columns and
+ * never start a character, so cursor motion steps over a whole glyph. */
+static int utf8_is_cont(unsigned char c)
+{
+    return (c & 0xC0) == 0x80;
+}
+
 /*
 **  TTY input/output functions.
 */
@@ -385,20 +393,27 @@ static void reposition(int key)
 static void left(el_status_t Change)
 {
     if (rl_point) {
-        if ((rl_point + prompt_len) % tty_cols == 0) {
-            tty_puts(line_up);
-            tty_forwardn(tty_cols);
-        } else {
-            tty_back();
-        }
+        unsigned char c = rl_line_buffer[rl_point - 1];
 
-        if (ISMETA(rl_line_buffer[rl_point - 1])) {
-            if (rl_meta_chars) {
-                tty_back();
+        /* Continuation bytes are zero-width: emit no cursor movement.
+         * The % tty_cols below is byte-granular column math, to be
+         * superseded by a display-column mapper in the wrapped-line slice. */
+        if (!utf8_is_cont(c)) {
+            if ((rl_point + prompt_len) % tty_cols == 0) {
+                tty_puts(line_up);
+                tty_forwardn(tty_cols);
+            } else {
                 tty_back();
             }
-        } else if (ISCTL(rl_line_buffer[rl_point - 1])) {
-            tty_back();
+
+            if (ISMETA(c)) {
+                if (rl_meta_chars) {
+                    tty_back();
+                    tty_back();
+                }
+            } else if (ISCTL(c)) {
+                tty_back();
+            }
         }
     }
 
@@ -408,13 +423,33 @@ static void left(el_status_t Change)
 
 static void right(el_status_t Change)
 {
-    if ((rl_point + prompt_len + 1) % tty_cols == 0)
+    unsigned char c = rl_line_buffer[rl_point];
+
+    /* A continuation byte is zero-width, so it never triggers a wrap. */
+    if (!utf8_is_cont(c) && (rl_point + prompt_len + 1) % tty_cols == 0)
         tty_put('\n');
     else
-        tty_show(rl_line_buffer[rl_point]);
+        tty_show(c);
 
     if (Change == CSmove)
         rl_point++;
+}
+
+/* Step the cursor one whole glyph, skipping trailing UTF-8 continuation
+ * bytes.  Layered on the byte-granular left()/right() so the per-byte
+ * callers (word, case, transpose) keep working unchanged. */
+static void glyph_right(void)
+{
+    do {
+        right(CSmove);
+    } while (rl_point < rl_end && utf8_is_cont(rl_line_buffer[rl_point]));
+}
+
+static void glyph_left(void)
+{
+    do {
+        left(CSmove);
+    } while (rl_point > 0 && utf8_is_cont(rl_line_buffer[rl_point]));
 }
 
 el_status_t el_ring_bell(void)
@@ -819,7 +854,7 @@ static el_status_t fd_char(void)
     do {
         if (rl_point >= rl_end)
             break;
-        right(CSmove);
+        glyph_right();
     } while (++i < Repeat);
     return CSstay;
 }
@@ -891,7 +926,7 @@ static el_status_t bk_char(void)
     do {
         if (rl_point == 0)
             break;
-        left(CSmove);
+        glyph_left();
     } while (++i < Repeat);
 
     return CSstay;

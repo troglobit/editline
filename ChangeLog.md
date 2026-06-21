@@ -4,6 +4,14 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[UNRELEASED][]
+--------------
+
+### Fixes
+- Fix #66: `write_history()` now detects and reports `fprintf()` write
+  errors, e.g. a full disk, instead of silently returning success
+
+
 [1.17.1][] - 2020-02-23
 -----------------------
 

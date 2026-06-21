@@ -1648,8 +1648,12 @@ int write_history(const char *filename)
     if (!fp)
 	return EOF;
 
-    while (i < H.Size)
-	fprintf(fp, "%s\n", H.Lines[i++]);
+    while (i < H.Size) {
+	if (fprintf(fp, "%s\n", H.Lines[i++]) < 0) {
+	    fclose(fp);
+	    return EOF;
+	}
+    }
 
     return fclose(fp);
 }

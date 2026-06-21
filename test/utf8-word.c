@@ -14,6 +14,8 @@ static const struct testcase cases[] = {
 	{ "utf8-bk-word",      "caf\303\251 b\033bX\r",     "caf\303\251 Xb", NULL },
 	{ "utf8-fd-kill-word", "caf\303\251 bar\001\033d\r"," bar"          , NULL },
 	{ "utf8-bk-kill-word", "caf\303\251\027\r",         ""              , NULL },
+	/* M-u uppercases ASCII only; the multibyte é is left intact. */
+	{ "utf8-upcase-word",  "caf\303\251\001\033u\r",    "CAF\303\251"   , NULL },
 };
 
 int main(void)

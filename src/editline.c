@@ -588,11 +588,15 @@ static el_status_t do_case(el_case_t type)
             end = rl_end;
 
         for (i = rl_point, p = &rl_line_buffer[i]; rl_point < end; p++) {
-            if ((type == TOupper) || (type == TOcapitalize && rl_point == i)) {
-                if (islower((unsigned char)(*p)))
-                    *p = toupper((unsigned char)(*p));
-            } else if (isupper((unsigned char)(*p))) {
-                *p = tolower((unsigned char)(*p));
+            /* Only fold ASCII; a multibyte glyph's bytes must be left as-is,
+             * else a single-byte locale's toupper/tolower corrupts them. */
+            if ((unsigned char)*p < 0x80) {
+                if ((type == TOupper) || (type == TOcapitalize && rl_point == i)) {
+                    if (islower((unsigned char)(*p)))
+                        *p = toupper((unsigned char)(*p));
+                } else if (isupper((unsigned char)(*p))) {
+                    *p = tolower((unsigned char)(*p));
+                }
             }
             right(CSmove);
         }

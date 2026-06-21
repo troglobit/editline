@@ -7,6 +7,10 @@ All notable changes to the project are documented in this file.
 [UNRELEASED][]
 --------------
 
+### Changes
+- Add regression test suite, run with `make check`, driving the editor
+  over a pseudo-terminal
+
 ### Fixes
 - Fix #5: don't shell-quote completions from a custom completer; only
   built-in filename completion escapes spaces and special characters

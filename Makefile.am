@@ -2,7 +2,7 @@ pkgconfigdir    = $(libdir)/pkgconfig
 pkgconfig_DATA  = libeditline.pc
 doc_DATA        = README.md LICENSE
 EXTRA_DIST      = README.md LICENSE ChangeLog.md INSTALL.md
-SUBDIRS         = src include man
+SUBDIRS         = src include man test
 
 if ENABLE_EXAMPLES
 SUBDIRS            += examples

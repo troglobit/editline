@@ -27,3 +27,12 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+test-driver
+test/basic
+test/utf8-move
+test/utf8-delete
+test/utf8-word
+test/utf8-wrap
+*.a
+*.log
+*.trs

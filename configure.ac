@@ -6,7 +6,7 @@ AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/editline.c])
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile libeditline.pc src/Makefile include/Makefile man/Makefile examples/Makefile])
+AC_CONFIG_FILES([Makefile libeditline.pc src/Makefile include/Makefile man/Makefile examples/Makefile test/Makefile])
 
 # Checks for programs.
 AC_PROG_CC
@@ -22,6 +22,16 @@ AC_HEADER_STAT
 # Check for malloc.h instead of AC_FUNC_MALLOC/REALLOC AIX and others
 # mess up the traditional malloc check.
 AC_CHECK_HEADERS([malloc.h signal.h stdlib.h string.h termcap.h termio.h termios.h sgtty.h unistd.h])
+
+# For the test suite: forkpty() lives in libutil on glibc, in libc on the BSDs.
+# Keep the dependency on the test program only, out of the library and examples.
+AC_CHECK_HEADERS([pty.h util.h libutil.h])
+save_LIBS="$LIBS"
+LIBS=""
+AC_SEARCH_LIBS([forkpty], [util])
+PTY_LIBS="$LIBS"
+LIBS="$save_LIBS"
+AC_SUBST([PTY_LIBS])
 
 # In termios.h or in sys/ioctl.g?
 AC_HEADER_TIOCGWINSZ

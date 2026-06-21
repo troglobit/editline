@@ -23,15 +23,19 @@ jobs:
       MAKEFLAGS: -j3
       CC: ${{ matrix.compiler }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix= --disable-silent-rules \
-                      --enable-sigstop --enable-terminal-bell
+          ./configure --prefix= --disable-silent-rules        \
+                      --enable-sigstop --enable-terminal-bell \
+                      --enable-examples
       - name: Build
         run: |
           make
+      - name: Test
+        run: |
+          make check || (cat test/test-suite.log; false)
       - name: Install to ~/tmp and Inspect
         run: |
           DESTDIR=~/tmp make install-strip

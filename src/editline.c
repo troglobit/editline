@@ -162,6 +162,33 @@ static int utf8_is_cont(unsigned char c)
     return (c & 0xC0) == 0x80;
 }
 
+/* Number of glyph starts in rl_line_buffer[begin .. begin + count), i.e. the
+ * character count of a byte range.  Equals count for plain ASCII. */
+static int glyph_count(int begin, int count)
+{
+    int n = 0, k;
+
+    for (k = 0; k < count; k++) {
+        if (!utf8_is_cont(rl_line_buffer[begin + k]))
+            n++;
+    }
+
+    return n;
+}
+
+/* Byte offset of the glyph boundary just after pos: skip the start byte and
+ * any UTF-8 continuation bytes that follow it.  Clamped to rl_end. */
+static int next_glyph(int pos)
+{
+    if (pos < rl_end) {
+        do {
+            pos++;
+        } while (pos < rl_end && utf8_is_cont(rl_line_buffer[pos]));
+    }
+
+    return pos;
+}
+
 /*
 **  TTY input/output functions.
 */
@@ -440,9 +467,10 @@ static void right(el_status_t Change)
  * callers (word, case, transpose) keep working unchanged. */
 static void glyph_right(void)
 {
-    do {
+    int next = next_glyph(rl_point);
+
+    while (rl_point < next)
         right(CSmove);
-    } while (rl_point < rl_end && utf8_is_cont(rl_line_buffer[rl_point]));
 }
 
 static void glyph_left(void)
@@ -906,7 +934,8 @@ static el_status_t delete_string(int count)
     if (rl_point + count > rl_end && (count = rl_end - rl_point) <= 0)
         return CSstay;
 
-    if (count > 1)
+    /* Yank the deletion only when it spans more than one whole glyph. */
+    if (glyph_count(rl_point, count) > 1)
         save_yank(rl_point, count);
 
     for (p = &rl_line_buffer[rl_point], i = rl_end - (rl_point + count) + 1; --i >= 0; p++)
@@ -934,15 +963,15 @@ static el_status_t bk_char(void)
 
 static el_status_t bk_del_char(void)
 {
-    int i = 0;
+    int start = rl_point, n = 0;
 
     do {
         if (rl_point == 0)
             break;
-        left(CSmove);
-    } while (++i < Repeat);
+        glyph_left();
+    } while (++n < Repeat);
 
-    return delete_string(i);
+    return delete_string(start - rl_point);
 }
 
 static el_status_t kill_line(void)
@@ -1022,7 +1051,14 @@ static el_status_t end_line(void)
 
 static el_status_t del_char(void)
 {
-    return delete_string(Repeat == NO_ARG ? CSeof : Repeat);
+    int glyphs = Repeat == NO_ARG ? 1 : Repeat;
+    int pos = rl_point;
+
+    /* Span forward over whole glyphs so a multibyte character deletes as one. */
+    while (glyphs-- > 0 && pos < rl_end)
+        pos = next_glyph(pos);
+
+    return delete_string(pos - rl_point);
 }
 
 el_status_t el_del_char(void)
@@ -1906,7 +1942,7 @@ static el_status_t fd_kill_word(void)
 
     do_forward(CSstay);
     if (old_point != rl_point) {
-        i = rl_point - old_point - 1;
+        i = rl_point - old_point;
         rl_point = old_point;
         return delete_string(i);
     }

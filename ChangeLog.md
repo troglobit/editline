@@ -3,20 +3,40 @@ Change Log
 
 All notable changes to the project are documented in this file.
 
-
-[UNRELEASED][]
---------------
+[2.0.][UNRELEASED]
+-----------------------
 
 ### Changes
+
+- Add UTF-8 support, issue #37: cursor movement, deletion, word motion
+  and wrapped-line redisplay operate on whole glyphs.  Display width is
+  one column per glyph; wide and zero-width (combining) characters are
+  not yet handled
+- Recognize more terminal key sequences: Meta+Left/Right, Ctrl/Alt
+  arrows (`\e[1;3C`, `\e[1;3D`), and Home/End in tmux and urxvt
+- Move-word-forward now stops at the end of the current word
+- Ctrl-U now deletes from the cursor to the beginning of the line
+- `rl_attempted_completion_over` is now exported in `editline.h`
+- New configure flag `--enable-examples` to build example programs
+- Remove the incomplete WIN32 support; Windows is not supported
 - Add regression test suite, run with `make check`, driving the editor
   over a pseudo-terminal
 
 ### Fixes
+
 - Fix #5: don't shell-quote completions from a custom completer; only
   built-in filename completion escapes spaces and special characters
+- Fix #41: add missing includes in the examples
 - Fix #66: `write_history()` now detects and reports `fprintf()` write
   errors, e.g. a full disk, instead of silently returning success
-
+- Fix #75: build with autoconf 2.72
+- Fix crash when termcap is used and `cursor_left` is unavailable
+- Fix buffer overrun detected by AddressSanitizer
+- Fix double free in completion handling
+- Honor `el_hist_size` and the default prompt
+- Fix and consistently use the `rl_set_prompt()` API
+- Make `editline.h` self-contained, include `stdio.h`
+- Fix `configure --disable-arrow-keys` build option
 
 [1.17.1][] - 2020-02-23
 -----------------------
@@ -263,22 +283,22 @@ Adaptations to Debian editline package.
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/finit/compare/1.17.1...HEAD
-[1.17.1]:        https://github.com/troglobit/finit/compare/1.17.0...1.17.1
-[1.17.0]:        https://github.com/troglobit/finit/compare/1.16.1...1.17.0
-[1.16.1]:        https://github.com/troglobit/finit/compare/1.16.0...1.16.1
-[1.16.0]:        https://github.com/troglobit/finit/compare/1.15.3...1.16.0
-[1.15.3]:        https://github.com/troglobit/finit/compare/1.15.2...1.15.3
-[1.15.2]:        https://github.com/troglobit/finit/compare/1.15.1...1.15.2
-[1.15.1]:        https://github.com/troglobit/finit/compare/1.15.0...1.15.1
-[1.15.0]:        https://github.com/troglobit/finit/compare/1.14.2...1.15.0
-[1.14.2]:        https://github.com/troglobit/finit/compare/1.14.1...1.14.2
-[1.14.1]:        https://github.com/troglobit/finit/compare/1.14.0...1.14.1
-[1.14.0]:        https://github.com/troglobit/finit/compare/1.13.0...1.14.0
-[1.13.0]:        https://github.com/troglobit/finit/compare/0.3.0...1.13.0
-[0.3.0]:         https://github.com/troglobit/finit/compare/0.2.3...0.3.0
-[0.2.3]:         https://github.com/troglobit/finit/compare/0.1.0...0.2.3
-[0.1.0]:         https://github.com/troglobit/finit/compare/0.0.0...0.1.0
+[UNRELEASED]:    https://github.com/troglobit/editline/compare/1.17.1...HEAD
+[1.17.1]:        https://github.com/troglobit/editline/compare/1.17.0...1.17.1
+[1.17.0]:        https://github.com/troglobit/editline/compare/1.16.1...1.17.0
+[1.16.1]:        https://github.com/troglobit/editline/compare/1.16.0...1.16.1
+[1.16.0]:        https://github.com/troglobit/editline/compare/1.15.3...1.16.0
+[1.15.3]:        https://github.com/troglobit/editline/compare/1.15.2...1.15.3
+[1.15.2]:        https://github.com/troglobit/editline/compare/1.15.1...1.15.2
+[1.15.1]:        https://github.com/troglobit/editline/compare/1.15.0...1.15.1
+[1.15.0]:        https://github.com/troglobit/editline/compare/1.14.2...1.15.0
+[1.14.2]:        https://github.com/troglobit/editline/compare/1.14.1...1.14.2
+[1.14.1]:        https://github.com/troglobit/editline/compare/1.14.0...1.14.1
+[1.14.0]:        https://github.com/troglobit/editline/compare/1.13.0...1.14.0
+[1.13.0]:        https://github.com/troglobit/editline/compare/0.3.0...1.13.0
+[0.3.0]:         https://github.com/troglobit/editline/compare/0.2.3...0.3.0
+[0.2.3]:         https://github.com/troglobit/editline/compare/0.1.0...0.2.3
+[0.1.0]:         https://github.com/troglobit/editline/compare/0.0.0...0.1.0
 [libuEv]:        http://github.com/troglobit/libuev
 [Travis-CI]:     https://travis-ci.org/troglobit/uftpd
 [Coverity Scan]: https://scan.coverity.com/projects/2947

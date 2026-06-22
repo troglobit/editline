@@ -32,6 +32,7 @@ All notable changes to the project are documented in this file.
 - Fix #75: build with autoconf 2.72
 - Fix `read_history()` splitting lines longer than 255 bytes across
   history entries and chopping a byte, mid-glyph for UTF-8
+- Fix Ctrl-A and Ctrl-E (or Home and End keys) scrolling the screen up
 - Fix crash when termcap is used and `cursor_left` is unavailable
 - Fix buffer overrun detected by AddressSanitizer
 - Fix double free in completion handling

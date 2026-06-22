@@ -34,6 +34,8 @@ test/utf8-delete
 test/utf8-word
 test/utf8-wrap
 test/history
+test/eltty
+test/homeend
 *.a
 *.log
 *.trs

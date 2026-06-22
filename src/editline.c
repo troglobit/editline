@@ -95,6 +95,11 @@ static char       CLEAR[]= "\ec";
 static const char *el_term = "dumb";
 static int        Repeat;
 static int        old_point;
+/* Canonical key a cursor jump declares for reposition(): the Home/End keys
+ * arrive as multi-byte escape sequences, so reposition() only sees the
+ * leading ESC and cannot tell them from any other escape.  beg_line() and
+ * end_line() set this so they are repositioned like Ctrl-A / Ctrl-E. */
+static int        repos_key;
 static int        el_push_back;
 static int        el_pushed;
 static int        el_intr_pending;
@@ -408,6 +413,13 @@ static void reposition(int key)
     int i = 0;
     int col;
 
+    /* A Home/End jump arrives as an escape sequence, so reposition() is
+     * passed the leading ESC; honor the canonical key it declared instead. */
+    if (repos_key) {
+        key = repos_key;
+        repos_key = 0;
+    }
+
     tty_put('\r');
 
     if (n > 0) {
@@ -422,12 +434,19 @@ static void reposition(int key)
 	/* move to end of line(s) */
         if (key == CTL('E')) {
 	    int k;
+	    /* Row holding the end of the line and that row's column count.  A
+	     * line ending exactly on a row boundary keeps the cursor in that
+	     * row's last column (deferred wrap), not at the start of the next
+	     * row -- otherwise Ctrl-E steps onto a fresh row below and the
+	     * terminal scrolls the whole line up. */
+	    int last_row  = (len_with_prompt - 1) / tty_cols;  /* = n, less one on an exact fit */
+	    int last_cols = len_with_prompt - last_row * tty_cols;
 
-            for (k = line; k < n; k++)
+            for (k = line; k < last_row; k++)
                 tty_puts(line_down);
 
-	    /* determine reminder of last line and redraw only it */
-            i = disp_col_to_byte(disp_col(rl_point) - (len_with_prompt % tty_cols));
+	    /* redraw only that last row, landing the cursor at its end */
+            i = disp_col_to_byte(disp_col(rl_point) - last_cols);
         } else {
 	    int k;
 
@@ -451,7 +470,10 @@ static void reposition(int key)
          * a glitch/erase, not a byte of the glyph -- do not unify these.) */
         if (utf8_is_cont((unsigned char)rl_line_buffer[i + 1]))
             continue;
-        if ((++col) % tty_cols == 0)
+	/* Wrap to the next row only when more characters follow; after the
+	 * final one the cursor stays at the end of this row (deferred wrap),
+	 * so a line ending on a row boundary does not scroll. */
+        if ((++col) % tty_cols == 0 && i + 1 < rl_point)
             tty_put('\n');
     }
 }
@@ -1078,6 +1100,7 @@ static el_status_t beg_line(void)
 {
     if (rl_point) {
         rl_point = 0;
+        repos_key = CTL('A');
         return CSmove;
     }
 
@@ -1088,6 +1111,7 @@ static el_status_t end_line(void)
 {
     if (rl_point != rl_end) {
         rl_point = rl_end;
+        repos_key = CTL('E');
         return CSmove;
     }
 

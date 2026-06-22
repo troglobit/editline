@@ -18,9 +18,9 @@ jobs:
           ./configure --prefix=
       - name: Build release ...
         run: |
-          make release
+          make distcheck
           mkdir -p artifacts/
-          mv ../*.tar.* artifacts/
+          mv *.tar.gz artifacts/
       - name: Extract ChangeLog entry ...
         run: |
           awk '/-----*/{if (x == 1) exit; x=1;next}x' ChangeLog.md \

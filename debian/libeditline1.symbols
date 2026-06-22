@@ -14,7 +14,6 @@ libeditline.so.1 libeditline1 #MINVER#
  el_prev_hist@Base 1.17.1
  el_print_columns@Base 1.17.1
  el_ring_bell@Base 1.17.1
- prompt_len@Base 1.17.1
  read_history@Base 1.17.1
  readline@Base 1.17.1
  rl_add_slash@Base 1.17.1
@@ -25,6 +24,7 @@ libeditline.so.1 libeditline1 #MINVER#
  rl_callback_read_char@Base 1.17.1
  rl_clear_message@Base 1.17.1
  rl_complete@Base 1.17.1
+ rl_complete_is_custom@Base 2.0.0
  rl_completion_entry_function@Base 1.17.1
  rl_completion_matches@Base 1.17.1
  rl_deprep_term_function@Base 1.17.1

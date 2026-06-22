@@ -3,8 +3,8 @@ Change Log
 
 All notable changes to the project are documented in this file.
 
-[2.0.][UNRELEASED]
------------------------
+[2.0.0][] - 2026-06-22
+----------------------
 
 ### Changes
 
@@ -286,7 +286,8 @@ Adaptations to Debian editline package.
 - First version, forked from Minix current 2008-06-06
 
 
-[UNRELEASED]:    https://github.com/troglobit/editline/compare/1.17.1...HEAD
+[UNRELEASED]:    https://github.com/troglobit/editline/compare/2.0.0...HEAD
+[2.0.0]:         https://github.com/troglobit/editline/compare/1.17.0...2.0.0
 [1.17.1]:        https://github.com/troglobit/editline/compare/1.17.0...1.17.1
 [1.17.0]:        https://github.com/troglobit/editline/compare/1.16.1...1.17.0
 [1.16.1]:        https://github.com/troglobit/editline/compare/1.16.0...1.16.1

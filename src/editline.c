@@ -1730,10 +1730,46 @@ void add_history(const char *p)
 }
 
 
+/* Read one newline-terminated line of any length, growing the buffer as
+ * needed.  Returns an allocated string without the trailing newline, or
+ * NULL at end of file.  A fixed buffer would split long lines (and chop a
+ * byte mid-glyph for multibyte input) across separate history entries. */
+static char *read_line(FILE *fp)
+{
+    size_t len = 0, size = MEM_INC;
+    char *line, *tmp;
+    int c;
+
+    line = malloc(size);
+    if (!line)
+	return NULL;
+
+    while ((c = getc(fp)) != EOF && c != '\n') {
+	if (len + 1 >= size) {
+	    tmp = realloc(line, size + MEM_INC);
+	    if (!tmp) {
+		free(line);
+		return NULL;
+	    }
+	    line = tmp;
+	    size += MEM_INC;
+	}
+	line[len++] = (char)c;
+    }
+
+    if (c == EOF && len == 0) {
+	free(line);
+	return NULL;
+    }
+
+    line[len] = '\0';
+    return line;
+}
+
 int read_history(const char *filename)
 {
     FILE *fp;
-    char buf[SCREEN_INC];
+    char *line;
 
     hist_alloc();
 
@@ -1742,12 +1778,9 @@ int read_history(const char *filename)
 	return EOF;
 
     H.Size = 0;
-    while (H.Size < el_hist_size) {
-	if (!fgets(buf, SCREEN_INC, fp))
-	    break;
-
-	buf[strlen(buf) - 1] = 0; /* Remove '\n' */
-	add_history(buf);
+    while (H.Size < el_hist_size && (line = read_line(fp)) != NULL) {
+	add_history(line);
+	free(line);
     }
 
     return fclose(fp);

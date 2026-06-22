@@ -30,6 +30,8 @@ All notable changes to the project are documented in this file.
 - Fix #66: `write_history()` now detects and reports `fprintf()` write
   errors, e.g. a full disk, instead of silently returning success
 - Fix #75: build with autoconf 2.72
+- Fix `read_history()` splitting lines longer than 255 bytes across
+  history entries and chopping a byte, mid-glyph for UTF-8
 - Fix crash when termcap is used and `cursor_left` is unavailable
 - Fix buffer overrun detected by AddressSanitizer
 - Fix double free in completion handling

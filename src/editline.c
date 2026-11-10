@@ -203,6 +203,21 @@ static int next_glyph(int pos)
     return pos;
 }
 
+/* Number of display columns of a NUL-terminated string: one column per
+ * glyph start, UTF-8 continuation bytes (0x80-0xBF) count for none.
+ * Equals strlen() for plain ASCII. */
+static int glyph_len(const char *s)
+{
+    int n = 0;
+
+    for (; *s; s++) {
+        if (!utf8_is_cont((unsigned char)*s))
+            n++;
+    }
+
+    return n;
+}
+
 /* Display columns occupied by rl_line_buffer[0 .. b): one column per glyph,
  * like the wrap math's byte==column assumption but corrected for multibyte
  * (continuation bytes add no column).  Equals b for plain ASCII. */
@@ -380,14 +395,19 @@ void el_print_columns(int ac, char **av)
     int         j;
     int         k;
     int         len;
+	int			g;
     int         skip;
     int         longest;
     int         cols;
     int         colwidth;
 
-    /* Find longest name, determine column count from that. */
+    /*
+     * Find longest name in display columns (one column per glyph, UTF-8
+     * continuation bytes count for none), determine column count from
+     * that.
+     */
     for (longest = 0, i = 0; i < ac; i++) {
-        if ((j = strlen((char *)av[i])) > longest)
+        if ((j = glyph_len((char *)av[i])) > longest)
             longest = j;
     }
 
@@ -403,7 +423,12 @@ void el_print_columns(int ac, char **av)
                 tty_put(*p);
 
             if (j + skip < ac) {
-                while (++len < colwidth)
+                /* Pad in display glyphs, not bytes: a multibyte name is
+                 * narrower on screen than its byte count, so byte-based
+                 * width wastes a column per byte (and in derived ports
+                 * that mix the two measures it merges the next name
+                 * into it). */
+                for (g = glyph_len((char *)av[j]); g < colwidth; g++)
                     tty_put(' ');
             }
         }
@@ -411,7 +436,6 @@ void el_print_columns(int ac, char **av)
         tty_puts(NEWLINE);
     }
 }
-
 static void reposition(int key)
 {
     int len_with_prompt = prompt_len + disp_col(rl_end);
@@ -1959,8 +1983,15 @@ static el_status_t c_complete(void)
             return CSstay;
         }
 
+        /*
+         * Quote characters the shell would interpret.  UTF-8 bytes
+         * (>= 0x80) are data, not control characters, even on platforms
+         * where char is signed: quoting them would corrupt multibyte
+         * filenames.
+         */
         while (*p) {
             if (!rl_complete_is_custom()
+				&& (unsigned char)*p < 0x80
                 && (*p < ' ' || strchr(SEPS, *p) != NULL)
                 && (!unique || p[1] != 0)) {
                 *q++ = '\\';
